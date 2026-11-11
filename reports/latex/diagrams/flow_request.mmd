@@ -1,0 +1,33 @@
+sequenceDiagram
+    autonumber
+    actor Analyst as Analyst<br/>browser user
+    participant React as React app<br/>shared filters · charts
+    participant FastAPI as FastAPI<br/>/api/* endpoints
+    participant Query as Query layer<br/>whitelist · lru_cache
+    participant DuckDB as DuckDB<br/>hc.duckdb · read-only
+
+    Analyst->>React: click bar "age 25-34"
+    activate React
+    Note over React: update shared filters (all pages)
+    React->>FastAPI: GET /api/by/income_type<br/>?age_bucket=25-34
+    activate FastAPI
+    Note over FastAPI: check names against the whitelist<br/>unknown dimension or filter -> 400
+    FastAPI->>Query: by_dimension(dim, filters)
+    activate Query
+    
+    alt result already cached
+        Note over Query: rows from memory · < 5 ms
+    else first request for these filters
+        Query->>DuckDB: SELECT ... GROUP BY 1
+        activate DuckDB
+        DuckDB-->>Query: rows · 50-200 ms
+        deactivate DuckDB
+        Note over Query: rows (cached for next time)
+    end
+    
+    Query-->>FastAPI: 
+    deactivate Query
+    FastAPI-->>React: JSON · gzip
+    deactivate FastAPI
+    React-->>Analyst: charts, KPIs, tables re-render
+    deactivate React

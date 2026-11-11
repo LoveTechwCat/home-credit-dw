@@ -1,0 +1,94 @@
+erDiagram
+    dim_contract {
+        string contract_key PK
+        string contract_type
+        string accompanied_by
+        string appr_weekday
+        string appr_hour_band
+    }
+
+    dim_region {
+        string region_key PK
+        string region_rating_client
+        string region_rating_city
+        string density_band
+    }
+
+    dim_credit_history {
+        string credit_history_key PK
+        string bureau_active_bucket
+        string max_dpd_bucket
+        string has_current_overdue
+        string has_bad_debt
+        string prev_approval_bucket
+    }
+
+    dim_customer {
+        string customer_key PK
+        string sk_id_curr "natural key"
+        string gender
+        string age_bucket
+        string income_type
+        string income_bracket
+        string occupation_type
+        string plus_education_family_housing "..."
+    }
+
+    dim_bureau_category {
+        string bureau_category_key PK
+        string credit_active
+        string credit_type
+        string credit_currency
+    }
+
+    dim_time {
+        string date_key PK "yyyymmdd"
+        string full_date
+        string day_offset "vs snapshot"
+        string year
+        string quarter
+        string year_month
+    }
+
+    fact_loan_application {
+        string application_id PK
+        string customer_key FK
+        string credit_history_key FK
+        string contract_key FK
+        string region_key FK
+        string application_date_key FK
+        int target "0/1/NULL"
+        boolean is_train
+        float amt_credit "Σ"
+        float amt_income "Σ"
+        float debt_to_income
+        float ext_source_mean
+        int max_dpd_days
+        string plus_5_more_measures
+    }
+
+    fact_bureau_credit {
+        string bureau_credit_id PK
+        string customer_key FK
+        string bureau_category_key FK
+        string open_date_key FK
+        string close_date_key FK
+        float amt_credit_sum "Σ"
+        float amt_credit_sum_debt "Σ"
+        int credit_day_overdue
+        int credit_duration_days
+        string max_bb_dpd_status
+        string plus_2_more_measures
+    }
+
+    %% Relationships
+    dim_contract ||--o{ fact_loan_application : ""
+    dim_region ||--o{ fact_loan_application : ""
+    dim_credit_history ||--o{ fact_loan_application : ""
+    dim_customer ||--o{ fact_loan_application : ""
+    dim_time ||--o{ fact_loan_application : "application_date_key"
+
+    dim_customer ||--o{ fact_bureau_credit : ""
+    dim_bureau_category ||--o{ fact_bureau_credit : ""
+    dim_time ||--o{ fact_bureau_credit : "open_date_key"
+    dim_time |o--o{ fact_bureau_credit : "close_date_key (0..1)"
