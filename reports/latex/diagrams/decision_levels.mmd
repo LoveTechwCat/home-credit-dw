@@ -1,0 +1,36 @@
+flowchart TB
+    subgraph Strategic["Cấp chiến lược — Executive / CRO"]
+        S1[Phân bổ hạn mức và vốn]
+        S2[Hoạch định dự phòng ECL]
+        S3[Định hướng danh mục và khẩu vị rủi ro]
+    end
+
+    subgraph Tactical["Cấp chiến thuật — Risk Manager"]
+        T1[Điều chỉnh ngưỡng Green / Red]
+        T2[Quản lý knock-out rules]
+        T3[Giám sát OLAP và chất lượng danh mục]
+    end
+
+    subgraph Operational["Cấp tác nghiệp — Credit Underwriter"]
+        O1[Green: Auto-Approve]
+        O2[Yellow: Manual Review]
+        O3[Red: Auto-Reject]
+    end
+
+    DW[(Data Warehouse)] --> OLAP[OLAP cubes<br/>và dashboard]
+    OLAP --> T3
+    OLAP --> S1
+    OLAP --> S2
+
+    Applicant[Hồ sơ vay] --> PDModel[Mô hình PD]
+    PDModel --> Score[Điểm rủi ro và lý do giải thích]
+    Score --> O1
+    Score --> O2
+    Score --> O3
+
+    O2 --> Underwriter[Chuyên viên thẩm định]
+    Underwriter -->|Kết quả và ghi chú| DW
+
+    T1 -.->|Cập nhật ngưỡng| Score
+    T2 -.->|Cập nhật quy tắc| Score
+    S3 -.->|Khẩu vị và giới hạn| T1

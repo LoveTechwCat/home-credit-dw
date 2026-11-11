@@ -1,6 +1,30 @@
 \part{Thiết kế kho dữ liệu và quy trình ETL}
 % Input: docs/star_schema.md, docs/etl_mapping.md, data/warehouse/dq_report.json
 \section{Nguồn dữ liệu}
+Dữ liệu thực nghiệm của hệ thống được trích xuất từ tập dữ liệu công khai \href{https://www.kaggle.com/competitions/home-credit-default-risk/data}{Home Credit Default Risk}, mô phỏng nghiệp vụ thẩm định tín dụng tiêu dùng cho nhóm khách hàng chưa có hoặc có ít lịch sử tín dụng chính thức (\textit{unbanked/underbanked}). Cấu trúc dữ liệu nguồn là một hệ cơ sở dữ liệu quan hệ phi chuẩn hóa (\textit{denormalized relational structure}) gồm 7 tập tin chính, phản ánh hai nhóm thông tin cốt lõi: dữ liệu tĩnh tại thời điểm nộp đơn và dữ liệu chuỗi thời gian ghi nhận hành vi thanh toán trong quá khứ (\textit{longitudinal/behavioral logs}).
+
+\subsection{Phân rã thực thể và Quan hệ nghiệp vụ}
+\begin{itemize}
+	\item \textbf{Thực thể hạt nhân (\texttt{application\_\{train|test\}.csv})}: Mỗi bản ghi đại diện cho một hồ sơ vay vốn tại Home Credit, được định danh đơn nhất bằng khóa chính \texttt{SK\_ID\_CURR}. Bảng lưu trữ biến mục tiêu phân loại rủi ro \texttt{TARGET} ($1$ biểu thị khách hàng trễ hạn thanh toán nghiêm trọng, $0$ biểu thị khoản vay tất toán đúng hạn) cùng các thuộc tính nhân khẩu học, thu nhập, tình trạng việc làm và thông số khoản tín dụng yêu cầu.
+
+	\item \textbf{Dữ liệu tín dụng liên ngân hàng (Credit Bureau)}:
+	      \begin{itemize}[topsep=0pt, itemsep=0pt, parsep=0pt]
+		      \item \texttt{bureau.csv}: Lưu vết toàn bộ các hợp đồng tín dụng trước đây của khách hàng tại các tổ chức tài chính khác được ghi nhận qua Trung tâm Thông tin Tín dụng. Quan hệ giữa khách hàng và các khoản vay ngoài là quan hệ một--nhiều ($1:N$) qua khóa \texttt{SK\_ID\_CURR}.
+		      \item \texttt{bureau\_balance.csv}: Ghi nhận trạng thái dư nợ và hành vi thanh toán hàng tháng của từng hợp đồng ngoài hệ thống, liên kết với \texttt{bureau.csv} thông qua khóa ngoại \texttt{SK\_ID\_BUREAU} ($1:N$).
+	      \end{itemize}
+
+	\item \textbf{Dữ liệu lịch sử nội bộ Home Credit}:
+	      \begin{itemize}[topsep=0pt, itemsep=0pt, parsep=0pt]
+		      \item \texttt{previous\_application.csv}: Lưu trữ toàn bộ các hồ sơ vay vốn trong quá khứ của khách hàng tại chính Home Credit, định danh bằng \texttt{SK\_ID\_PREV} và liên kết với bảng trung tâm bằng \texttt{SK\_ID\_CURR} ($1:N$).
+		      \item \texttt{POS\_CASH\_balance.csv}: Nhật ký dư nợ hàng tháng của các khoản vay điểm bán (Point of Sale) và tiền mặt trong quá khứ, liên kết qua cặp khóa (\texttt{SK\_ID\_PREV}, \texttt{SK\_ID\_CURR}).
+		      \item \texttt{instalments\_payments.csv}: Dữ liệu giao dịch trả nợ thực tế cho từng kỳ thanh toán của các hợp đồng cũ, phản ánh số ngày trễ hạn (\texttt{DAYS\_INSTALMENT} so với \texttt{DAYS\_ENTRY\_PAYMENT}) và sai lệch số tiền phải trả so với số tiền thực nộp.
+		      \item \texttt{credit\_card\_balance.csv}: Biến động số dư và hành vi sử dụng hạn mức thẻ tín dụng hàng tháng của khách hàng trong hệ thống.
+	      \end{itemize}
+\end{itemize}
+
+\subsection{Mức độ chi tiết (Granularity) và Lược đồ quan hệ}
+Đặc thù phân rã $1:N$ đa cấp từ các bảng lịch sử đặt ra yêu cầu kiến trúc cho quy trình ETL/ELT: các bảng hành vi cần được làm sạch, đồng bộ chiều thời gian tương đối và thực hiện kỹ thuật tổng hợp đặc trưng (\textit{aggregation}) trước khi tích hợp vào mô hình đa chiều và các thuật toán dự báo rủi ro tín dụng.
+\mermaidfile[width=\linewidth]{diagrams/hc_description.mmd}
 \section{Mô hình đa chiều (Star Schema)}
 \mermaidfile{diagrams/star_schema.mmd}
 \section{Giả định về thời gian}

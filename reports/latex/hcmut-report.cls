@@ -46,7 +46,7 @@
 \newtheorem{remark}{Remark}[section]
 \theoremstyle{proposition}
 \newtheorem{proposition}{Proposition}[section]
-\RequirePackage{xcolor}
+\RequirePackage[dvipsnames]{xcolor}
 \RequirePackage{algorithm, algpseudocode}
 
 % --- Page layout and spacing ---
@@ -83,12 +83,8 @@
 %---------------------------------------------------------------------
 % 3. Colour definitions
 %---------------------------------------------------------------------
-\definecolor{keywordcolor}{rgb}{0.13,0.13,1}      % Blue keywords
-\definecolor{stringcolor}{rgb}{0.7,0.13,0.13}     % Dark red strings
-\definecolor{commentcolor}{rgb}{0.25,0.5,0.35}    % Green comments
-\definecolor{backgroundcolor}{rgb}{0.97,0.97,0.97}% Light background
-\definecolor{numbercolor}{rgb}{0.85,0.65,0.13}    % Numbers
-\definecolor{modal-color}{rgb}{0.10,0.74,0.33}    % Modal logo
+\definecolor{green}{rgb}{0.10,0.74,0.33}    	  % Auto-Approve
+\definecolor{yellow}{HTML}{E1E816}				  % Manual Review
 
 %---------------------------------------------------------------------
 % 4. Page geometry, spacing and numbering depth
