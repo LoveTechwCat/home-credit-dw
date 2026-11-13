@@ -40,3 +40,7 @@ Thumbs.db
 frontend/node_modules/
 frontend/dist/
 frontend/*.tsbuildinfo
+
+# Developer
+graphify-out/
+.agents/

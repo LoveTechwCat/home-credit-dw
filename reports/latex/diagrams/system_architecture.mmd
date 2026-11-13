@@ -1,0 +1,30 @@
+flowchart TB
+    subgraph Presentation["Frontend"]
+        UI["React 18 + TypeScript SPA"]
+        Components["Trực quan Hóa<br/>• Recharts<br/>• FilterBar<br/>• Risk Simulator"]
+        UI --- Components
+    end
+    subgraph Service["Backend"]
+        API["FastAPI Web Service<br/>(Uvicorn ASGI Server)"]
+        Security["Kiểm soát An toàn & Tối ưu<br/>• Whitelist Dimensions & Filters<br/>• Tham số hóa SQL chống Injection<br/>• LRU Cache (In-Memory Response)"]
+        API --- Security
+    end
+    subgraph Analytics["Tầng Động Cơ Phân Tích & DSS"]
+        DSS["Decision Support System (dss)<br/>• Bộ luật thẩm định Green/Yellow/Red<br/>• Mô hình LightGBM (p_default)<br/>• Feature Pipeline (mart.v_application_wide)"]
+    end
+    subgraph Storage["DW"]
+        DuckDB[("DuckDB Columnar Engine<br/>(hc.duckdb - 864 MB)")]
+        Marts["Lớp Data Mart (mart.*)<br/>• v_application_wide<br/>• kpi_portfolio_summary<br/>• kpi_default_by_segment"]
+        DW_Tables["Lớp Kho Dữ Liệu (dw.*)<br/>• Fact Tables: Loan & Bureau<br/>• Dim Tables: 6 dimensions"]
+        DuckDB --- Marts
+        DuckDB --- DW_Tables
+    end
+    subgraph Pipeline["ETL"]
+        ETL["ETL Engine (Python & SQL)<br/>• Extract: Staging TRY_CAST<br/>• Clean: 10 Business Rules (clean.py)<br/>• Aggregate: N..1 History Aggregation<br/>• Load & Atomic Publish (.building)"]
+        Raw[("Kaggle Raw CSVs")]
+        Raw --> ETL
+    end
+    UI -->|HTTP/JSON Requests| API
+    API -->|Nội suy & Đánh giá rủi ro| DSS
+    API -->|Vectorized SQL Queries| DuckDB
+    ETL -->|Bulk Insert & Atomic Swap| DuckDB

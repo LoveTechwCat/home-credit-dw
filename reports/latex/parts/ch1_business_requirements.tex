@@ -2,7 +2,7 @@
 \setcounter{page}{1}
 \fancyfoot{} % Remove Roman page counter
 \startfooter{Báo cáo Bài tập lớn\\CO4031 -- HK261}
-\part{Phân tích yêu cầu nghiệp vụ}
+\part{Yêu cầu nghiệp vụ}
 % Input: docs/kpi_definitions.md (KPI)
 \section{Bối cảnh và bài toán}
 
@@ -17,7 +17,7 @@ Vấn đề này gắn liền với bất đối xứng thông tin trong thị t
 
 Trong bối cảnh đó, Home Credit đặt ra bài toán dự đoán khả năng hoàn trả khoản vay của khách hàng dựa trên dữ liệu hồ sơ, lịch sử tín dụng nội bộ và thông tin từ các tổ chức tín dụng bên ngoài. Bộ dữ liệu \textit{Home Credit Default Risk} bao gồm hồ sơ vay, lịch sử tín dụng từ Credit Bureau, số dư thẻ tín dụng, khoản vay POS/cash và lịch sử trả góp, phản ánh tính đa nguồn và đa chiều của dữ liệu tín dụng tiêu dùng.~\cite{homecredit2018}
 
-\subsection{Thách thức nghiệp vụ và mâu thuẫn mục tiêu}
+\subsection{Thách thức nghiệp vụ và Mâu thuẫn mục tiêu}
 Quy trình thẩm định và phê duyệt tín chấp đối mặt với mâu thuẫn giữa mục tiêu mở rộng doanh số và kiểm soát tổn thất tín dụng. Cụ thể, bài toán bao gồm ba thách thức chính:
 \begin{itemize}
 	\item \textbf{Bất đối xứng thông tin:} Thiếu hồ sơ tín dụng lịch sử và dữ liệu tài chính có thể kiểm chứng làm tăng nguy cơ lựa chọn bất lợi. Khi lender không thể phân biệt đáng tin cậy giữa khách hàng tốt và khách hàng có rủi ro cao, việc mở rộng tín dụng có thể làm gia tăng tỷ lệ vỡ nợ kỳ vọng.~\cite{stiglitz1981credit}
@@ -28,19 +28,22 @@ Quy trình thẩm định và phê duyệt tín chấp đối mặt với mâu t
 \subsection{Định nghĩa bài toán kỹ thuật}
 Hệ thống cần giải quyết bài toán tích hợp giữa quản trị dữ liệu và hỗ trợ quyết định tín dụng, gồm hai thành phần chính:
 \begin{itemize}
-	\item \textbf{Xây dựng Kho dữ liệu tập trung (Data Warehouse -- DW):} Chuẩn hóa, làm sạch và tích hợp dữ liệu từ nhiều nguồn, bao gồm thông tin nhân khẩu học, hồ sơ vay, lịch sử tín dụng nội bộ, số dư thẻ, lịch sử trả góp và dữ liệu từ Credit Bureau. Mô hình dữ liệu đa chiều (\textit{dimensional modeling}) được sử dụng để tổ chức dữ liệu quanh các fact table và dimension table, phục vụ phân tích OLAP và báo cáo quản trị.~\cite{kimball2013dw}
-	\item \textbf{Xây dựng Hệ hỗ trợ quyết định (Decision Support System -- DSS):} Kết hợp mô hình học máy ước lượng xác suất vỡ nợ (\textit{Probability of Default} -- PD) với bộ luật nghiệp vụ phân loại ba mức Green / Yellow / Red. Theo khung Basel, PD là thành phần cốt lõi trong ước lượng rủi ro tín dụng nội bộ, gắn liền với LGD (\textit{Loss Given Default}) và EAD (\textit{Exposure at Default}).~\cite{basel2019credit}
+	\item \textbf{Xây dựng Kho dữ liệu tập trung} Chuẩn hóa, làm sạch và tích hợp dữ liệu từ nhiều nguồn, bao gồm thông tin nhân khẩu học, hồ sơ vay, lịch sử tín dụng nội bộ, số dư thẻ, lịch sử trả góp và dữ liệu từ Credit Bureau. Mô hình dữ liệu đa chiều (\textit{dimensional modeling}) được sử dụng để tổ chức dữ liệu quanh các fact table và dimension table, phục vụ phân tích OLAP và báo cáo quản trị.~\cite{kimball2013dw}
+	\item \textbf{Xây dựng Hệ hỗ trợ quyết định} Kết hợp mô hình học máy ước lượng xác suất vỡ nợ (\textit{Probability of Default} -- PD) với bộ luật nghiệp vụ phân loại ba mức Green / Yellow / Red. Theo khung Basel, PD là thành phần cốt lõi trong ước lượng rủi ro tín dụng nội bộ, gắn liền với LGD (\textit{Loss Given Default}) và EAD (\textit{Exposure at Default}).~\cite{basel2019credit}
 	\item Hệ thống nhằm tự động hóa bước sàng lọc ban đầu, ưu tiên hồ sơ theo mức độ rủi ro, rút ngắn thời gian xử lý và hỗ trợ kiểm soát tổn thất tín dụng kỳ vọng. Mục tiêu mô hình hóa là dự đoán biến mục tiêu nhị phân: khách hàng gặp khó khăn thanh toán (\textit{TARGET} = 1) hoặc không gặp khó khăn thanh toán (\textit{TARGET} = 0).~\cite{homecredit2018}
 \end{itemize}
 
-\section{Người dùng và quyết định cần hỗ trợ}
+\section{Người dùng và Quyết định cần hỗ trợ}
 Hệ thống hỗ trợ quyết định tín dụng phục vụ ba nhóm người dùng chính với nhu cầu thông tin và phạm vi ra quyết định khác nhau: chuyên viên thẩm định tín dụng ở cấp tác nghiệp, quản trị viên rủi ro ở cấp chiến thuật, và ban điều hành hoặc Giám đốc Quản trị rủi ro (\textit{Chief Risk Officer} -- CRO) ở cấp chiến lược. Cách phân tầng này phù hợp với nguyên lý của hệ hỗ trợ quyết định: các quyết định tác nghiệp thường mang tính lặp lại và có cấu trúc rõ ràng hơn, trong khi quyết định chiến thuật và chiến lược đòi hỏi phân tích đa chiều, kịch bản và thông tin tổng hợp từ nhiều nguồn.~\cite{turban2010dsbi}
-\begin{figure}[htbp]
+
+\begin{figure}[H]
 	\centering
-	\mermaidfile[width=0.8\linewidth]{diagrams/decision_levels.mmd}
-	\caption{Decision levels overview}
+	\mermaidfile{diagrams/decision_levels.mmd}
+	\caption{Luồng Quyết định trong Home Credit}
 	\label{fig:decision_levels}
-\end{figure}\begin{table}[H]
+\end{figure}
+
+\begin{table}[H]
 	\centering
 	\caption{Cấp độ người dùng và Quyết định được hỗ trợ}
 	\label{tab:user-decision-levels}
@@ -65,7 +68,7 @@ Hệ thống hỗ trợ quyết định tín dụng phục vụ ba nhóm ngườ
 	\end{tabular}
 \end{table}
 
-\subsection{Credit Underwriter -- Cấp tác nghiệp}
+\subsection*{Credit Underwriter -- Cấp tác nghiệp}
 \paragraph{Nhu cầu thông tin:} Chuyên viên thẩm định cần tiếp cận thông tin tổng hợp về hồ sơ vay và hồ sơ khách hàng, bao gồm thu nhập, tỷ lệ nợ trên thu nhập, lịch sử trễ hạn nội bộ và liên ngân hàng, số dư thẻ, lịch sử trả góp, các yếu tố rủi ro chính chi phối điểm tín dụng, cùng lý do giải thích cho kết quả phân loại của mô hình. Basel Committee yêu cầu quy trình cấp tín dụng phải dựa trên tiêu chí rõ ràng, hiểu biết đầy đủ về hồ sơ rủi ro của người vay và nguồn trả nợ.~\cite{basel2025credit}
 
 \paragraph{Quyết định cần hỗ trợ:} Hệ thống phân luồng hồ sơ thành ba nhóm:
@@ -75,7 +78,7 @@ Hệ thống hỗ trợ quyết định tín dụng phục vụ ba nhóm ngườ
 	\item \textbf{Thẩm định thủ công (\textcolor{yellow}{\textit{Manual Review}}):} Hồ sơ nằm trong vùng ranh giới, cần xác minh bổ sung như gọi điện xác nhận, yêu cầu chứng từ thu nhập, kiểm tra thông tin thực địa hoặc xem xét điều chỉnh hạn mức. Đây là luồng quan trọng vì quyết định không thể chỉ dựa hoàn toàn vào điểm số mô hình; người thẩm định cần được cung cấp cả kết quả mô hình và các bằng chứng nghiệp vụ liên quan.
 \end{enumerate}
 
-\subsection{Credit Risk Manager -- Cấp chiến thuật}
+\subsection*{Credit Risk Manager -- Cấp chiến thuật}
 \paragraph{Nhu cầu thông tin:} Quản trị viên rủi ro cần các báo cáo phân tích đa chiều (\textit{OLAP cubes}) về chất lượng danh mục, phân phối điểm rủi ro theo nghề nghiệp, khu vực địa lý, loại sản phẩm vay, hạn mức và biến động tỷ lệ quá hạn theo thời gian. Basel Committee nhấn mạnh rằng ngân hàng cần có hệ thống thông tin và kỹ thuật phân tích để đo lường rủi ro tín dụng, giám sát chất lượng danh mục và phát hiện sớm các khoản vay có vấn đề.~\cite{basel2025credit}
 
 \paragraph{Quyết định cần hỗ trợ:} Các quyết định chiến thuật bao gồm:
@@ -86,7 +89,7 @@ Hệ thống hỗ trợ quyết định tín dụng phục vụ ba nhóm ngườ
 	\item Theo dõi hiệu năng của mô hình PD theo thời gian, đặc biệt là sự suy giảm chất lượng dự báo (\textit{model drift}) và mức độ ổn định của phân phối điểm rủi ro.
 \end{itemize}
 
-\subsection{Ban Điều hành và Giám đốc Quản trị rủi ro (Executive / CRO -- Cấp chiến lược)}
+\subsection*{Executive/CRO -- Cấp chiến lược}
 \paragraph{Nhu cầu thông tin:} Ban điều hành và CRO cần dashboard tổng hợp về chất lượng danh mục, các chỉ số rủi ro theo phân khúc, xu hướng nợ quá hạn, tổn thất kỳ vọng (\textit{Expected Loss} -- EL), mức độ tập trung rủi ro và tỷ suất sinh lời trên vốn điều chỉnh theo rủi ro (\textit{Risk-Adjusted Return on Capital} -- RAROC). RAROC được sử dụng để so sánh lợi nhuận của hoạt động tín dụng với lượng vốn cần thiết để hấp thụ rủi ro; công thức phổ biến là:
 \[\mathrm{RAROC}=\frac{\text{Doanh thu} - \text{Chi phí} - \text{Tổn thất kỳ vọng} + \text{Thu nhập từ vốn}}{\text{Vốn kinh tế}}.\]
 Trong đó, tổn thất kỳ vọng thường được ước lượng theo:
@@ -102,7 +105,7 @@ Trong đó, tổn thất kỳ vọng thường được ước lượng theo:
 
 \section{KPI}
 
-\section{Phạm vi và giả định}
+\section{Phạm vi và Giả định}
 \subsection{Phạm vi dự án}
 
 \subsubsection*{Phạm vi dữ liệu}

@@ -24,6 +24,7 @@ Kho dữ liệu là **DuckDB**: chạy local bằng file `data/warehouse/hc.duck
 
 ## Cài đặt
 
+### Trên Window
 Python 3.12 và Node.js 20 trở lên.
 
 ```bash
@@ -32,6 +33,16 @@ python -m venv .venv
 
 ```bash
 .venv/Scripts/pip.exe install -e ".[etl,api,dev]"
+```
+
+```bash
+cd frontend && npm install && npm run build
+```
+
+### Trên MacOS
+
+```bash
+uv sync
 ```
 
 ```bash

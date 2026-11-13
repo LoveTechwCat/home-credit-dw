@@ -1,21 +1,23 @@
-flowchart TB
-    subgraph Strategic["Cấp chiến lược — Executive / CRO"]
+flowchart LR
+    subgraph Strategic["Cấp chiến lược<br>Executive / CRO"]
         S1[Phân bổ hạn mức và vốn]
         S2[Hoạch định dự phòng ECL]
         S3[Định hướng danh mục và khẩu vị rủi ro]
     end
 
-    subgraph Tactical["Cấp chiến thuật — Risk Manager"]
+    subgraph Tactical["Cấp chiến thuật<br>Risk Manager"]
         T1[Điều chỉnh ngưỡng Green / Red]
         T2[Quản lý knock-out rules]
         T3[Giám sát OLAP và chất lượng danh mục]
     end
 
-    subgraph Operational["Cấp tác nghiệp — Credit Underwriter"]
+    subgraph Operational["Cấp tác nghiệp<br>Credit Underwriter"]
         O1[Green: Auto-Approve]
         O2[Yellow: Manual Review]
         O3[Red: Auto-Reject]
     end
+
+
 
     DW[(Data Warehouse)] --> OLAP[OLAP cubes<br/>và dashboard]
     OLAP --> T3

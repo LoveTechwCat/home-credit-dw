@@ -1,0 +1,40 @@
+flowchart LR
+    subgraph RawSources["Nguồn Thô (Kaggle CSVs)"]
+        R_App["application_{train|test}"]
+        R_Bur["bureau & bureau_balance"]
+        R_Prev["previous_application"]
+        R_Inst["installments_payments"]
+        R_Pos["POS_CASH_balance"]
+        R_CC["credit_card_balance"]
+    end
+
+    subgraph StagingTables["Tầng Staging & Tổng hợp"]
+        S_App["staging.application_clean"]
+        S_Agg["staging.agg_credit_profile"]
+    end
+
+    subgraph Dimensions["Bảng Chiều (Dimensions)"]
+        D_Cust["dim_customer"]
+        D_Hist["dim_credit_history (Mini-dim)"]
+        D_Cont["dim_contract"]
+        D_Reg["dim_region"]
+        D_Cat["dim_bureau_category (Junk)"]
+        D_Time["dim_time (Role-playing)"]
+    end
+
+    subgraph Facts["Bảng Sự Kiện (Facts)"]
+        F_Loan["fact_loan_application"]
+        F_Bur["fact_bureau_credit"]
+    end
+
+    R_App --> S_App
+    R_Bur & R_Prev & R_Inst & R_Pos & R_CC --> S_Agg
+
+    S_App --> D_Cust
+    S_App --> D_Cont
+    S_App --> D_Reg
+    S_Agg --> D_Hist
+    R_Bur --> D_Cat
+
+    S_App & S_Agg & D_Cust & D_Hist & D_Cont & D_Reg & D_Time --> F_Loan
+    R_Bur & D_Cust & D_Cat & D_Time --> F_Bur
