@@ -1,0 +1,18 @@
+graph TD
+    subgraph Cube["Không Gian Khối Đa Chiều (Multidimensional Space)"]
+        D1["Chiều Khách Hàng (Customer)"]
+        D2["Chiều Lịch Sử Tín Dụng (Credit History)"]
+        D3["Chiều Hợp Đồng (Contract)"]
+        D4["Chiều Thời Gian (Time)"]
+    end
+
+    subgraph Ops["Các Thao Tác Phân Tích OLAP"]
+        O1["<b>Roll-up</b><br/>Gộp nhóm phân cấp:<br/>Age Bucket &rarr; Income &rarr; Toàn bộ danh mục"]
+        O2["<b>Cube</b><br/>Tổng hợp toàn bộ tổ hợp chiều:<br/>Contract Type &times; Gender"]
+        O3["<b>Drill-down</b><br/>Đi sâu vào chi tiết:<br/>Nhóm tuổi '25-34' &rarr; Nghề nghiệp cụ thể"]
+        O4["<b>Slice & Dice</b><br/>Cắt lát (Cash loans) &<br/>Định vị (Bureau có lịch sử & DPD cụ thể)"]
+        O5["<b>Time Trend</b><br/>Phân tích chuỗi thời gian:<br/>Quý &rarr; Năm &rarr; Tổng quan"]
+        O6["<b>Ranking Window</b><br/>Xếp hạng rủi ro:<br/>Top 3 nghề rủi ro nhất mỗi nhóm tuổi"]
+    end
+
+    Cube --> Ops

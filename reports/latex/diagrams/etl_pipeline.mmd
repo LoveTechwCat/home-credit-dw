@@ -1,0 +1,29 @@
+flowchart LR
+    subgraph S1["1. Extract & Type Cast"]
+        direction TB
+        Raw["Kaggle CSVs"] --> Staging["staging.* Tables<br/>(TRY_CAST String &rarr; Declared Types)"]
+    end
+
+    subgraph S2["2. Clean & Normalize"]
+        Clean["staging.application_clean<br/>(10 Rules: Sentinel, Outlier,<br/>Buckets, Ratios)"]
+    end
+
+    subgraph S3["3. History Aggregation"]
+        Agg["staging.agg_credit_profile<br/>(1..N Roll-up: bureau, prev,<br/>POS, CC, inst)"]
+    end
+
+    subgraph S4["4. Dimensional Load"]
+        TempDW[("hc.duckdb.building<br/>Load 6 Dims & 2 Facts")]
+    end
+
+    subgraph S5["5. Quality Gate & Publish"]
+        direction LR
+        DQ{"Kiểm tra Chất lượng<br/>• PK Unique & FK Integrity<br/>• Row Counts & Reconcile"}
+        DQ -->|Pass 100%| ProdDW[("hc.duckdb<br/>(Atomic Rename)")]
+        DQ -->|Fail| Abort["Hủy & Giữ Kho cũ"]
+    end
+
+    Staging --> Clean
+    Staging --> Agg
+    Clean & Agg --> TempDW
+    TempDW --> DQ

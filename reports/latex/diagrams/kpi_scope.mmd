@@ -1,0 +1,36 @@
+flowchart LR
+    subgraph Sources["Nguồn dữ liệu Home Credit"]
+        A1[application_train / test]
+        A2[bureau + bureau_balance]
+        A3[previous_application]
+        A4[POS_CASH_balance]
+        A5[credit_card_balance]
+        A6[installments_payments]
+    end
+
+    Sources --> ETL[ETL / ELT Pipeline]
+    ETL --> Staging[Staging và Data Quality]
+    Staging --> DW[(Galaxy Schema DW)]
+
+    subgraph DWModel["Mô hình đa chiều"]
+        F1[fact_loan_application]
+        F2[fact_bureau_credit]
+        D1[dim_customer]
+        D2[dim_credit_metrics]
+        D3[dim_region]
+        D4[dim_contract]
+        D5[dim_bureau_category]
+        D6[dim_time]
+    end
+
+    DW --> DWModel
+    DWModel --> OLAP[OLAP: slice, dice,<br/>drill-down, roll-up]
+    OLAP --> KPI1[DR, AR, STP, MRR]
+    OLAP --> KPI2[EL = PD x EAD x LGD]
+
+    DW --> Features[Feature Store / Feature Engineering]
+    Features --> ML[Mô hình PD]
+    ML --> Metrics[ROC-AUC >= 0.75<br/>Gini >= 0.50]
+    ML --> Triage[Triage Engine<br/>Green / Yellow / Red]
+    Triage --> KPI3[Inference latency <= 200 ms]
+    Triage --> Ops[Auto-approve,<br/>manual review, auto-reject]

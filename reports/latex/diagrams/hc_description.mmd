@@ -1,0 +1,49 @@
+erDiagram
+    application_train_test_csv {
+        string description "Bảng chính: tập dữ liệu train và test"
+        string target "Biến mục tiêu (nhị phân)"
+        string info "Thông tin khoản vay & khách hàng lúc nộp hồ sơ"
+    }
+
+    bureau_csv {
+        string description "Khoản vay cũ tại tổ chức tín dụng khác"
+        string row_nature "1 dòng = 1 khoản vay tại Credit Bureau"
+    }
+
+    bureau_balance_csv {
+        string description "Số dư hàng tháng tại Credit Bureau"
+        string type "Dữ liệu hành vi"
+    }
+
+    previous_application_csv {
+        string description "Hồ sơ vay trước đây tại Home Credit"
+        string info "Thông số khoản vay cũ lúc nộp hồ sơ"
+        string row_nature "1 dòng = 1 hồ sơ vay cũ"
+    }
+
+    POS_CASH_balance_csv {
+        string description "Số dư hàng tháng khoản vay cũ tại Home Credit"
+        string type "Dữ liệu hành vi"
+    }
+
+    instalments_payments_csv {
+        string description "Lịch sử thanh toán từng kỳ trả góp cũ"
+        string type "Dữ liệu hành vi"
+    }
+
+    credit_card_balance_csv {
+        string description "Số dư hàng tháng thẻ tín dụng cũ"
+        string type "Dữ liệu hành vi"
+    }
+
+    %% Relationships
+    application_train_test_csv ||--o{ bureau_csv : "SK_ID_CURR"
+    bureau_csv ||--o{ bureau_balance_csv : "SK_ID_BUREAU"
+    
+    application_train_test_csv ||--o{ previous_application_csv : "SK_ID_CURR"
+    application_train_test_csv ||--o{ POS_CASH_balance_csv : "SK_ID_CURR"
+    application_train_test_csv ||--o{ credit_card_balance_csv : "SK_ID_CURR"
+
+    previous_application_csv ||--o{ POS_CASH_balance_csv : "SK_ID_PREV"
+    previous_application_csv ||--o{ instalments_payments_csv : "SK_ID_PREV"
+    previous_application_csv ||--o{ credit_card_balance_csv : "SK_ID_PREV"
