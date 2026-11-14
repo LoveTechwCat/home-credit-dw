@@ -64,6 +64,7 @@ cd frontend && npm install && npm run build
 | `hcdw serve` | Mở web app tại http://127.0.0.1:8000 (API + dashboard đã build). Tài liệu API: `/docs` |
 | `hcdw push` | Đẩy kho local lên MotherDuck (cần `MOTHERDUCK_TOKEN`) |
 | `hcdw info` | Xem kho đang dùng và số dòng của từng bảng |
+| `hcdw ui` | Mở DuckDB UI (giao diện SQL trên trình duyệt) tại http://localhost:4213, kho gắn ở chế độ chỉ đọc (catalog `hc`) |
 | `python scripts/capture_figures.py` | Chụp ảnh các trang và sơ đồ vào `reports/figures/` (cần `hcdw serve` đang chạy) |
 | `python -m dss.train` | Train mô hình DSS |
 

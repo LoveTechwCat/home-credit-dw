@@ -166,6 +166,35 @@ def serve(
 
 
 @app.command()
+def ui() -> None:
+    """Open the DuckDB web UI (SQL notebooks) on the local warehouse, read-only, at http://localhost:4213."""
+    import time
+
+    import duckdb
+
+    from hcdw.db import sql_literal_path
+
+    s = get_settings()
+    if not s.dw_path.exists():
+        typer.echo(f"{s.dw_path} not found. Build it first with `hcdw etl`.", err=True)
+        raise typer.Exit(1)
+    # The UI keeps its own state in a separate database it must write to, so the session itself is
+    # writable (in-memory) and only the warehouse is attached read-only.
+    con = duckdb.connect()
+    con.execute(f"ATTACH {sql_literal_path(s.dw_path)} AS hc (READ_ONLY)")
+    con.execute("USE hc")
+    con.execute("CALL start_ui()")
+    typer.echo("DuckDB UI: http://localhost:4213  (catalog 'hc', read-only). Ctrl+C to stop.")
+    typer.echo("Stop it before running `hcdw etl`.")
+    try:
+        while True:
+            time.sleep(3600)
+    except KeyboardInterrupt:
+        con.execute("CALL stop_ui_server()")
+        con.close()
+
+
+@app.command()
 def info() -> None:
     """Show which warehouse is configured and its table sizes."""
     from hcdw.db import get_conn
