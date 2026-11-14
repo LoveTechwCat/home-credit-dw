@@ -16,7 +16,7 @@ Hệ thống gồm 5 chức năng chính được tổ chức thành các tầng
 
 \begin{itemize}[topsep=2pt, itemsep=2pt, parsep=0pt]
 	\item \textbf{Tầng Thu thập và Chuyển đổi (ETL Engine):} Trích xuất dữ liệu thô từ Kaggle ($2{,}6$ GB gồm 8 tập tin CSV), thực thi 10 quy tắc làm sạch dữ liệu nghiệp vụ bằng thư viện tối ưu và chuyển đổi các bảng quan hệ $1:N$ thành các chỉ số tổng hợp cấp độ khách hàng bằng DuckDB SQL.
-	\item \textbf{Tầng Lưu trữ và Động cơ OLAP (DuckDB Warehouse):} Sử dụng hệ quản trị cơ sở dữ liệu phân tích nhúng DuckDB dưới dạng tập tin đơn nhất (\texttt{hc.duckdb}, dung lượng xấp xỉ $864$ MB). DuckDB áp dụng cơ chế xử lý dữ liệu theo cột (\textit{columnar-vectorized execution}), loại bỏ hoàn toàn chi phí truyền thông liên tiến trình (\textit{IPC overhead}) và tối ưu hóa tính toán cho các hàm tổng hợp đa chiều.
+	\item \textbf{Tầng Lưu trữ và Động cơ OLAP (DuckDB Warehouse):} Sử dụng hệ quản trị cơ sở dữ liệu phân tích nhúng DuckDB dưới dạng tập tin đơn nhất (\texttt{hc.duckdb}, dung lượng khoảng $870$ MB). DuckDB áp dụng cơ chế xử lý dữ liệu theo cột (\textit{columnar-vectorized execution}), loại bỏ hoàn toàn chi phí truyền thông liên tiến trình (\textit{IPC overhead}) và tối ưu hóa tính toán cho các hàm tổng hợp đa chiều.
 	\item \textbf{Tầng Dịch vụ và Xử lý Nghiệp vụ (FastAPI Backend):} Đóng vai trò cầu nối trung gian, chịu trách nhiệm tiếp nhận yêu cầu từ trình duyệt, thẩm định danh sách trắng (\textit{whitelist validation}) để phòng chống tấn công chèn mã SQL, tham số hóa các điều kiện lọc và duy trì bộ nhớ đệm kết quả truy vấn nội bộ (\textit{LRU cache}).
 	\item \textbf{Tầng Động cơ Hỗ trợ Quyết định (Decision Support Engine):} Tích hợp mô hình học máy phân lớp rủi ro LightGBM cùng bộ luật thẩm định đa tầng (Green / Yellow / Red), cho phép đánh giá tức thì điểm tín dụng của một hồ sơ mô phỏng.
 	\item \textbf{Tầng Trình diễn (React SPA Frontend):} Ứng dụng đơn trang xây dựng trên nền tảng React 18, TypeScript và Tailwind CSS, tích hợp thư viện biểu đồ Recharts và các sơ đồ kiến trúc động.
@@ -27,7 +27,7 @@ Hệ thống gồm 5 chức năng chính được tổ chức thành các tầng
 \begin{enumerate}
 	\item \textbf{Cơ chế Triển khai Nguyên tử:} Trong quá trình tái cấu trúc hoặc làm mới dữ liệu (Full Refresh), quy trình ETL không ghi trực tiếp lên tập tin dữ liệu đang phục vụ mà xuất kết quả vào một tập tin tạm thời \texttt{hc.duckdb.building}. Chỉ khi toàn bộ các bước trích xuất, làm sạch, tính toán mart và vượt $100\%$ các bài kiểm tra chất lượng (\textit{Data Quality Gates}), hệ thống mới thực hiện đổi tên tập tin nguyên tử (\textit{atomic rename}) để thay thế kho dữ liệu đang chạy. Nếu xảy ra lỗi giữa chừng, tập tin cũ hoàn toàn không bị ảnh hưởng, loại trừ nguy cơ hỏng kho dữ liệu.
 	\item \textbf{An toàn Truy vấn và Chống SQL Injection:} Trình duyệt và người dùng tuyệt đối không gửi trực tiếp các chuỗi truy vấn SQL thô về máy chủ. Lớp API tại \texttt{src/hcdw/api/app.py} và \texttt{queries.py} thực hiện xác thực mọi tham số truy vấn thông qua tập danh sách trắng cố định \texttt{DIMENSIONS} và \texttt{MEASURES}. Bất kỳ tham số lạ nào đều bị từ chối với mã lỗi HTTP 400. Toàn bộ các giá trị lọc được đưa vào câu truy vấn thông qua các tham số gán (\textit{parameterized bindings} dạng \texttt{?}), ngăn chặn triệt để nguy cơ tiêm mã độc.
-	\item \textbf{Bộ nhớ Đệm Tầng Truy vấn:} Do dữ liệu kho là một snapshot, kết quả của một phép toán tổng hợp tương ứng với một bộ lọc cố định là bất biến cho đến kỳ ETL kế tiếp. Lớp truy vấn tích hợp bộ nhớ đệm LRU Cache: các truy vấn lặp lại được load trực tiếp từ RAM với độ trễ $<5$ ms, trong khi các truy vấn phân tích quét trên $356.000$ bản ghi lần đầu chỉ mất từ $15-60$ ms.
+	\item \textbf{Bộ nhớ Đệm Tầng Truy vấn:} Do dữ liệu kho là một snapshot, kết quả của một phép toán tổng hợp tương ứng với một bộ lọc cố định là bất biến cho đến kỳ ETL kế tiếp. Lớp truy vấn tích hợp bộ nhớ đệm LRU Cache: các truy vấn lặp lại được trả trực tiếp từ RAM với độ trễ $<5$ ms, trong khi các truy vấn phân tích quét trên $356.000$ bản ghi lần đầu mất khoảng $50-150$ ms (đo trên máy tính xách tay cá nhân).
 \end{enumerate}
 
 \begin{table}[H]
@@ -66,9 +66,9 @@ Hệ thống gồm 5 chức năng chính được tổ chức thành các tầng
 Mỗi tương tác lọc hoặc phóng to/thu nhỏ trên bảng điều khiển kích hoạt một chu trình xử lý khép kín. Hình~\ref{fig:flow_request} minh họa chi tiết tuần tự các bước truyền thông từ trình duyệt đến cơ sở dữ liệu:
 \begin{enumerate}[topsep=0pt, itemsep=1pt]
 	\item Chuyên viên phân tích thao tác nhấp chuột trên một thành phần biểu đồ (ví dụ: cột độ tuổi \texttt{25-34}).
-	\item React cập nhật trạng thái \texttt{sharedFilters} và phát lệnh gọi HTTP GET tới endpoint \texttt{/api/by/income\_type?age\_bucket=25-34}.
+	\item React cập nhật trạng thái bộ lọc dùng chung (\texttt{FiltersProvider}, áp dụng cho mọi trang) và phát lệnh gọi HTTP GET tới endpoint \texttt{/api/by/income\_type?age\_bucket=25-34}.
 	\item FastAPI xác thực các tham số đối chiếu với danh sách trắng cho phép.
-	\item Bộ điều phối truy vấn kiểm tra bộ đệm nội bộ: nếu đã tồn tại, dữ liệu được nén Gzip và trả về ngay ($< 5$ ms); nếu là bộ lọc mới, hệ thống kích hoạt câu lệnh SQL vector hóa xuống DuckDB ($15-60$ ms) rồi lưu vào cache.
+	\item Bộ điều phối truy vấn kiểm tra bộ đệm nội bộ: nếu đã tồn tại, dữ liệu được nén Gzip và trả về ngay ($< 5$ ms); nếu là bộ lọc mới, hệ thống kích hoạt câu lệnh SQL vector hóa xuống DuckDB ($50-150$ ms) rồi lưu vào cache.
 	\item Trình duyệt nhận kết quả dạng JSON và tái render thời toàn bộ các biểu đồ liên quan.
 \end{enumerate}
 
@@ -76,7 +76,7 @@ Mỗi tương tác lọc hoặc phóng to/thu nhỏ trên bảng điều khiển
 Để phục vụ nhu cầu ra quyết định của các cấp quản trị rủi ro, hệ thống cung cấp các mẫu truy vấn phân tích đa chiều chuẩn hóa trên cơ sở dữ liệu DuckDB thông qua View tầng Mart (\texttt{mart.v\_application\_wide}) và các bảng Fact/Dimension liên kết.
 
 \subsection{Không gian Khối Đa chiều và Các Thao tác Phân tích}
-Khối dữ liệu phân tích tín dụng được cấu thành từ 5 chiều nghiệp vụ cốt lõi: Chiều Khách hàng (\texttt{dim\_customer}), Chiều Lịch sử Tín dụng (\texttt{dim\_credit\_history}), Chiều Hợp đồng (\texttt{dim\_contract}), Chiều Địa lý (\texttt{dim\_region}) và Chiều Thời gian (\texttt{dim\_time}). Mối quan hệ giữa không gian khối đa chiều và 6 thao tác phân tích nền tảng được cài đặt trong hệ thống như sau:
+Khối dữ liệu của fact hồ sơ vay (\texttt{fact\_loan\_application}) được cấu thành từ 5 chiều nghiệp vụ cốt lõi: Chiều Khách hàng (\texttt{dim\_customer}), Chiều Lịch sử Tín dụng (\texttt{dim\_credit\_history}), Chiều Hợp đồng (\texttt{dim\_contract}), Chiều Địa lý (\texttt{dim\_region}) và Chiều Thời gian (\texttt{dim\_time}). Mối quan hệ giữa không gian khối đa chiều và 6 thao tác phân tích nền tảng được cài đặt trong hệ thống như sau:
 
 \begin{figure}[H]
 	\centering
@@ -108,7 +108,7 @@ ORDER BY GROUPING(age_bucket), age_bucket, GROUPING(income_bracket), income_brac
 	\label{sql:olap_rollup}
 \end{listing}
 
-\paragraph{Thực nghiệm:} Dữ liệu cho thấy xu hướng rõ nét: tỷ lệ nợ xấu ở nhóm khách hàng trẻ tuổi ($18-24$) đạt mức cao nhất ($10{,}4\%$), sau đó giảm dần đều theo tuổi ($55-64$ chỉ còn $5{,}3\%$). Đồng thời, trong cùng một nhóm tuổi, khách hàng có thu nhập trên $300.000$ đơn vị tiền tệ luôn có tỷ lệ vỡ nợ thấp hơn đáng kể so với nhóm có thu nhập dưới $100.000$.
+\paragraph{Thực nghiệm:} Dữ liệu cho thấy xu hướng rõ nét: tỷ lệ nợ xấu ở nhóm khách hàng trẻ tuổi ($18-24$) đạt mức cao nhất ($12{,}3\%$), sau đó giảm dần đều theo tuổi ($55-64$ còn $5{,}4\%$ và $65+$ chỉ $3{,}7\%$; trung bình toàn danh mục $8{,}07\%$). Đồng thời, trong cùng một nhóm tuổi, khách hàng có thu nhập trên $300.000$ đơn vị tiền tệ luôn có tỷ lệ vỡ nợ thấp hơn đáng kể so với nhóm có thu nhập dưới $100.000$.
 
 \subsubsection*{Kịch bản 2: CUBE Toàn diện trên Loại Hợp đồng và Giới tính}
 \paragraph{Mục đích:} Cung cấp bức tranh toàn diện về mọi tổ hợp chiều giữa sản phẩm vay (Khoản vay tiền mặt \textit{Cash loans} so với Thấu chi/thẻ \textit{Revolving loans}) và giới tính khách hàng (\textit{M/F}), bao gồm cả các giá trị trung vị đòn bẩy DTI.
@@ -131,11 +131,11 @@ ORDER BY GROUPING(contract_type), contract_type, GROUPING(gender), gender;
 	\label{sql:olap_cube}
 \end{listing}
 
-\paragraph{Thực nghiệm:} Khách hàng nam giới có tỷ lệ nợ xấu ($10{,}1\%$) cao hơn đáng kể so với nữ giới ($7{,}0\%$). Sản phẩm Khoản vay tiền mặt chiếm đa số tuyệt đối khối lượng giải ngân và có tỷ lệ vỡ nợ ($8{,}3\%$) cao hơn so với sản phẩm thẻ quay vòng ($5{,}5\%$). Trung vị DTI duy trì ổn định ở mức $0{,}16 - 0{,}18$.
+\paragraph{Thực nghiệm:} Khách hàng nam giới có tỷ lệ nợ xấu ($10{,}1\%$) cao hơn đáng kể so với nữ giới ($7{,}0\%$). Sản phẩm Khoản vay tiền mặt chiếm đa số tuyệt đối khối lượng giải ngân và có tỷ lệ vỡ nợ ($8{,}3\%$) cao hơn so với sản phẩm thẻ quay vòng ($5{,}5\%$). Trung vị DTI khoảng $0{,}16 - 0{,}18$ với khoản vay tiền mặt, nhưng chỉ khoảng $0{,}09 - 0{,}11$ với thẻ quay vòng.
 
 \subsubsection*{Kịch bản 3: Drill-down từ Nhóm tuổi sang Chi tiết Nghề nghiệp}
 \paragraph{Mục đích:} Khi phát hiện nhóm tuổi trẻ $25-34$ có tỷ lệ nợ xấu vượt mức trung bình, chuyên viên thẩm định thực hiện thao tác đào sâu (\textit{drill-down}) từ nhóm tuổi này vào loại hình thu nhập và nghề nghiệp chi tiết để phát hiện cụm rủi ro cụ thể.
-\paragraph{Hiện thực:} Áp dụng điều kiện lát cắt \mintinline[fontsize=\small]{sql}|codeage_bucket = '25-34'| và \mintinline[fontsize=\small]{sql}|HAVING COUNT(*) >= 30| loại các mẫu nghề nghiệp quá nhỏ, tránh nhiễu thống kê:
+\paragraph{Hiện thực:} Áp dụng điều kiện lát cắt \mintinline[fontsize=\small]{sql}|age_bucket = '25-34'| và \mintinline[fontsize=\small]{sql}|HAVING COUNT(*) >= 30| loại các mẫu nghề nghiệp quá nhỏ, tránh nhiễu thống kê:
 
 \begin{listing}[H]
 	\footnotesize
@@ -156,7 +156,7 @@ ORDER BY default_rate_pct DESC;
 	\label{sql:olap_drilldown}
 \end{listing}
 
-\paragraph{Thực nghiệm:} Kết quả biểu hiện xu hướng phân hóa sâu sắc: trong nhóm tuổi $25-34$, nhóm lao động phổ thông (\textit{Low-skill Laborers}) và tài xế (\textit{Drivers}) có tỷ lệ nợ xấu lên đến $14{,}2\%$ và $11{,}8\%$. Ngược lại, nhóm nhân viên kế toán (\textit{Accountants}) và quản lý cấp cao (\textit{Managers}) chỉ ghi nhận mức rủi ro lần lượt là $4{,}8\%$ và $5{,}6\%$.
+\paragraph{Thực nghiệm:} Kết quả biểu hiện xu hướng phân hóa sâu sắc: trong nhóm tuổi $25-34$ (tỷ lệ chung $10{,}7\%$), lao động phổ thông tay nghề thấp (\textit{Low-skill Laborers}) có tỷ lệ nợ xấu $20{,}1\%$, nhân viên vệ sinh (\textit{Cleaning staff}) $16{,}6\%$ và tài xế (\textit{Drivers}) $13{,}1\%$. Ngược lại, nhóm nhân viên kế toán (\textit{Accountants}) và quản lý (\textit{Managers}) chỉ ghi nhận mức rủi ro lần lượt là $6{,}0\%$ và $8{,}3\%$. Ở mức chi tiết (loại thu nhập $\times$ nghề nghiệp), tổ hợp rủi ro nhất là \textit{Commercial associate} -- \textit{Cleaning staff} ($23{,}4\%$), an toàn nhất là \textit{State servant} -- \textit{Secretaries} ($3{,}3\%$).
 
 \subsubsection*{Kịch bản 4: Slice \& Dice kết hợp Pivot Ma trận Lịch sử Tín dụng}
 \paragraph{Mục đích:} Chuyên viên rủi ro cắt lát (\textit{Slice}) trên sản phẩm Khoản vay tiền mặt (\textit{Cash loans}), định vị lát cắt phụ (\textit{Dice}) trên tập khách hàng đã có lịch sử tín dụng tại Credit Bureau, sau đó xoay ma trận (\textit{Pivot}) hiển thị mối quan hệ giữa số khoản vay đang hoạt động và số ngày quá hạn tối đa trong lịch sử (DPD).
@@ -181,7 +181,7 @@ ORDER BY bureau_active_bucket;
 	\label{sql:olap_pivot}
 \end{listing}
 
-\paragraph{Thực nghiệm:} Ma trận cho thấy hiện tượng tích tụ rủi ro: khách hàng chưa từng quá hạn (\textit{No DPD}) có tỷ lệ vỡ nợ chỉ từ $6{,}5\% - 7{,}8\%$. Tuy nhiên, khi lịch sử ghi nhận quá hạn từ $31$ ngày trở lên, tỷ lệ nợ xấu vọt lên $18\% - 24\%$, và vượt $30\%$ đối với nhóm trễ hạn nghiêm trọng $90+$ ngày.
+\paragraph{Thực nghiệm:} Ma trận cho thấy hiện tượng tích tụ rủi ro theo cả hai chiều. Theo số khoản vay đang hoạt động: ở mọi mức DPD, nhóm có từ $6$ khoản trở lên luôn rủi ro nhất ($11{,}1\% - 16{,}8\%$), gấp khoảng $1{,}5-2{,}5$ lần nhóm không còn khoản nào đang hoạt động ($4{,}4\% - 11{,}3\%$). Theo lịch sử quá hạn: khách hàng chưa từng quá hạn (\textit{No DPD}) có tỷ lệ vỡ nợ thấp nhất ($4{,}4\% - 11{,}1\%$), còn nhóm quá hạn $61-90$ ngày cao nhất ($11{,}3\% - 16{,}8\%$). Đáng chú ý, nhóm $90+$ ngày ($8{,}2\% - 13{,}9\%$) lại thấp hơn nhóm $61-90$, cho thấy DPD lịch sử không tăng rủi ro một cách tuyến tính và cần kết hợp với các chỉ số khác.
 
 \subsubsection*{Kịch bản 5: Phân tích Xu hướng Chuỗi Thời gian trên Fact Bureau}
 \paragraph{Mục đích:} Ban điều hành (CRO) theo dõi xu hướng tăng trưởng khối lượng giải ngân và tỷ lệ tín dụng còn hiệu lực (\textit{Active}) qua các năm và các quý, dựa trên trục thời gian quy chiếu lịch sử.
@@ -206,7 +206,7 @@ ORDER BY GROUPING(t.year), t.year, GROUPING(t.quarter), t.quarter;
 	\label{sql:olap_trend}
 \end{listing}
 
-\paragraph{Thực nghiệm:} Phân tích chuỗi thời gian cho thấy tổng quy mô tín dụng báo cáo ngoài hệ thống tăng trưởng liên tục từ giai đoạn 2014 đến 2018. Tỷ lệ các khoản nợ còn hiệu lực (\textit{Active}) chiếm tỷ trọng cao ở các quý gần mốc tham chiếu (\textit{anchor date}), phản ánh chính xác gánh nặng nợ hiện hành của khách hàng tại thời điểm thẩm định.
+\paragraph{Thực nghiệm:} Số khoản tín dụng được mở tăng đều từ năm 2013 ($145$ nghìn khoản) tới đỉnh năm 2017 ($359$ nghìn khoản); năm 2018 chỉ có dữ liệu tới ngày mốc tham chiếu (17/05) nên thấp hơn. Tỷ lệ khoản còn hiệu lực (\textit{Active}) tăng mạnh ở các năm gần mốc tham chiếu (\textit{anchor date}): khoảng $10\%$ với các khoản mở năm 2010--2012, $68\%$ năm 2017 và $85\%$ năm 2018. Điều này phản ánh đúng gánh nặng nợ hiện hành của khách hàng tại thời điểm thẩm định.
 
 \subsubsection*{Kịch bản 6: Xếp hạng Phân khúc Rủi ro Bằng Hàm Cửa sổ (Window Function)}
 \paragraph{Mục đích:} Tự động trích xuất danh sách Top 3 nhóm ngành nghề có xác suất vỡ nợ cao nhất trong từng nhóm tuổi để phòng Quản trị rủi ro thiết lập các chính sách hạn chế hạn mức hoặc yêu cầu chứng minh thu nhập khắt khe hơn.
@@ -240,7 +240,7 @@ ORDER BY age_bucket, rank_in_bucket;
 	\label{sql:olap_ranking}
 \end{listing}
 
-\paragraph{Thực nghiệm:} Trong mọi nhóm tuổi, top 3 rủi ro vỡ nợ luôn thuộc về các nhóm nghề có tính chất công việc không ổn định: \textit{Low-skill Laborers}, \textit{Drivers} và \textit{Cooking staff}. Ngược lại, khối ngành công nghệ cao, quản trị và chuyên gia y tế không bao giờ xuất hiện trong nhóm cảnh báo này.
+\paragraph{Thực nghiệm:} \textit{Low-skill Laborers} đứng đầu danh sách rủi ro ở 5 trên 6 nhóm tuổi (từ $13{,}7\%$ đến $20{,}2\%$); các vị trí tiếp theo chủ yếu là các nghề có tính chất công việc không ổn định như \textit{Drivers}, \textit{Security staff} và \textit{Cleaning staff}. Có hai ngoại lệ cần đọc thận trọng vì cỡ mẫu nhỏ: \textit{IT staff} ở nhóm $45-54$ tuổi ($56$ hồ sơ) và \textit{Medicine staff} đứng đầu nhóm $65+$ ($72$ hồ sơ, $6{,}9\%$, vẫn thấp hơn trung bình toàn danh mục). Kết quả này minh họa vì sao truy vấn đặt ngưỡng tối thiểu $30$ hồ sơ, và vì sao ngưỡng này nên được nâng lên khi ra chính sách thực tế.
 
 \subsection{Hiệu năng Truy vấn Thực tế}
 Để chứng minh năng lực của kiến trúc DuckDB trong phân tích dữ liệu lớn so với hệ cơ sở dữ liệu hàng truyền thống, Bảng~\ref{tab:olap-benchmark} tổng hợp thời gian phản hồi thực tế của 6 kịch bản trên:
@@ -254,40 +254,43 @@ ORDER BY age_bucket, rank_in_bucket;
 		\toprule
 		\textbf{Kịch bản}          & \textbf{Toán tử Cốt lõi}                           & \textbf{Số dòng} & \textbf{Lần 1} & \textbf{Bộ đệm} \\
 		\midrule
-		1. Roll-up Tuổi/Thu nhập   & \mintinline[fontsize=\small]{sql}|GROUP BY ROLLUP| & $307.511$        & $28\text{ ms}$ & $< 2\text{ ms}$ \\
-		2. CUBE Sản phẩm/Giới tính & \mintinline[fontsize=\small]{sql}|GROUP BY CUBE|   & $307.511$        & $34\text{ ms}$ & $< 2\text{ ms}$ \\
-		3. Drill-down Nghề nghiệp  & \mintinline[fontsize=\small]{sql}|HAVING + FILTER| & $307.511$        & $22\text{ ms}$ & $< 2\text{ ms}$ \\
-		4. Slice \& Dice Pivot     & \mintinline[fontsize=\small]{sql}|PIVOT ... USING| & $307.511$        & $38\text{ ms}$ & $< 2\text{ ms}$ \\
-		5. Time Trend Bureau       & \mintinline[fontsize=\small]{sql}|JOIN + ROLLUP|   & $1.716.428$      & $54\text{ ms}$ & $< 2\text{ ms}$ \\
-		6. Window Ranking          & \mintinline[fontsize=\small]{sql}|RANK() OVER|     & $307.511$        & $31\text{ ms}$ & $< 2\text{ ms}$ \\
+		1. Roll-up Tuổi/Thu nhập   & \mintinline[fontsize=\small]{sql}|GROUP BY ROLLUP| & $307.511$        & $104\text{ ms}$ & $< 5\text{ ms}$ \\
+		2. CUBE Sản phẩm/Giới tính & \mintinline[fontsize=\small]{sql}|GROUP BY CUBE|   & $307.511$        & $140\text{ ms}$ & $< 5\text{ ms}$ \\
+		3. Drill-down Nghề nghiệp  & \mintinline[fontsize=\small]{sql}|HAVING + FILTER| & $307.511$        & $56\text{ ms}$  & $< 5\text{ ms}$ \\
+		4. Slice \& Dice Pivot     & \mintinline[fontsize=\small]{sql}|PIVOT ... USING| & $307.511$        & $86\text{ ms}$  & $< 5\text{ ms}$ \\
+		5. Time Trend Bureau       & \mintinline[fontsize=\small]{sql}|JOIN + ROLLUP|   & $1.716.428$      & $80\text{ ms}$  & $< 5\text{ ms}$ \\
+		6. Window Ranking          & \mintinline[fontsize=\small]{sql}|RANK() OVER|     & $307.511$        & $59\text{ ms}$  & $< 5\text{ ms}$ \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-Thời gian phản hồi đều duy trì dưới $60$ms ngay cả đối với bảng Fact có $1{,}7$ triệu dòng. Kết quả này chứng minh rằng DuckDB hoàn toàn đủ năng lực đảm nhận vai trò động cơ OLAP hiệu năng cao mà không cần đầu tư các cụm máy chủ phân tán đắt tiền.
+Cột \textit{Lần 1} là thời gian chạy trực tiếp trên DuckDB với kết nối mới, đo trên một máy tính xách tay cá nhân (Windows 11) với toàn bộ dữ liệu thật; cột \textit{Bộ đệm} là thời gian khi API trả kết quả đã lưu trong bộ nhớ đệm. Mọi truy vấn đều hoàn tất trong khoảng $50-150$ ms, kể cả khi quét bảng Fact có $1{,}7$ triệu dòng. Kết quả này cho thấy DuckDB đủ năng lực đảm nhận vai trò động cơ OLAP cho quy mô dữ liệu của bài toán mà không cần máy chủ cơ sở dữ liệu riêng hay cụm máy phân tán.
 
 \section{Bảng Điều khiển Trực quan Hóa (Dashboard)}
 Tầng giao diện người dùng được xây dựng thành một trung tâm điều hành phân tích (\textit{Analytics Command Center}), cho phép chuyên viên thẩm định và lãnh đạo rủi ro quan sát số liệu đa chiều, lọc động tức thời và tương tác sâu với dữ liệu.
 
 \subsection{Bộ lọc chung (Global FilterBar)}
-Nhằm bảo đảm tính nhất quán khi người dùng chuyển hướng giữa các trang nghiệp vụ, \texttt{FilterBar} (\texttt{frontend/src/components/FilterBar.tsx}) lưu trữ trạng thái lọc toàn cục cho 4 chiều thông tin chính:
+Nhằm bảo đảm tính nhất quán khi người dùng chuyển hướng giữa các trang nghiệp vụ, thanh lọc \texttt{FilterBar} (\texttt{frontend/src/components/FilterBar.tsx}) giữ một trạng thái lọc toàn cục (\textit{slice/dice}) cho 6 chiều thông tin:
 \begin{itemize}[topsep=0pt, itemsep=1pt]
-	\item \textbf{Nhóm tuổi (\texttt{age\_bucket}):} Lựa chọn đơn hoặc đa khoảng tuổi ($18-24, 25-34, \dots$).
+	\item \textbf{Nhóm tuổi (\texttt{age\_bucket}):} một hoặc nhiều khoảng tuổi ($18-24, 25-34, \dots, 65+$).
+	\item \textbf{Khung thu nhập (\texttt{income\_bracket}):} từ dưới $100$ nghìn tới trên $300$ nghìn đơn vị tiền tệ.
+	\item \textbf{Loại hình thu nhập (\texttt{income\_type}):} người làm công (\textit{Working}), lao động khu vực thương mại (\textit{Commercial associate}), công chức (\textit{State servant}), hưu trí (\textit{Pensioner}), \dots
 	\item \textbf{Giới tính (\texttt{gender}):} Nam (\textit{M}) hoặc Nữ (\textit{F}).
-	\item \textbf{Nguồn thu nhập (\texttt{income\_type}):} Đối tượng làm công ăn lương (\textit{Working}), công chức (\textit{Commercial associate}) hay hưu trí (\textit{Pensioner}).
-	\item \textbf{Loại hợp đồng (\texttt{contract\_type}):} Khoản vay tiền mặt hoặc Thẻ tín dụng xoay vòng.
+	\item \textbf{Loại hợp đồng (\texttt{contract\_type}):} khoản vay tiền mặt (\textit{Cash loans}) hoặc tín dụng quay vòng (\textit{Revolving loans}).
+	\item \textbf{Trình độ học vấn (\texttt{education\_type}).}
 \end{itemize}
-Khi một điều kiện lọc thay đổi, toàn bộ các đồ thị và thẻ chỉ số trên trang hiện tại tự động đồng bộ hóa mà không cần tải lại toàn trang.
+Bộ lọc áp dụng cho mọi trang và được giữ khi chuyển trang. Ngoài các ô chọn, người dùng có thể \textbf{nhấp trực tiếp vào một cột biểu đồ} để lọc theo giá trị đó (\textit{cross-filtering}); biểu đồ chứa bộ lọc vẫn hiển thị đủ các nhóm và làm nổi bật nhóm đang chọn. Khi điều kiện lọc thay đổi, các đồ thị và thẻ chỉ số được cập nhật ngay mà không tải lại trang. Để tránh diễn giải sai, các nhóm có dưới $30$ hồ sơ có nhãn bị ẩn khỏi biểu đồ và các nhóm dưới $300$ hồ sơ được vẽ mờ.
 
 \subsection{Tổng quan và Danh mục Tín dụng (Overview \& Portfolio)}
-Trang Tổng quan (Hình~\ref{fig:dashboard_overview}) đóng vai trò là điểm tiếp cận đầu tiên cho lãnh đạo cấp cao, hiển thị 4 thẻ KPI động cốt lõi:
+Trang Tổng quan (Hình~\ref{fig:dashboard_overview}) đóng vai trò là điểm tiếp cận đầu tiên cho lãnh đạo cấp cao, hiển thị 5 thẻ KPI động (giá trị trên toàn bộ dữ liệu, chưa lọc):
 \begin{itemize}[topsep=0pt, itemsep=1pt]
-	\item \textbf{Total Applications:} Tổng hồ sơ tiếp nhận ($356.255$ đơn).
-	\item \textbf{Default Rate:} Tỷ lệ nợ xấu trung bình tập huấn luyện ($8{,}07\%$).
-	\item \textbf{Median DTI:} Tỷ lệ trả nợ trên thu nhập trung vị ($16{,}2\%$).
-	\item \textbf{Avg Credit Amount:} Hạn mức khoản vay bình quân ($599.026$ đơn vị tiền tệ).
+	\item \textbf{Default rate:} tỷ lệ nợ xấu trên tập có nhãn ($8{,}07\%$ của $307.511$ hồ sơ).
+	\item \textbf{Applications:} tổng số hồ sơ, gồm cả tập train và test ($356.255$).
+	\item \textbf{Overdue share:} tỷ lệ khách đang quá hạn hoặc từng quá hạn trên $30$ ngày ($9{,}7\%$).
+	\item \textbf{Median debt-to-income:} trung vị tỷ lệ tiền trả góp trên thu nhập ($0{,}163$).
+	\item \textbf{Average credit:} khoản vay bình quân ($587{,}8$ nghìn đơn vị tiền tệ).
 \end{itemize}
-Phía dưới là các biểu đồ phân phối cơ cấu dân số, phân loại thu nhập và tình trạng hôn nhân/gia đình của khách hàng.
+Phía dưới là biểu đồ tỷ lệ nợ xấu theo nhóm tuổi và theo loại hình thu nhập (nhấp vào cột để lọc, có đường tham chiếu trung bình danh mục), đường cong rủi ro theo điểm tín dụng ngoài (\texttt{ext\_source\_mean}), khung nhận định tự động (ví dụ: nhóm $18-24$ tuổi vỡ nợ gấp $3{,}4$ lần nhóm $65+$) và bảng tóm tắt kích thước các bảng trong kho.
 
 \begin{figure}[H]
 	\centering
@@ -296,7 +299,7 @@ Phía dưới là các biểu đồ phân phối cơ cấu dân số, phân lo�
 	\label{fig:dashboard_overview}
 \end{figure}
 
-Trang Danh mục (Hình~\ref{fig:dashboard_portfolio}) tập trung sâu hơn vào phân tích đòn bẩy tài chính và cơ cấu các gói sản phẩm vay, giúp người dùng so sánh tương quan giữa giá trị hàng hóa tiêu dùng (\texttt{amt\_goods\_price}) và quy mô khoản vay được phê duyệt.
+Trang Danh mục (Hình~\ref{fig:dashboard_portfolio}) đi sâu vào rủi ro theo sản phẩm và phân khúc khách hàng: tỷ lệ nợ xấu theo loại hợp đồng, trình độ học vấn, tình trạng gia đình và loại nhà ở; biểu đồ hộp so sánh tỷ lệ nợ trên thu nhập (\textit{debt-to-income}) giữa khoản vay đã trả và khoản vay vỡ nợ, với các phân vị được tính chính xác trên toàn bộ hồ sơ có nhãn (không lấy mẫu); và một bảng phân khúc cho phép chọn bất kỳ chiều nào, sắp xếp theo số hồ sơ, tỷ lệ nợ xấu, tỷ lệ quá hạn, khoản vay bình quân hoặc trung vị DTI.
 
 \begin{figure}[H]
 	\centering
@@ -306,7 +309,7 @@ Trang Danh mục (Hình~\ref{fig:dashboard_portfolio}) tập trung sâu hơn và
 \end{figure}
 
 \subsection{Phân tích Đa chiều (Multidimensional Drill-down)}
-Trang Phân tích Đa chiều (Hình~\ref{fig:dashboard_drilldown}) cho phép người dùng thực hiện thao tác đào sâu dữ liệu tương tác. Người dùng có thể nhấp chọn từng nhóm tuổi để hệ thống lập tức tái cấu trúc biểu đồ nghề nghiệp và biểu đồ phân bổ điểm đánh giá rủi ro ngoài (\texttt{ext\_source\_mean}). Giao diện này hỗ trợ phát hiện tức thì các nhóm phân khúc dị biệt có nguy cơ phát sinh tổn thất cao.
+Trang Phân tích Đa chiều (Hình~\ref{fig:dashboard_drilldown}) hiện thực thao tác \textit{drill-down} và \textit{roll-up} trên một phân cấp do người dùng tự định nghĩa (mặc định: nhóm tuổi $\to$ khung thu nhập $\to$ loại hình thu nhập $\to$ nghề nghiệp; có thể thêm, bớt hoặc đổi thứ tự từ 2 đến 5 cấp). Ở mỗi cấp, nhấp vào một cột để đi sâu xuống cấp kế tiếp; thanh điều hướng (\textit{breadcrumb}) cho phép quay lại bất kỳ cấp nào phía trên. Mỗi cấp là một truy vấn \texttt{GROUP BY} trên \texttt{mart.v\_application\_wide} với đường đào sâu làm điều kiện \texttt{WHERE}, kèm bảng số liệu (số hồ sơ, tỷ lệ nợ xấu) bên cạnh biểu đồ. Giao diện này giúp phát hiện nhanh các phân khúc dị biệt có nguy cơ tổn thất cao.
 
 \begin{figure}[H]
 	\centering
@@ -316,7 +319,7 @@ Trang Phân tích Đa chiều (Hình~\ref{fig:dashboard_drilldown}) cho phép ng
 \end{figure}
 
 \subsection{Lịch sử Tín dụng Liên ngân hàng (Credit History)}
-Trang Lịch sử Tín dụng (Hình~\ref{fig:dashboard_credit_history}) khai thác chiều dữ liệu \texttt{fact\_bureau\_credit} và \texttt{dim\_credit\_history}. Biểu đồ trực quan hóa số lượng hợp đồng vay ngoài đã đóng so với số hợp đồng đang hoạt động, đồng thời phân nhóm khách hàng theo các mức DPD và nợ xấu lịch sử (\textit{bad debt}). Đây là công cụ hữu hiệu giúp chuyên viên thẩm định xác minh tính trung thực và mức độ phụ thuộc tín dụng của người nộp đơn.
+Trang Lịch sử Tín dụng (Hình~\ref{fig:dashboard_credit_history}) gồm hai phần. Phần thứ nhất dùng mini-dimension \texttt{dim\_credit\_history}: tỷ lệ nợ xấu theo số ngày quá hạn tối đa (DPD), theo số khoản vay đang hoạt động tại các tổ chức khác và theo tỷ lệ được duyệt của các hồ sơ trước đây, cùng một bản đồ nhiệt (\textit{heatmap}) kết hợp hai chiều DPD $\times$ số khoản vay đang hoạt động. Phần thứ hai khai thác \texttt{fact\_bureau\_credit} thông qua chiều khách hàng dùng chung (\textit{drill-across}): các thẻ chỉ số (số khoản tín dụng, tỷ lệ còn hiệu lực, dư nợ đang hoạt động, thời hạn trung vị), biểu đồ số khoản tín dụng mở theo năm/quý/tháng chia theo trạng thái, và cơ cấu theo loại tín dụng. Mọi số liệu đều tính trên nhóm khách đang được chọn ở thanh lọc, giúp chuyên viên đánh giá mức độ phụ thuộc tín dụng của nhóm khách hàng đó.
 
 \begin{figure}[H]
 	\centering
@@ -326,7 +329,13 @@ Trang Lịch sử Tín dụng (Hình~\ref{fig:dashboard_credit_history}) khai th
 \end{figure}
 
 \subsection{Thám hiểm Dữ liệu Trực tiếp (OLAP Explorer/Pivot View)}
-Trang OLAP Explorer (Hình~\ref{fig:dashboard_olap_pivot}) là công cụ phân tích tự do (\textit{ad-hoc analysis}) cho phép người dùng tự lựa chọn chiều phân tích cho trục hàng (Row Dimension), chiều cho trục cột (Column Dimension) và chỉ số tính toán (Measure: Đếm số lượng, Tỷ lệ nợ xấu, DTI bình quân). Giao diện kích hoạt truy vấn Pivot động xuống DuckDB và hiển thị kết quả dưới dạng bảng nhiệt ma trận trực quan.
+Trang OLAP Explorer (Hình~\ref{fig:dashboard_olap_pivot}) là giao diện truy vấn của hệ thống, gồm hai chế độ:
+\begin{itemize}[topsep=0pt, itemsep=1pt]
+	\item \textbf{Pivot builder:} người dùng tự chọn chiều cho trục hàng, chiều cho trục cột (trong 14 chiều) và một trong 7 chỉ số (tỷ lệ nợ xấu, số hồ sơ, tỷ lệ quá hạn, khoản vay bình quân, tổng dư nợ, trung vị DTI, điểm tín dụng ngoài bình quân). API sinh truy vấn \texttt{GROUP BY CUBE}, nên bảng kết quả có sẵn dòng và cột tổng \texttt{ALL} (\textit{roll-up}); các ô quá ít hồ sơ được ẩn theo ngưỡng do người dùng đặt, các ô còn lại được tô màu theo giá trị. Người dùng có thể xem câu SQL đã chạy và tải kết quả dưới dạng CSV; thanh lọc chung đóng vai trò \textit{slice/dice}.
+	\item \textbf{Saved queries:} chạy 6 truy vấn OLAP mẫu đã trình bày ở phần Kịch bản Truy vấn OLAP Nghiệp vụ (Listing~\ref{sql:olap_rollup} đến~\ref{sql:olap_ranking}), hiển thị cả câu SQL lẫn kết quả.
+\end{itemize}
+
+Trang \textbf{Risk Simulator} (mô phỏng quyết định cho một hồ sơ) được trình bày ở phần Hệ hỗ trợ quyết định. Ngoài ra, trang \textbf{Architecture} hiển thị trực tiếp các sơ đồ thiết kế của hệ thống (kiến trúc C4, quy trình ETL, star schema, data lineage, luồng truy vấn, luồng DSS) theo giao diện sáng/tối và cho phép tải về dạng SVG.
 
 \begin{figure}[H]
 	\centering
