@@ -24,36 +24,37 @@ Sơ đồ chi tiết (kiến trúc hệ thống, ETL, star schema, data lineage,
 Kho dữ liệu là **DuckDB**: chạy local bằng file `data/warehouse/hc.duckdb`, hoặc trên
 **MotherDuck** (DuckDB cloud) để cả nhóm dùng chung. Chọn nơi dùng bằng biến `DW_TARGET` trong `.env`.
 
-## Cài đặt
+## Bắt đầu nhanh
 
-### Trên Windows
-Python 3.11+ và Node.js 20 trở lên.
+Cần Python 3.11+ và Node.js 20+. Các bước chạy theo thứ tự, từ thư mục gốc của repo.
 
-```bash
-python -m venv .venv
-```
+**1. Cài đặt**
 
-```bash
-.venv/Scripts/pip.exe install -e ".[etl,api,dev]"
-```
+| | Windows (PowerShell) | macOS / Linux |
+|---|---|---|
+| Môi trường Python | `python -m venv .venv` | `uv sync --all-extras` (bỏ qua dòng dưới) |
+| Gói Python | `.venv\Scripts\pip install -e ".[etl,api,ml,dev]"` | |
+| Giao diện web | `cd frontend; npm install; npm run build; cd ..` | `cd frontend && npm install && npm run build && cd ..` |
+| Cấu hình | `copy .env.example .env` | `cp .env.example .env` |
 
-```bash
-cd frontend && npm install && npm run build
-```
+Sau bước này lệnh `hcdw` nằm ở `.venv\Scripts\hcdw` (Windows) hoặc `.venv/bin/hcdw` (macOS/Linux); kích hoạt môi trường (`.venv\Scripts\activate` hoặc `source .venv/bin/activate`) để gõ thẳng `hcdw`.
 
-### Trên MacOS
+**2. Dựng kho và chấm điểm.** Chọn một trong hai nguồn dữ liệu:
 
-```bash
-uv sync --all-extras
-```
+| Nguồn | Lệnh | Thời gian |
+|---|---|---|
+| Dữ liệu mẫu có sẵn trong repo (khoảng 5.000 khách, không cần tài khoản Kaggle) | `hcdw etl --source sample --score` | khoảng 35 giây |
+| Dữ liệu thật | `hcdw download` → `hcdw synth-dates` → `hcdw etl --source raw --score` | khoảng 1,5 phút cho bước cuối |
 
-```bash
-cd frontend && npm install && npm run build
-```
+`hcdw download` cần đã tham gia cuộc thi trên Kaggle và có `KAGGLE_API_TOKEN` trong `.env` (hoặc `~/.kaggle/kaggle.json`). `hcdw synth-dates` sinh nguồn ngày mô phỏng; dữ liệu mẫu đã kèm sẵn file này.
 
-Để train mô hình DSS, cài thêm `pip install -e ".[ml]"` (Windows; `--all-extras` đã gồm `ml`). Sau đó `copy .env.example .env`.
+**3. Mở web app:** `hcdw serve`, rồi vào http://127.0.0.1:8000.
 
-## Chạy
+**4. Kiểm thử (tùy chọn):** `pytest -q` (macOS: `.venv/bin/python -m pytest -q`).
+
+Báo cáo và slide build riêng: xem [reports/latex](reports/latex) (`latexmk -pdf -shell-escape main.tex`) và [reports/slides/README.md](reports/slides/README.md) (`latexmk -xelatex slides.tex`).
+
+## Các lệnh hcdw
 
 | Lệnh | Việc làm |
 |---|---|
