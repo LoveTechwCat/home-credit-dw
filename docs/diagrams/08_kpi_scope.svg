@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 1240 772" width="1240" height="772" role="img" aria-labelledby="dg8-t dg8-d">
+<title id="dg8-t">KPI scope: all applications vs historical loans</title>
+<desc id="dg8-d">All 356,255 applications are scored: 307,511 historical loans (train), which have an outcome, and 48,744 new applications (test), which do not. Counts, decision rates, total credit, credit at risk, grade mix, average PD, the SM-5 medians and the rules' "Loans hit" cover every scored application. Default rate, approved default rate, rule rates, model AUC and the outcome waffle use historical loans only. On the simulated calendar, historical applications run from 2015-06-02 to 2017-05-22 with outcomes up to 2018-05-17, and new applications from 2017-05-22 to the 2018-05-17 snapshot without an outcome, so the default rate over time stops at 2017-05. A table maps each page to its scope: Overview waffle historical; Overview KPI tiles, Analytics and Explorer all applications with outcome measures on historical loans; Playground hero KPIs on the approved subset of all applications; Grades and model with an All, Historical or New toggle, default All.</desc>
+<style>
+.dg{--canvas:#fcfcfb;--bg:#ffffff;--line:#d6d5ce;--ink:#171716;--ink2:#52514e;--ink3:#8a8882;--acc:#2a78d6;--acc-soft:#eaf2fd;--acc-ink:#1c5cab;--teal:#1baf7a;--teal-soft:#e3f5ee;--teal-ink:#0f7a54;--ext:#efeeea;font-family:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+@media (prefers-color-scheme:dark){.dg{--canvas:#1a1a19;--bg:#232321;--line:#3b3b37;--ink:#f0efec;--ink2:#c3c2b7;--ink3:#97958e;--acc:#3987e5;--acc-soft:#15263b;--acc-ink:#8dbaf0;--teal:#199e70;--teal-soft:#11302a;--teal-ink:#5fd3a6;--ext:#2c2c2a}}
+:root[data-theme=light] .dg{--canvas:#fcfcfb;--bg:#ffffff;--line:#d6d5ce;--ink:#171716;--ink2:#52514e;--ink3:#8a8882;--acc:#2a78d6;--acc-soft:#eaf2fd;--acc-ink:#1c5cab;--teal:#1baf7a;--teal-soft:#e3f5ee;--teal-ink:#0f7a54;--ext:#efeeea}
+:root[data-theme=dark] .dg{--canvas:#1a1a19;--bg:#232321;--line:#3b3b37;--ink:#f0efec;--ink2:#c3c2b7;--ink3:#97958e;--acc:#3987e5;--acc-soft:#15263b;--acc-ink:#8dbaf0;--teal:#199e70;--teal-soft:#11302a;--teal-ink:#5fd3a6;--ext:#2c2c2a}
+.dg text{fill:var(--ink)}.dg .t3{fill:var(--ink3)}
+.dg .canvas{fill:var(--canvas)}
+.dg .ti{font-size:15px;font-weight:600}.dg .tech{font-size:12px;fill:var(--acc-ink)}.dg .techt{font-size:12px;fill:var(--teal-ink)}.dg .d{font-size:12.5px;fill:var(--ink2)}.dg .sm{font-size:11.5px}
+.dg .pg{font-size:13px;font-weight:600}.dg .cap{font-size:11px;font-weight:700;letter-spacing:0.7px;fill:var(--ink3)}
+.dg .card{fill:var(--bg);stroke:var(--line);stroke-width:1.2}
+.dg .allc{fill:var(--acc-soft);stroke:var(--acc);stroke-width:1.4}
+.dg .hist{fill:var(--teal-soft);stroke:var(--teal);stroke-width:1.2}
+.dg .outc{fill:var(--teal-soft);fill-opacity:0.5;stroke:var(--teal);stroke-width:1.2;stroke-dasharray:5 4}
+.dg .newc{fill:var(--ext);stroke:var(--line);stroke-width:1.2}
+.dg .dotA{fill:var(--acc)}.dg .dotH{fill:var(--teal)}
+.dg .axis{fill:none;stroke:var(--ink3);stroke-width:1.2}
+.dg .mark{fill:none;stroke:var(--ink2);stroke-width:1.4;stroke-dasharray:4 4}
+.dg .row{fill:var(--line);opacity:0.6}
+.dg .chA{fill:var(--acc-soft)}.dg .chH{fill:var(--teal-soft)}.dg .chN{fill:var(--ext)}
+.dg .ctA{font-size:11.5px;font-weight:600;fill:var(--acc-ink)}.dg .ctH{font-size:11.5px;font-weight:600;fill:var(--teal-ink)}.dg .ctN{font-size:11.5px;font-weight:600;fill:var(--ink2)}
+.dg .lg{font-size:12.5px;fill:var(--ink2)}
+</style>
+<rect class="canvas" width="1240" height="772"/>
+
+<!-- 1. Every application is scored: historical + new -->
+<text x="20" y="34" class="ti">Every application is scored · 356,255</text>
+<rect class="hist" x="20" y="48" width="1036" height="30" rx="6"/>
+<rect class="newc" x="1058" y="48" width="162" height="30" rx="6"/>
+<text x="34" y="68" class="d">Historical loans (train) · 307,511 · 86.3% · outcome known</text>
+<text x="1070" y="68" class="d">New (test) · 48,744</text>
+<text x="20" y="98" class="t3 sm">Outcome measures can only use historical loans: new applications have no repaid / defaulted outcome yet.</text>
+
+<!-- 2. What each scope measures -->
+<rect class="allc" x="20" y="116" width="590" height="202" rx="12"/>
+<text x="40" y="144" class="ti">All scored applications · 356,255</text>
+<text x="40" y="162" class="tech">[every row of mart.v_application_wide]</text>
+<circle class="dotA" cx="44" cy="184" r="2.5"/><text x="54" y="188" class="d">Counts: applications, scored, by decision</text>
+<circle class="dotA" cx="44" cy="206" r="2.5"/><text x="54" y="210" class="d">Decision rates: approval (KPI-04), manual review (KPI-05), reject</text>
+<circle class="dotA" cx="44" cy="228" r="2.5"/><text x="54" y="232" class="d">Total credit (KPI-02) · credit at risk = Σ credit × PD (KPI-03)</text>
+<circle class="dotA" cx="44" cy="250" r="2.5"/><text x="54" y="254" class="d">Grade mix (SM-1) · average PD (SM-3)</text>
+<circle class="dotA" cx="44" cy="272" r="2.5"/><text x="54" y="276" class="d">Median debt-to-income and credit-to-income (SM-5)</text>
+<circle class="dotA" cx="44" cy="294" r="2.5"/><text x="54" y="298" class="d">Playground Rules card: “Loans hit” (violators)</text>
+
+<rect class="hist" x="630" y="116" width="590" height="202" rx="12"/>
+<text x="650" y="144" class="ti">Historical loans only · 307,511</text>
+<text x="650" y="162" class="techt">[AVG(target) FILTER (WHERE is_train)]</text>
+<circle class="dotH" cx="654" cy="184" r="2.5"/><text x="664" y="188" class="d">Default rate (KPI-01)</text>
+<circle class="dotH" cx="654" cy="206" r="2.5"/><text x="664" y="210" class="d">Approved default rate (SM-2)</text>
+<circle class="dotH" cx="654" cy="228" r="2.5"/><text x="664" y="232" class="d">Rule rates: violators' default rate → rule grade</text>
+<circle class="dotH" cx="654" cy="250" r="2.5"/><text x="664" y="254" class="d">Model AUC (SM-4) on out-of-fold predictions</text>
+<circle class="dotH" cx="654" cy="272" r="2.5"/><text x="664" y="276" class="d">Overview waffle: outcome by decision</text>
+<circle class="dotH" cx="654" cy="294" r="2.5"/><text x="664" y="298" class="d">Analytics: default rate over time (ends 2017-05)</text>
+
+<!-- 3. Timeline (simulated dates); x = 40 + months since 2015-06-01 × 31.67 -->
+<text x="20" y="354" class="ti">Timeline</text>
+<text x="98" y="354" class="t3 sm">simulated dates (hcdw synth-dates) · snapshot 2018-05-17</text>
+<path class="mark" d="M790,362 V478"/>
+<rect class="hist" x="41" y="368" width="749" height="24" rx="5"/>
+<text x="53" y="385" class="d">Historical applications · 2015-06-02 → 2017-05-22</text>
+<rect class="outc" x="73" y="400" width="1092" height="24" rx="5"/>
+<text x="85" y="417" class="d">Outcome dates (repaid / defaulted) · 2015-07-02 → 2018-05-17 · historical only</text>
+<rect class="newc" x="790" y="432" width="375" height="24" rx="5"/>
+<text x="802" y="449" class="d">New · 2017-05-22 → 2018-05-17 · no outcome</text>
+<path class="axis" d="M40,472 H1180 M41,468 V476 M262,468 V476 M642,468 V476 M1022,468 V476 M1165,468 V476"/>
+<text x="41" y="490" class="t3 sm">2015-06</text>
+<text x="262" y="490" class="t3 sm" text-anchor="middle">2016</text>
+<text x="642" y="490" class="t3 sm" text-anchor="middle">2017</text>
+<text x="1022" y="490" class="t3 sm" text-anchor="middle">2018</text>
+<text x="1180" y="490" class="t3 sm" text-anchor="end">snapshot 2018-05-17</text>
+<text x="790" y="508" class="t3 sm" text-anchor="middle">default rate over time stops at 2017-05</text>
+
+<!-- 4. Scope per page -->
+<rect class="card" x="20" y="526" width="1200" height="200" rx="12"/>
+<text x="40" y="552" class="cap">PAGE</text>
+<text x="200" y="552" class="cap">ELEMENT</text>
+<text x="560" y="552" class="cap">VOLUME · CREDIT · MIX</text>
+<text x="860" y="552" class="cap">OUTCOME MEASURES</text>
+<rect class="row" x="21" y="562" width="1198" height="1"/>
+
+<text x="40" y="586" class="pg">Overview</text><text x="200" y="586" class="d">Waffle: out of every 100 applications</text>
+<rect class="chH" x="560" y="572" width="84" height="20" rx="10"/><text x="602" y="586" class="ctH" text-anchor="middle">Historical</text>
+<rect class="chH" x="860" y="572" width="84" height="20" rx="10"/><text x="902" y="586" class="ctH" text-anchor="middle">Historical</text>
+
+<text x="40" y="610" class="pg">Overview</text><text x="200" y="610" class="d">5 KPI tiles</text>
+<rect class="chA" x="560" y="596" width="44" height="20" rx="10"/><text x="582" y="610" class="ctA" text-anchor="middle">All</text>
+<rect class="chH" x="860" y="596" width="84" height="20" rx="10"/><text x="902" y="610" class="ctH" text-anchor="middle">Historical</text>
+
+<text x="40" y="634" class="pg">Analytics</text><text x="200" y="634" class="d">4 panels + Cube table</text>
+<rect class="chA" x="560" y="620" width="44" height="20" rx="10"/><text x="582" y="634" class="ctA" text-anchor="middle">All</text>
+<rect class="chH" x="860" y="620" width="84" height="20" rx="10"/><text x="902" y="634" class="ctH" text-anchor="middle">Historical</text>
+
+<text x="40" y="658" class="pg">Explorer</text><text x="200" y="658" class="d">Cohort metrics and applications</text>
+<rect class="chA" x="560" y="644" width="44" height="20" rx="10"/><text x="582" y="658" class="ctA" text-anchor="middle">All</text>
+<rect class="chH" x="860" y="644" width="84" height="20" rx="10"/><text x="902" y="658" class="ctH" text-anchor="middle">Historical</text>
+
+<text x="40" y="682" class="pg">Playground</text><text x="200" y="682" class="d">5 hero KPIs, current → simulated</text>
+<rect class="chA" x="560" y="668" width="160" height="20" rx="10"/><text x="640" y="682" class="ctA" text-anchor="middle">All · approved subset</text>
+<rect class="chH" x="860" y="668" width="84" height="20" rx="10"/><text x="902" y="682" class="ctH" text-anchor="middle">Historical</text>
+
+<text x="40" y="706" class="pg">Grades &amp; model</text><text x="200" y="706" class="d">Grade mix, policy, AUC</text>
+<rect class="chN" x="560" y="692" width="156" height="20" rx="10"/><text x="638" y="706" class="ctN" text-anchor="middle">Toggle · default All</text>
+<rect class="chH" x="860" y="692" width="210" height="20" rx="10"/><text x="965" y="706" class="ctH" text-anchor="middle">Historical · AUC out-of-fold</text>
+
+<!-- Legend -->
+<g transform="translate(20,744)">
+  <rect class="allc" x="0" y="0" width="18" height="13" rx="3"/><text x="26" y="11" class="lg">All scored applications</text>
+  <rect class="hist" x="220" y="0" width="18" height="13" rx="3"/><text x="246" y="11" class="lg">Historical loans (outcome known)</text>
+  <rect class="newc" x="500" y="0" width="18" height="13" rx="3"/><text x="526" y="11" class="lg">New applications (no outcome)</text>
+  <path class="mark" d="M760,7 H790"/><text x="798" y="11" class="lg">end of the default-rate series</text>
+</g>
+</svg>

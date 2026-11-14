@@ -5,6 +5,7 @@ real 2.5 GB download. Values are random (seeded); only the shape matches the rea
 """
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 import numpy as np
@@ -23,7 +24,8 @@ def _with_nans(rng, arr, share):
     return arr
 
 
-def make_fixture(out_dir: Path, n_customers: int = 300, test_share: float = 0.2, seed: int = 7) -> dict[str, int]:
+def make_fixture(out_dir: Path, n_customers: int = 300, test_share: float = 0.2, seed: int = 7,
+                 with_dates: bool = True) -> dict[str, int]:
     rng = np.random.default_rng(seed)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -227,4 +229,13 @@ def make_fixture(out_dir: Path, n_customers: int = 300, test_share: float = 0.2,
     }
     for stem, df in files.items():
         df.to_csv(out_dir / f"{stem}.csv", index=False)
-    return {stem: len(df) for stem, df in files.items()}
+    counts = {stem: len(df) for stem, df in files.items()}
+    if with_dates:  # the simulated dates source, generated exactly as for data/raw
+        from hcdw.config import get_settings
+        from hcdw.synth import make_application_dates
+
+        s = get_settings()
+        make_application_dates(out_dir, out_dir / "application_dates.csv", s.synthetic_dates,
+                               date.fromisoformat(s.anchor_date))
+        counts["application_dates"] = len(train) + len(test)
+    return counts

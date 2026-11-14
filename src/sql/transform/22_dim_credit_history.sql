@@ -2,7 +2,8 @@
 INSERT INTO dw.dim_credit_history
 SELECT
     ROW_NUMBER() OVER (ORDER BY bureau_active_bucket, max_dpd_bucket, has_current_overdue,
-                                has_bad_debt, prev_approval_bucket)::INTEGER AS credit_history_key,
+                                has_bad_debt, prev_approval_bucket, credit_history_status)::INTEGER
+                                                                            AS credit_history_key,
     *
 FROM (
     SELECT DISTINCT
@@ -10,6 +11,7 @@ FROM (
         max_dpd_bucket,
         has_current_overdue,
         has_bad_debt,
-        prev_approval_bucket
+        prev_approval_bucket,
+        credit_history_status
     FROM staging.agg_credit_profile
 );

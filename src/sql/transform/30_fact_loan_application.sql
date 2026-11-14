@@ -6,8 +6,10 @@ SELECT
     h.credit_history_key,
     k.contract_key,
     r.region_key,
-    -- No real application date exists: every application sits on the snapshot date.
-    CAST(strftime(DATE '{{anchor_date}}', '%Y%m%d') AS INTEGER) AS application_date_key,
+    -- Dates from the application_dates source (staging.application_calendar): without one the
+    -- application sits on the snapshot date and has no outcome date.
+    t_app.date_key                                         AS application_date_key,
+    t_out.date_key                                         AS outcome_date_key,
     a.is_train,
     a.target,
     a.amt_income_total,
@@ -27,12 +29,16 @@ SELECT
 FROM staging.application_clean a
 JOIN dw.dim_customer c         ON c.sk_id_curr = a.sk_id_curr
 JOIN staging.agg_credit_profile p ON p.sk_id_curr = a.sk_id_curr
+JOIN staging.application_calendar cal ON cal.sk_id_curr = a.sk_id_curr
+JOIN dw.dim_time t_app      ON t_app.day_offset = cal.application_offset
+LEFT JOIN dw.dim_time t_out ON t_out.day_offset = cal.outcome_offset
 JOIN dw.dim_credit_history h
      ON  h.bureau_active_bucket = p.bureau_active_bucket
      AND h.max_dpd_bucket       = p.max_dpd_bucket
      AND h.has_current_overdue  = p.has_current_overdue
      AND h.has_bad_debt         = p.has_bad_debt
      AND h.prev_approval_bucket = p.prev_approval_bucket
+     AND h.credit_history_status = p.credit_history_status
 JOIN dw.dim_contract k
      ON  k.contract_type  = a.contract_type
      AND k.accompanied_by = a.accompanied_by

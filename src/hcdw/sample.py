@@ -19,7 +19,8 @@ CHILD_BY_CURR = ["bureau", "previous_application", "installments_payments", "POS
 
 
 def build_sample(raw_dir: Path, out_dir: Path, n_customers: int, test_share: float, seed: int,
-                 compress: bool = True) -> dict[str, int]:
+                 compress: bool = True, extra_dirs: list[Path] | tuple[Path, ...] = ()) -> dict[str, int]:
+    """extra_dirs: other folders holding optional sources (e.g. data/synthetic/application_dates.csv)."""
     raw_dir, out_dir = Path(raw_dir), Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     con = duckdb.connect()
@@ -27,7 +28,10 @@ def build_sample(raw_dir: Path, out_dir: Path, n_customers: int, test_share: flo
     opts = "HEADER, DELIMITER ','" + (", COMPRESSION gzip" if compress else "")
 
     def src(stem: str) -> Path | None:
-        return find_source_file(raw_dir, stem)
+        for folder in (raw_dir, *map(Path, extra_dirs)):
+            if folder.is_dir() and (path := find_source_file(folder, stem)) is not None:
+                return path
+        return None
 
     train = src("application_train")
     if train is None:
@@ -66,7 +70,7 @@ def build_sample(raw_dir: Path, out_dir: Path, n_customers: int, test_share: flo
         ).fetchone()[0]
 
     in_ids = "CAST(SK_ID_CURR AS BIGINT) IN (SELECT sk_id_curr FROM ids)"
-    for stem in ["application_train", "application_test", *CHILD_BY_CURR]:
+    for stem in ["application_train", "application_test", *CHILD_BY_CURR, "application_dates"]:
         copy(stem, in_ids)
 
     bureau = src("bureau")

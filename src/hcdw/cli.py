@@ -69,6 +69,28 @@ def fixture(
     typer.echo(f"Written to {out}")
 
 
+@app.command("synth-dates")
+def synth_dates(
+    source: str = typer.Option("raw", help="raw | sample | fixture | <folder with the application CSVs>"),
+    out: Path = typer.Option(None, help="Output file (default <paths.synthetic_dir>/application_dates.csv)"),
+) -> None:
+    """Write the SIMULATED application_dates.csv source (application/outcome dates; see hcdw.synth)."""
+    from datetime import date
+
+    from hcdw.synth import make_application_dates
+
+    s = get_settings()
+    out = out or s.synthetic_dir / "application_dates.csv"
+    try:
+        counts = make_application_dates(_resolve_source(source), out, s.synthetic_dates,
+                                        date.fromisoformat(s.anchor_date))
+    except (FileNotFoundError, ValueError) as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1)
+    typer.echo(json.dumps(counts, indent=2))
+    typer.echo(f"Written to {out}")
+
+
 @app.command()
 def sample(
     n: int = typer.Option(None, help="Number of applicants (default from settings.yaml)"),
@@ -80,45 +102,136 @@ def sample(
     s = get_settings()
     cfg = s.raw["sample"]
     counts = build_sample(s.raw_dir, s.sample_dir, n or int(cfg["n_customers"]),
-                          float(cfg["test_share"]), int(cfg["seed"]), compress=compress)
+                          float(cfg["test_share"]), int(cfg["seed"]), compress=compress,
+                          extra_dirs=[s.synthetic_dir])
     typer.echo(json.dumps(counts, indent=2))
+
+
+def _open_warehouse(read_only: bool, target: str | None = None):
+    """Open the warehouse, turning 'file locked by another process' into a clear message + exit 1."""
+    import duckdb
+
+    from hcdw.db import get_conn
+
+    try:
+        return get_conn(target, read_only=read_only)
+    except FileNotFoundError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1)
+    except duckdb.IOException as exc:
+        if "lock" not in str(exc).lower():
+            raise
+        typer.echo(f"{get_settings().dw_path.name} is open in another process (`hcdw serve`, `hcdw ui` or a "
+                   f"notebook?). Stop it and run the command again; nothing was changed.\n  ({exc})", err=True)
+        raise typer.Exit(1)
+
+
+def _print_checks(checks: list[dict]) -> None:
+    for c in checks:
+        typer.echo(f"  [{'PASS' if c['passed'] else 'FAIL'}] {c['name']}: {c['detail']}")
+
+
+def _train() -> None:
+    try:
+        from dss.train import train as fit
+    except ImportError:
+        typer.echo('Model libraries missing. Run: pip install -e ".[ml]"', err=True)
+        raise typer.Exit(1)
+    con = _open_warehouse(read_only=True, target="local")
+    try:
+        m = fit(con)
+    except ValueError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1)
+    finally:
+        con.close()
+    typer.echo(json.dumps({k: m[k] for k in ("auc_oof", "brier", "mean_pd_oof", "base_rate", "n_train")}, indent=2))
+    typer.echo("Top features (mean |SHAP|): "
+               + ", ".join(f"{g['feature']} {g['mean_abs_shap']:.3f}" for g in m["global_shap"][:5]))
+
+
+def _score() -> None:
+    try:
+        from dss.score import score_all
+    except ImportError:
+        typer.echo('Model libraries missing. Run: pip install -e ".[ml]"', err=True)
+        raise typer.Exit(1)
+    # A writable connection would create an empty file, so check first.
+    dw_path = get_settings().dw_path
+    if not dw_path.exists():
+        typer.echo(f"Warehouse not found at {dw_path}. Run `hcdw etl` first.", err=True)
+        raise typer.Exit(1)
+    con = _open_warehouse(read_only=False, target="local")
+    try:
+        summary = score_all(con)
+    except (FileNotFoundError, RuntimeError, ValueError) as exc:  # no/stale model, failed write
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1)
+    finally:
+        con.close()
+    checks = summary.pop("dq_checks")
+    typer.echo(json.dumps(summary, indent=2))
+    _print_checks([c for c in checks if c["name"].startswith(("dss:", "completeness:risk", "pk_unique:fact_r",
+                                                                "fk:fact_r"))])
+    if not summary["dq_passed"]:
+        _print_checks([c for c in checks if not c["passed"]])
+        typer.echo("Data quality checks failed after scoring.", err=True)
+        raise typer.Exit(1)
 
 
 @app.command()
 def etl(
     source: str = typer.Option("raw", help="raw | sample | fixture | <folder with the CSVs>"),
+    score: bool = typer.Option(False, "--score", help="Then train the model and score every application"),
     push: bool = typer.Option(False, help="Upload to MotherDuck after a successful run"),
 ) -> None:
     """Run extract -> clean -> aggregate -> load -> quality into the local DuckDB file."""
-    from hcdw.etl.pipeline import WarehouseLockedError, run
+    from hcdw.etl.pipeline import DataQualityError, WarehouseLockedError, run
 
+    # Sources from other systems kept outside data/raw (application_dates.csv) are read from their own
+    # folder; the sample and the fixture carry their own copy.
+    extra = [get_settings().synthetic_dir] if source == "raw" else []
     try:
-        report = run(_resolve_source(source))
+        report = run(_resolve_source(source), extra_source_dirs=extra)
+    except DataQualityError as exc:  # the new build was discarded; the live warehouse is unchanged
+        _print_checks(exc.report["data_quality"]["checks"])
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1)
     except (WarehouseLockedError, FileNotFoundError) as exc:
         typer.echo(str(exc), err=True)
         raise typer.Exit(1)
     dq = report["data_quality"]
     typer.echo(json.dumps({"timings_sec": report["timings_sec"], "row_counts": dq["row_counts"]}, indent=2))
-    for c in dq["checks"]:
-        typer.echo(f"  [{'PASS' if c['passed'] else 'FAIL'}] {c['name']}: {c['detail']}")
-    if not dq["passed"]:
-        typer.echo("Data quality checks failed.", err=True)
-        raise typer.Exit(1)
+    _print_checks(dq["checks"])
+    if score:
+        _train()
+        _score()
     if push:
         _push()
 
 
 @app.command()
+def train() -> None:
+    """Train the risk model (LightGBM 5-fold CV + isotonic calibration) into models/."""
+    _train()
+
+
+@app.command()
+def score() -> None:
+    """Score every application (PD, rules, A-E grades, policy) into dw.fact_risk_assessment."""
+    _score()
+
+
+@app.command()
 def dq() -> None:
     """Re-run the data-quality checks on the current warehouse."""
-    from hcdw.db import get_conn
     from hcdw.etl.quality import run_checks
 
-    con = get_conn(read_only=get_settings().dw_target == "local")
-    result = run_checks(con)
+    settings = get_settings()
+    con = _open_warehouse(read_only=settings.dw_target == "local")
+    result = run_checks(con, settings)
     con.close()
-    for c in result["checks"]:
-        typer.echo(f"  [{'PASS' if c['passed'] else 'FAIL'}] {c['name']}: {c['detail']}")
+    _print_checks(result["checks"])
     typer.echo(json.dumps(result["null_pct_fact_loan_application"], indent=2))
     if not result["passed"]:
         raise typer.Exit(1)

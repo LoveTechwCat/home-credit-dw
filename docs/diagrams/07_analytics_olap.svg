@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 1240 706" width="1240" height="706" role="img" aria-labelledby="dg7-t dg7-d">
+<title id="dg7-t">Analytics: OLAP operations mapped to UI controls</title>
+<desc id="dg7-d">Each OLAP operation on the Analytics page maps to a UI control, a field of the POST /api/analytics/cube request and a part of the SQL that cube.py runs on mart.v_application_wide. Slice and dice are the filter-bar chips, sent as conditions and compiled to WHERE application_id IN (cohort) with bound parameters. Roll-up and drill-down are the Interval switch, the up and down arrows on a time chip, and removing or adding a dimension; they change the row and column levels, and GROUPING SETS returns every row prefix as a subtotal plus the grand total. Pivot swaps rows and columns. The measure picker chooses a whitelisted measure; default rate counts historical loans only. Clicking a cell or bar drills through to the Explorer with the cell's members as conditions. The Cube tab sends five cube queries per change (four fixed panels and the Cube table); the SQL queries tab runs six saved OLAP queries through /api/olap.</desc>
+<style>
+.dg{--canvas:#fcfcfb;--bg:#ffffff;--line:#d6d5ce;--ink:#171716;--ink2:#52514e;--ink3:#8a8882;--acc:#2a78d6;--acc-soft:#eaf2fd;--acc-ink:#1c5cab;--ext:#efeeea;font-family:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+@media (prefers-color-scheme:dark){.dg{--canvas:#1a1a19;--bg:#232321;--line:#3b3b37;--ink:#f0efec;--ink2:#c3c2b7;--ink3:#97958e;--acc:#3987e5;--acc-soft:#15263b;--acc-ink:#8dbaf0;--ext:#2c2c2a}}
+:root[data-theme=light] .dg{--canvas:#fcfcfb;--bg:#ffffff;--line:#d6d5ce;--ink:#171716;--ink2:#52514e;--ink3:#8a8882;--acc:#2a78d6;--acc-soft:#eaf2fd;--acc-ink:#1c5cab;--ext:#efeeea}
+:root[data-theme=dark] .dg{--canvas:#1a1a19;--bg:#232321;--line:#3b3b37;--ink:#f0efec;--ink2:#c3c2b7;--ink3:#97958e;--acc:#3987e5;--acc-soft:#15263b;--acc-ink:#8dbaf0;--ext:#2c2c2a}
+.dg text{fill:var(--ink)}.dg .t3{fill:var(--ink3)}
+.dg .canvas{fill:var(--canvas)}
+.dg .h{font-size:15px;font-weight:600}.dg .hs{font-size:12px;fill:var(--ink3)}
+.dg .ti{font-size:15px;font-weight:600}.dg .tech{font-size:12px;fill:var(--acc-ink)}.dg .d{font-size:12.5px;fill:var(--ink2)}.dg .sm{font-size:11.5px}
+.dg .code{font-family:"Cascadia Code",Consolas,ui-monospace,monospace;font-size:12px;fill:var(--acc-ink)}
+.dg .card{fill:var(--bg);stroke:var(--line);stroke-width:1.2}.dg .acc{fill:var(--acc-soft);stroke:var(--acc);stroke-width:1.4}
+.dg .e{fill:none;stroke:var(--ink3);stroke-width:1.6}.dg .ah{fill:var(--ink3)}
+</style>
+<defs>
+  <marker id="dg7-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker>
+</defs>
+<rect class="canvas" width="1240" height="706"/>
+
+<!-- Column headers -->
+<text x="20" y="30" class="h">OLAP operation</text><text x="20" y="48" class="hs">what the analyst does</text>
+<text x="268" y="30" class="h">UI control</text><text x="268" y="48" class="hs">Analytics page · Cube tab</text>
+<text x="588" y="30" class="h">Request field</text><text x="588" y="48" class="hs">CubeQuery (strict)</text>
+<text x="848" y="30" class="h">SQL</text><text x="848" y="48" class="hs">cube.py · one query on mart.v_application_wide</text>
+
+<!-- Arrows between the columns (under the cards) -->
+<path class="e" d="M240,98 H266" marker-end="url(#dg7-a)"/><path class="e" d="M560,98 H586" marker-end="url(#dg7-a)"/><path class="e" d="M820,98 H846" marker-end="url(#dg7-a)"/>
+<path class="e" d="M240,183 H266" marker-end="url(#dg7-a)"/><path class="e" d="M560,183 H586" marker-end="url(#dg7-a)"/><path class="e" d="M820,183 H846" marker-end="url(#dg7-a)"/>
+<path class="e" d="M240,268 H266" marker-end="url(#dg7-a)"/><path class="e" d="M560,268 H586" marker-end="url(#dg7-a)"/><path class="e" d="M820,268 H846" marker-end="url(#dg7-a)"/>
+<path class="e" d="M240,344 H266" marker-end="url(#dg7-a)"/><path class="e" d="M560,344 H586" marker-end="url(#dg7-a)"/><path class="e" d="M820,344 H846" marker-end="url(#dg7-a)"/>
+<path class="e" d="M240,420 H266" marker-end="url(#dg7-a)"/><path class="e" d="M560,420 H586" marker-end="url(#dg7-a)"/><path class="e" d="M820,420 H846" marker-end="url(#dg7-a)"/>
+
+<!-- Row 1: slice / dice -->
+<rect class="acc" x="20" y="66" width="220" height="64" rx="12"/>
+<text x="36" y="93" class="ti">Slice / dice</text>
+<text x="36" y="112" class="t3 sm">fix one or more members</text>
+<rect class="card" x="268" y="66" width="292" height="64" rx="12"/>
+<text x="284" y="93" class="d">Filter-bar chips</text>
+<text x="284" y="112" class="t3 sm">field · operator · value</text>
+<rect class="card" x="588" y="66" width="232" height="64" rx="12"/>
+<text x="604" y="93" class="code">conditions[ ]</text>
+<text x="604" y="112" class="t3 sm">shared by all 5 requests</text>
+<rect class="card" x="848" y="66" width="372" height="64" rx="12"/>
+<text x="864" y="93" class="code">WHERE application_id IN (cohort)</text>
+<text x="864" y="112" class="t3 sm">values sent as bound parameters</text>
+
+<!-- Row 2: roll-up / drill-down -->
+<rect class="acc" x="20" y="142" width="220" height="82" rx="12"/>
+<text x="36" y="168" class="ti">Roll-up / drill-down</text>
+<text x="36" y="186" class="t3 sm">coarser / finer levels</text>
+<rect class="card" x="268" y="142" width="292" height="82" rx="12"/>
+<text x="284" y="168" class="d">Interval: Year · Quarter · Month</text>
+<text x="284" y="186" class="d">▲ / ▼ chip: year → quarter → month</text>
+<text x="284" y="204" class="d">× drop a dimension · + add one</text>
+<rect class="card" x="588" y="142" width="232" height="82" rx="12"/>
+<text x="604" y="168" class="code">rows[ ] · cols[ ]</text>
+<text x="604" y="186" class="t3 sm">levels; ≤ 2 rows, ≤ 1 col</text>
+<rect class="card" x="848" y="142" width="372" height="82" rx="12"/>
+<text x="864" y="168" class="code">GROUP BY GROUPING SETS (…)</text>
+<text x="864" y="186" class="t3 sm">each prefix of rows = a subtotal</text>
+<text x="864" y="204" class="t3 sm">() = grand total; null marks totals</text>
+
+<!-- Row 3: pivot -->
+<rect class="acc" x="20" y="236" width="220" height="64" rx="12"/>
+<text x="36" y="263" class="ti">Pivot</text>
+<text x="36" y="282" class="t3 sm">swap the axes</text>
+<rect class="card" x="268" y="236" width="292" height="64" rx="12"/>
+<text x="284" y="263" class="d">⇄ swap button</text>
+<text x="284" y="282" class="t3 sm">first row ↔ column dimension</text>
+<rect class="card" x="588" y="236" width="232" height="64" rx="12"/>
+<text x="604" y="263" class="code">rows ⇄ cols</text>
+<text x="604" y="282" class="t3 sm">same dimensions, axes swapped</text>
+<rect class="card" x="848" y="236" width="372" height="64" rx="12"/>
+<text x="864" y="263" class="d t3">—</text>
+<text x="864" y="282" class="t3 sm">only the axes change</text>
+
+<!-- Row 4: measure -->
+<rect class="acc" x="20" y="312" width="220" height="64" rx="12"/>
+<text x="36" y="339" class="ti">Measure</text>
+<text x="36" y="358" class="t3 sm">what each cell shows</text>
+<rect class="card" x="268" y="312" width="292" height="64" rx="12"/>
+<text x="284" y="339" class="d">Measure picker</text>
+<text x="284" y="358" class="t3 sm">Cube table; panels are fixed</text>
+<rect class="card" x="588" y="312" width="232" height="64" rx="12"/>
+<text x="604" y="339" class="code">measure</text>
+<text x="604" y="358" class="t3 sm">MEASURES whitelist (9)</text>
+<rect class="card" x="848" y="312" width="372" height="64" rx="12"/>
+<text x="864" y="339" class="code">AVG(target) FILTER (WHERE is_train)</text>
+<text x="864" y="358" class="t3 sm">default_rate: historical loans only</text>
+
+<!-- Row 5: drill-through -->
+<rect class="acc" x="20" y="388" width="220" height="64" rx="12"/>
+<text x="36" y="415" class="ti">Drill-through</text>
+<text x="36" y="434" class="t3 sm">to the applications</text>
+<rect class="card" x="268" y="388" width="292" height="64" rx="12"/>
+<text x="284" y="415" class="d">Click a cell or a bar</text>
+<text x="284" y="434" class="t3 sm">any panel or the Cube table</text>
+<rect class="card" x="588" y="388" width="232" height="64" rx="12"/>
+<text x="604" y="415" class="d t3">—</text>
+<text x="604" y="434" class="t3 sm">members become conditions</text>
+<rect class="card" x="848" y="388" width="372" height="64" rx="12"/>
+<text x="864" y="415" class="code">/explore?cohort=[…]</text>
+<text x="864" y="434" class="t3 sm">Explorer: POST /api/explore/applications</text>
+
+<!-- Cube tab: the fixed panels -->
+<rect class="card" x="20" y="476" width="660" height="210" rx="12"/>
+<text x="40" y="504" class="ti">Cube tab: 5 queries per change</text>
+<text x="40" y="522" class="tech">[each one POST /api/analytics/cube]</text>
+<text x="40" y="548" class="d">Applications over time</text><text x="236" y="548" class="code">interval × decision · n_applications</text>
+<text x="40" y="568" class="d">Default rate over time</text><text x="236" y="568" class="code">interval · default_rate</text>
+<text x="40" y="588" class="d">Grade mix over time</text><text x="236" y="588" class="code">interval × final_grade · n_applications, 100%</text>
+<text x="40" y="608" class="d">Default rate by segment</text><text x="236" y="608" class="code">Split by dimension · default_rate</text>
+<text x="40" y="628" class="d">Cube table</text><text x="236" y="628" class="code">rows × cols · measure picker</text>
+<text x="40" y="654" class="t3 sm">Interval (Year / Quarter / Month, default Month) drives the 3 time panels.</text>
+<text x="40" y="670" class="t3 sm">default_rate uses historical loans only, so its line ends in 2017-05.</text>
+
+<!-- SQL queries tab -->
+<rect class="card" x="700" y="476" width="520" height="210" rx="12"/>
+<text x="720" y="504" class="ti">SQL queries tab</text>
+<text x="720" y="522" class="tech">[GET /api/olap · /api/olap/{name}]</text>
+<text x="720" y="548" class="d">01 Roll-up</text><text x="900" y="548" class="t3 sm">age → income bracket → all</text>
+<text x="720" y="568" class="d">02 Cube</text><text x="900" y="568" class="t3 sm">contract type × gender, all subtotals</text>
+<text x="720" y="588" class="d">03 Drill-down</text><text x="900" y="588" class="t3 sm">age 25–34: employment → occupation</text>
+<text x="720" y="608" class="d">04 Slice, dice &amp; pivot</text><text x="900" y="608" class="t3 sm">cash loans with bureau history</text>
+<text x="720" y="628" class="d">05 Time roll-up</text><text x="900" y="628" class="t3 sm">bureau credits: quarter → year → all</text>
+<text x="720" y="648" class="d">06 Ranking</text><text x="900" y="648" class="t3 sm">top 3 riskiest occupations per age</text>
+<text x="720" y="674" class="t3 sm">saved SQL files in src/sql/olap, run read-only</text>
+</svg>

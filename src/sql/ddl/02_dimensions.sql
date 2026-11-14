@@ -48,7 +48,10 @@ CREATE TABLE dw.dim_credit_history (
     has_current_overdue   BOOLEAN NOT NULL,
     has_bad_debt          BOOLEAN NOT NULL,
     prev_approval_bucket  VARCHAR NOT NULL,      -- No previous / <50% / 50-99% / 100%
-    UNIQUE (bureau_active_bucket, max_dpd_bucket, has_current_overdue, has_bad_debt, prev_approval_bucket)
+    credit_history_status VARCHAR NOT NULL
+        CHECK (credit_history_status IN ('No bureau', 'Clean history', 'Current overdue')),
+    UNIQUE (bureau_active_bucket, max_dpd_bucket, has_current_overdue, has_bad_debt, prev_approval_bucket,
+            credit_history_status)
 );
 
 CREATE TABLE dw.dim_contract (

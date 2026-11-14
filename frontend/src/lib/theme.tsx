@@ -15,23 +15,26 @@ export interface ChartPalette {
   status: { good: string; warning: string; serious: string; critical: string };
 }
 
-const SEQ = ["#cde2fb", "#b7d3f6", "#9ec5f4", "#86b6ef", "#6da7ec", "#5598e7", "#3987e5",
-  "#2a78d6", "#256abf", "#1c5cab", "#184f95", "#104281", "#0d366b"];
+/** Sequential teal ramp (one hue, light -> dark) for heatmaps and pivot shading; same in both themes. */
+const SEQ = ["#e3f3f1", "#cdeae6", "#b4dfd9", "#97d2cb", "#78c3bb", "#58b2a9", "#38a098",
+  "#1a8d86", "#007d77", "#006c67", "#005a56", "#004845", "#003633"];
 
+/** Same values as the CSS tokens in index.css (SVG needs literal colours). */
 const PALETTES: Record<ThemeName, ChartPalette> = {
   light: {
-    surface: "#fcfcfb", ink: "#171716", ink2: "#52514e", muted: "#898781",
-    grid: "#e1e0d9", axis: "#c3c2b7",
-    series: ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"],
+    surface: "#ffffff", ink: "#15232b", ink2: "#52646c", muted: "#52646c",
+    grid: "#dde5e4", axis: "#c9d5d4",
+    // accent first (primary series), then the extra series colours, then amber; never cycled.
+    series: ["#00756f", "#1f6fb2", "#6d4bb8", "#b7791f", "#f2b705", "#52646c"],
     seq: SEQ,
-    status: { good: "#0ca30c", warning: "#fab219", serious: "#ec835a", critical: "#d03b3b" },
+    status: { good: "#1e7a3a", warning: "#f2b705", serious: "#b7791f", critical: "#b3261e" },
   },
   dark: {
-    surface: "#1a1a19", ink: "#f0efec", ink2: "#c3c2b7", muted: "#898781",
-    grid: "#2c2c2a", axis: "#383835",
-    series: ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300", "#9085e9", "#e66767"],
+    surface: "#172227", ink: "#e4ecec", ink2: "#9ab0b4", muted: "#9ab0b4",
+    grid: "#22323a", axis: "#2a3a40",
+    series: ["#3cc4b6", "#6fb2f0", "#b39cff", "#e9b45a", "#f2c14e", "#9ab0b4"],
     seq: SEQ,
-    status: { good: "#0ca30c", warning: "#fab219", serious: "#ec835a", critical: "#d03b3b" },
+    status: { good: "#7fd69b", warning: "#f2c14e", serious: "#e9b45a", critical: "#ff8a80" },
   },
 };
 

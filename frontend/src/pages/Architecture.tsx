@@ -6,70 +6,89 @@ import star from "../../../docs/diagrams/03_star_schema.svg?raw";
 import lineage from "../../../docs/diagrams/04_data_lineage.svg?raw";
 import request from "../../../docs/diagrams/05_request_flow.svg?raw";
 import dss from "../../../docs/diagrams/06_dss_flow.svg?raw";
+import olap from "../../../docs/diagrams/07_analytics_olap.svg?raw";
+import scope from "../../../docs/diagrams/08_kpi_scope.svg?raw";
 import { Diagram } from "../components/Diagram";
 import { Card, PageHeader } from "../components/ui";
 
 const DIAGRAMS = [
   {
     key: "system", name: "01_system_architecture", title: "System architecture (C4)", code: sys,
-    summary: "C4 container view: the analyst uses the web dashboard; the API answers from the DuckDB warehouse and the decision-support model; the ETL builds the warehouse from the Kaggle files.",
     points: [
-      "The warehouse is a single DuckDB file: columnar, vectorised, no server to run - full refresh of 2.6 GB of CSV in about 40 s.",
+      "The warehouse is a single DuckDB file: columnar, vectorised, no server to run - full refresh of 2.7 GB of CSV in about 15 s (≈ 1.5 min with --score).",
       "The API is the only reader of the warehouse; the browser never sees SQL it can change (dimensions are whitelisted, values are bound parameters).",
       "MotherDuck is an optional shared copy so teammates can query without downloading the data.",
     ],
   },
   {
     key: "etl", name: "02_etl_pipeline", title: "ETL pipeline", code: etl,
-    summary: "Seven steps write into a side file; only a run that passes every step replaces the live warehouse.",
     points: [
       "Extract reads every column as text and TRY_CASTs to the declared staging type, so one bad value never aborts a 27M-row load.",
       "Cleaning rules R1–R10 are in pandas (readable, unit-tested); heavy aggregation is in SQL (fast).",
-      "Quality gate: primary keys, foreign keys, row completeness and money reconciliation (staging total = fact total).",
+      "Quality gate: 50 checks - primary keys, foreign keys, row completeness and money reconciliation (staging total = fact total).",
     ],
   },
   {
     key: "star", name: "03_star_schema", title: "Star schema (fact constellation)", code: star,
-    summary: "Two facts share the customer and time dimensions, so analyses can drill across from applications to bureau credits.",
     points: [
       "Grain: one loan application (SK_ID_CURR) and one bureau credit (SK_ID_BUREAU).",
       "dim_credit_history is a mini-dimension: tens of millions of history rows collapsed into ~200 bucketed profiles.",
-      "dim_bureau_category is a junk dimension; dim_time plays two roles (open date, close date) on the bureau fact.",
+      "dim_bureau_category is a junk dimension; dim_time is role-playing on both facts: application/outcome date (simulated) and bureau open/close date.",
+      "The DSS adds dim_risk_grade, dim_rule, fact_risk_assessment and fact_rule_hit (one row per application and per rule hit).",
     ],
   },
   {
     key: "lineage", name: "04_data_lineage", title: "Data lineage", code: lineage,
-    summary: "Where every warehouse table comes from - from Kaggle file to staging, aggregate and star-schema table.",
     points: [
       "Child tables (1..N rows per applicant) are collapsed to one credit profile per applicant before they reach a dimension.",
       "fact_bureau_credit keeps the bureau grain and links back to dim_customer for drill-across.",
     ],
   },
   {
-    key: "request", name: "05_request_flow", title: "Query flow (OLAP request)", code: request,
-    summary: "What happens when an analyst clicks a bar: shared filter state → REST call → whitelisted SQL → cached result.",
+    key: "request", name: "05_request_flow", title: "Query flow (Analytics request)", code: request,
     points: [
-      "Results are memoised per (query, filters): the warehouse is a static snapshot, so the cache never goes stale until the next ETL.",
-      "Typical cold query on 356K applications: 50–200 ms; cached: under 5 ms.",
+      "Each Analytics panel is one POST /api/analytics/cube; one GROUPING SETS query returns cells, subtotals and the grand total (about 15–60 ms on 356K applications, not cached).",
+      "Overview queries (/api/by, KPI summary) are memoised: the warehouse is a static snapshot until the next ETL.",
     ],
   },
   {
     key: "dss", name: "06_dss_flow", title: "Decision support flow", code: dss,
-    summary: "The DSS turns a model probability and underwriting rules into one explainable decision.",
     points: [
-      "The model is trained on the warehouse (mart.v_application_wide), never on raw files, so the dashboard and the model see the same data.",
-      "The strictest outcome wins and every triggered rule is shown as a reason.",
+      "Score grade: LightGBM on the warehouse (mart.v_application_wide), 5-fold out-of-fold PD, isotonic-calibrated; gender is not a feature. PD cut-offs 1% / 7% / 13% / 20% give A–E.",
+      "Rule grade: the segment rule BR-SEG-01 (customer segments graded D or E) and business rules BR-RF-01..05, each graded by its historical default rate; the rule grade is the worst rule violated.",
+      "Final grade = the worse of the two, so rules can only downgrade, never upgrade.",
+      "Policy per grade: A / B Approve (up to 8× / 6× income), C / D Manual review (4× / 3×), E Reject; tuned in the Playground, including each rule's switch and threshold.",
+      "Explanation: top SHAP factors up and down, the violated rules with code, rate and grade, and one summary sentence (e.g. “Downgraded from B to D by segment rule BR-SEG-01.”).",
+    ],
+  },
+  {
+    key: "olap", name: "07_analytics_olap", title: "Analytics: OLAP operations", code: olap,
+    points: [
+      "Slice / dice = filter-bar chips → conditions[] → WHERE with bound parameters.",
+      "Roll-up / drill-down = Interval (Year / Quarter / Month) and ▲ / ▼ / × / + on dimension chips → levels in rows[] → GROUPING SETS subtotals.",
+      "Pivot = ⇄ (rows and columns swap); Measure select = measure (Default rate on historical loans only).",
+      "Drill-through: clicking a cell, bar or point opens the Explorer with that cell's members as conditions.",
+      "Four fixed panels (applications, default rate, grade mix over time; default rate by segment) plus 6 saved SQL queries.",
+    ],
+  },
+  {
+    key: "scope", name: "08_kpi_scope", title: "KPI scope", code: scope,
+    points: [
+      "All scored applications (356,255) = historical loans (307,511, with outcome) + new applications (48,744, no outcome yet).",
+      "On all scored applications: counts, decision rates, total credit, credit at risk, grade mix, average PD, rule loans hit.",
+      "On historical loans only: default rates (including approved), rule default rates, AUC, outcome breakdown and the waffle.",
+      "New applications have no outcome, so default rate over time ends around 2017-05.",
     ],
   },
 ];
 
 const STACK = [
   ["Storage & OLAP", "DuckDB (local file) · MotherDuck (optional cloud copy)"],
-  ["ETL", "Python 3.12 · pandas · DuckDB SQL · Typer CLI (hcdw)"],
-  ["Backend", "FastAPI · Uvicorn · cached, whitelisted SQL"],
+  ["ETL", "Python 3.11 · pandas · DuckDB SQL · Typer CLI (hcdw)"],
+  ["Backend", "FastAPI · Uvicorn · whitelisted SQL with bound parameters"],
   ["Frontend", "React 18 · TypeScript · Tailwind CSS · Recharts · hand-drawn SVG diagrams"],
-  ["Decision support", "LightGBM · scikit-learn · business rules"],
-  ["Quality", "pytest (ETL, API) · data-quality report per run"],
+  ["Decision support", "LightGBM · scikit-learn (isotonic calibration) · SHAP · A–E grading & rules"],
+  ["Quality", "pytest (ETL, API, DSS: model, grading, rules, policy) · data-quality report per run"],
 ];
 
 export default function Architecture() {
@@ -81,20 +100,19 @@ export default function Architecture() {
   const d = DIAGRAMS.find((x) => x.key === active)!;
   return (
     <div className="space-y-6">
-      <PageHeader title="Architecture & design"
-        description="How the system is built - from Kaggle files to this page. Each diagram is a hand-drawn SVG in docs/diagrams/ that follows the light/dark theme; hover it to open it full screen or download the SVG for the report." />
+      <PageHeader title="Architecture" />
 
-      <div className="flex gap-1 overflow-x-auto rounded-xl border border-line bg-surface p-1">
+      <div className="flex flex-wrap gap-1 rounded-2xl border-[1.5px] border-line bg-surface p-1">
         {DIAGRAMS.map((x, i) => (
           <button key={x.key} onClick={() => setActive(x.key)}
-            className={clsx("whitespace-nowrap rounded-lg px-3 py-1.5 text-[13px] font-medium transition",
-              active === x.key ? "bg-accent-soft text-accent-ink" : "text-ink-2 hover:bg-raised")}>
-            <span className="num mr-1.5 text-ink-3">{i + 1}</span>{x.title}
+            className={clsx("whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-medium transition",
+              active === x.key ? "bg-accent text-accent-on" : "text-ink-2 hover:bg-raised")}>
+            <span className={clsx("num mr-1.5", active === x.key ? "opacity-70" : "text-ink-3")}>{i + 1}</span>{x.title}
           </button>
         ))}
       </div>
 
-      <Card title={d.title} subtitle={d.summary}>
+      <Card title={d.title}>
         <Diagram key={d.key} svg={d.code} name={d.name} />
       </Card>
 

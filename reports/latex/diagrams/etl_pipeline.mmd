@@ -1,29 +1,31 @@
-flowchart LR
-    subgraph S1["1. Extract & Type Cast"]
-        direction TB
-        Raw["Kaggle CSVs"] --> Staging["staging.* Tables<br/>(TRY_CAST String &rarr; Declared Types)"]
+flowchart TD
+    CSV["CSV Kaggle (8 tập tin)"]
+    SYN["application_dates.csv (mô phỏng, tùy chọn)"]
+
+    subgraph BUILD["hcdw etl ghi vào hc.duckdb.building"]
+        subgraph ROW1["Trích xuất và biến đổi"]
+            direction LR
+            EXT["Trích xuất: staging, TRY_CAST"] --> CLN["Làm sạch: quy tắc R1-R10"] --> AGG["Gộp: 1 dòng mỗi khách"]
+        end
+        subgraph ROW2["Nạp"]
+            direction LR
+            LDD["Nạp bảng chiều"] --> LDF["Nạp bảng sự kiện"] --> MRT["Tạo khung nhìn mart"]
+        end
+        DQG["Cổng chất lượng: 50 kiểm tra"]
     end
 
-    subgraph S2["2. Clean & Normalize"]
-        Clean["staging.application_clean<br/>(10 Rules: Sentinel, Outlier,<br/>Buckets, Ratios)"]
-    end
+    PUB["Công bố: thay nguyên tử hc.duckdb"]
+    RBK["Hủy: giữ kho đang dùng"]
 
-    subgraph S3["3. History Aggregation"]
-        Agg["staging.agg_credit_profile<br/>(1..N Roll-up: bureau, prev,<br/>POS, CC, inst)"]
-    end
-
-    subgraph S4["4. Dimensional Load"]
-        TempDW[("hc.duckdb.building<br/>Load 6 Dims & 2 Facts")]
-    end
-
-    subgraph S5["5. Quality Gate & Publish"]
+    subgraph OPT["Tùy chọn: hcdw etl --score"]
         direction LR
-        DQ{"Kiểm tra Chất lượng<br/>• PK Unique & FK Integrity<br/>• Row Counts & Reconcile"}
-        DQ -->|Pass 100%| ProdDW[("hc.duckdb<br/>(Atomic Rename)")]
-        DQ -->|Fail| Abort["Hủy & Giữ Kho cũ"]
+        TRN["Huấn luyện"] --> SCR["Chấm điểm: ghi bảng DSS"]
     end
 
-    Staging --> Clean
-    Staging --> Agg
-    Clean & Agg --> TempDW
-    TempDW --> DQ
+    CSV --> ROW1
+    SYN -.-> ROW1
+    ROW1 --> ROW2
+    ROW2 --> DQG
+    DQG -->|"đạt hết"| PUB
+    DQG -->|"có lỗi"| RBK
+    PUB -.-> OPT

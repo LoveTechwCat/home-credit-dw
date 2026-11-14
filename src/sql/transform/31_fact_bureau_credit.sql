@@ -1,5 +1,7 @@
--- open_date  = snapshot date + DAYS_CREDIT       (DAYS_CREDIT is negative: days before the application)
--- close_date = snapshot date + DAYS_ENDDATE_FACT (closed credits only)
+-- DAYS_* are offsets from the applicant's application date (DAYS_CREDIT is negative: days before it):
+-- open_date  = application date + DAYS_CREDIT
+-- close_date = application date + DAYS_ENDDATE_FACT (closed credits only)
+-- The application date comes from staging.application_calendar (the snapshot date when unknown).
 -- Both dates are looked up in dim_time by day_offset, so a key always points at an existing row.
 -- A close date outside the calendar (the source has a few absurd values, e.g. 100+ years ago) or
 -- before the open date is treated as unusable and left NULL.
@@ -24,9 +26,10 @@ JOIN dw.dim_bureau_category g
      ON  g.credit_active   = COALESCE(b.credit_active, 'Unknown')
      AND g.credit_type     = COALESCE(b.credit_type, 'Unknown')
      AND g.credit_currency = COALESCE(b.credit_currency, 'Unknown')
-JOIN dw.dim_time t_open ON t_open.day_offset = b.days_credit
+JOIN staging.application_calendar cal ON cal.sk_id_curr = b.sk_id_curr
+JOIN dw.dim_time t_open ON t_open.day_offset = cal.application_offset + b.days_credit
 LEFT JOIN dw.dim_time t_close
-     ON  t_close.day_offset = b.days_enddate_fact::INTEGER
+     ON  t_close.day_offset = cal.application_offset + b.days_enddate_fact::INTEGER
      AND b.days_enddate_fact >= b.days_credit
 LEFT JOIN staging.agg_bureau_balance bb USING (sk_id_bureau)
 WHERE b.sk_id_bureau IS NOT NULL;

@@ -6,6 +6,7 @@ paths:
   fixture_dir: data/fixture
   dw_path: data/warehouse/hc.duckdb
   dq_report: data/warehouse/dq_report.json
+  synthetic_dir: data/synthetic     # simulated source system (`hcdw synth-dates` writes here)
 
 kaggle:
   competition: home-credit-default-risk
@@ -31,7 +32,101 @@ buckets:
     edges: [0, 100000, 150000, 200000, 300000, 1.0e12]
     labels: ["<100k", "100k-150k", "150k-200k", "200k-300k", "300k+"]
 
+# Simulated source system for application/outcome dates (the Kaggle data has none).
+# `hcdw synth-dates` writes <synthetic_dir>/application_dates.csv; the ETL loads it as an optional source.
+# Each date is a pure function of (seed, SK_ID_CURR): uniform inside its window, independent of every
+# other column, so calendar trends in the warehouse carry no meaning. A month is 30 days.
+synthetic_dates:
+  seed: 20180517
+  historical_window_days: [1080, 360] # train applications: anchor - 1080 .. anchor - 360 days
+  new_window_days: [360, 0]            # test (new) applications: anchor - 360 .. anchor (outcome not known yet)
+  default_after_months: [1, 12]        # TARGET = 1: outcome = application + 1..12 months (uniform)
+  repaid_observed_months: 12           # TARGET = 0: outcome = application + 12 months ("repaid as of")
+
 sample:
   n_customers: 5000
   test_share: 0.15
   seed: 42
+
+dss:
+  # Left-closed risk-rate cut-offs between A|B|C|D|E (exactly 0.07 is C). Shared by score and rule grades.
+  grade_thresholds: [0.01, 0.07, 0.13, 0.20]
+  grade_labels:                   # shown in the web app (English UI)
+    A: "Very low risk"
+    B: "Low risk"
+    C: "Moderate risk"
+    D: "High risk"
+    E: "Very high risk"
+
+  # Segment rule: segments with fewer train rows than this take the parent level's rate.
+  segment_min_n: 500
+  segment_trigger_grades: [D, E]
+  segment:
+    age_band:                     # left-closed, built from age_years (not the 6-bucket age_bucket)
+      edges: [18, 25, 35, 45, 55, 120]
+      labels: ["18-24", "25-34", "35-44", "45-54", "55+"]
+    income_groups: ["Working", "Commercial associate", "Pensioner", "State servant"]  # others -> Other
+    labels:                       # display only: "Segment: <history> | <age> | <income> | <region>"
+      credit_history_status:
+        "No bureau": "No bureau data"
+        "Clean history": "Bureau history, no overdue"
+        "Current overdue": "Currently overdue in bureau"
+      income_group:
+        "Working": "Working"
+        "Commercial associate": "Commercial associate"
+        "Pensioner": "Pensioner"
+        "State servant": "State servant"
+        "Other": "Other"
+      region_rating_client: {1: "Region 1", 2: "Region 2", 3: "Region 3"}
+
+  decision_labels:               # display labels, shared by the API and the UI
+    approve: "Approve"
+    review: "Manual review"
+    reject: "Reject"
+  policy:
+    A: {decision: approve, max_credit_to_income: 8.0}
+    B: {decision: approve, max_credit_to_income: 6.0}
+    C: {decision: review,  max_credit_to_income: 4.0}
+    D: {decision: review,  max_credit_to_income: 3.0}
+    E: {decision: reject,  max_credit_to_income: 0.0}
+
+  # Rule catalog. `sql` is a boolean expression over mart.v_application_wide columns (trusted config,
+  # never user input). NULL -> not violated in batch. The segment rule has no sql: it is evaluated by
+  # joining mart.segment_risk.
+  rules:
+    - code: BR-SEG-01
+      group: segment
+      label: "High-risk customer segment"
+      sql: null
+      requires: [credit_history_status, age_years, income_type, region_rating_client]
+    - code: BR-RF-01
+      group: business
+      label: "Often refused: under 50% of decided previous applications approved"
+      sql: "prev_approval_rate < 0.5"
+      requires: [prev_approval_rate]
+      # Playground only (simulation, never stored): the editable threshold; sql stays the scoring source
+      # and must equal "field op value" (tests/test_policy.py checks it).
+      param: {field: prev_approval_rate, op: "<", value: 0.5, unit: ratio, min: 0, max: 1, step: 0.05}
+    - code: BR-RF-02
+      group: business
+      label: "Frequent late payer: over 20% of instalments paid late"
+      sql: "late_payment_ratio > 0.2"
+      requires: [late_payment_ratio]
+      param: {field: late_payment_ratio, op: ">", value: 0.2, unit: ratio, min: 0, max: 1, step: 0.05}
+    - code: BR-RF-03
+      group: business
+      label: "Past due over 90 days in history"
+      sql: "max_dpd_days > 90"
+      requires: [max_dpd_days]
+      param: {field: max_dpd_days, op: ">", value: 90, unit: days, min: 0, max: 365, step: 15}
+    - code: BR-RF-04
+      group: business
+      label: "Currently overdue in the Credit Bureau"
+      sql: "has_current_overdue"
+      requires: [has_current_overdue]
+    - code: BR-RF-05
+      group: business
+      label: "Very frequent late payer: over 50% of instalments paid late"
+      sql: "late_payment_ratio > 0.5"
+      requires: [late_payment_ratio]
+      param: {field: late_payment_ratio, op: ">", value: 0.5, unit: ratio, min: 0, max: 1, step: 0.05}

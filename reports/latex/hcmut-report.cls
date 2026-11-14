@@ -57,7 +57,11 @@
 % --- Graphics and figures ---
 \RequirePackage{graphicx,tikz}
 \RequirePackage{wrapfig}
-\RequirePackage{mermaid}
+% Mermaid diagrams: each diagrams/<name>.mmd has a pre-rendered vector diagrams/<name>.mmd.pdf next to it
+% (regenerate after editing the .mmd), so the report builds without mermaid-cli.
+% The height cap keeps short diagrams from being blown up to the full text width.
+\newcommand{\mermaidfile}[2][width=\linewidth]{%
+  \includegraphics[height=0.42\textheight,keepaspectratio,#1]{#2.pdf}}
 \RequirePackage[center]{caption}
 \RequirePackage{subcaption,float}
 \RequirePackage{pgfplots}
@@ -69,6 +73,7 @@
 % --- Code listings ---
 \RequirePackage{listings}
 \RequirePackage[newfloat,cache=false]{minted}
+\SetupFloatingEnvironment{listing}{name={Mã nguồn},listname={Danh sách mã nguồn}}
 \RequirePackage{dirtree}
 
 % --- Boxes, headers, page references, links and bibliography ---
@@ -83,8 +88,6 @@
 %---------------------------------------------------------------------
 % 3. Colour definitions
 %---------------------------------------------------------------------
-\definecolor{green}{rgb}{0.10,0.74,0.33}    	  % Auto-Approve
-\definecolor{yellow}{HTML}{E1E816}				  % Manual Review
 
 %---------------------------------------------------------------------
 % 4. Page geometry, spacing and numbering depth
@@ -96,7 +99,7 @@
 	top=1.5cm,
 	bottom=1.5cm,
 	includeheadfoot=true,
-	headheight=30pt
+	headheight=35pt
 }
 \onehalfspacing
 \raggedbottom
@@ -118,14 +121,18 @@
 	urlcolor=blue
 }
 
-\AtBeginDocument{\renewcommand*{\bibname}{References}}
+% article prints the bibliography heading from \refname, so both names are set
+\AtBeginDocument{%
+	\renewcommand*{\bibname}{Tài liệu tham khảo}%
+	\renewcommand*{\refname}{Tài liệu tham khảo}%
+}
 
 % Number equations, tables, figures and listings per section
 \AtBeginDocument{%
 	\counterwithin{equation}{section}%
 	\counterwithin{table}{section}%
 	\counterwithin{figure}{section}%
-	\counterwithin{lstlisting}{section}%
+	\counterwithin{listing}{section}%
 }
 
 % Tighten math spacing inside list environments
@@ -181,7 +188,7 @@
 \newcommand{\stuname}[1]{\renewcommand{\@stuname}{#1}}
 \newcommand{\@reportplace}{Thành phố Hồ Chí Minh}
 \newcommand{\reportplace}[1]{\renewcommand{\@reportplace}{#1}}
-\newcommand{\@reporttime}{\the\day\ \Month Năm\the\year}
+\newcommand{\@reporttime}{15 tháng 11 năm 2026}
 \newcommand{\reporttime}[1]{\renewcommand{\@reporttime}{#1}}
 
 %---------------------------------------------------------------------

@@ -124,3 +124,12 @@ CREATE OR REPLACE TABLE staging.credit_card_balance (
     sk_dpd                     INTEGER,
     sk_dpd_def                 INTEGER
 );
+
+-- Optional source (application_dates.csv): calendar date of each application and, for loans with a
+-- known result, the date that result was observed. Kept as text so quality.py can report values that
+-- do not parse; 11_application_calendar.sql parses them. Absent file -> no rows.
+CREATE OR REPLACE TABLE staging.application_dates (
+    sk_id_curr        BIGINT,
+    application_date  VARCHAR,   -- ISO date
+    outcome_date      VARCHAR    -- ISO date; empty for applications without a known result
+);

@@ -1,271 +1,429 @@
-\part{Thiết kế Kho dữ liệu và Quy trình ETL}
-% Nguồn đối chiếu: docs/star_schema.md, docs/etl_mapping.md, data/warehouse/dq_report.json, configs/settings.yaml
+\part{Thiết kế kho dữ liệu và quy trình ETL}
+\label{part:ch2}
+% Long code identifiers cannot be hyphenated, so this chapter allows looser inter-word spacing.
+\begingroup
+\sloppy
 
-\section{Nguồn dữ liệu và Khám phá Dữ liệu (EDA)}
-Dữ liệu thực nghiệm của hệ thống được trích xuất từ tập dữ liệu công khai \href{https://www.kaggle.com/competitions/home-credit-default-risk/data}{Home Credit Default Risk}, mô phỏng nghiệp vụ thẩm định tín dụng tiêu dùng cho nhóm khách hàng chưa có hoặc có ít lịch sử tín dụng chính thức (\textit{unbanked/underbanked}). Cấu trúc dữ liệu nguồn là một hệ cơ sở dữ liệu quan hệ phi chuẩn hóa (\textit{denormalized relational structure}) gồm 8 tập tin chính, phản ánh hai nhóm thông tin cốt lõi: dữ liệu tĩnh tại thời điểm nộp đơn và dữ liệu chuỗi thời gian ghi nhận hành vi thanh toán trong quá khứ (\textit{longitudinal/behavioral logs}).
+Chương này trình bày nguồn dữ liệu, mô hình đa chiều của kho, giả định về trục thời gian, quy trình ETL và cổng kiểm tra chất lượng. Số liệu trong chương lấy từ kho dữ liệu dựng trên dữ liệu thật và từ báo cáo \texttt{data/warehouse/dq\_report.json}.
 
-\subsection{Phân rã Thực thể và Quan hệ Nghiệp vụ}
-Hệ thống dữ liệu nguồn gồm 8 tập tin quan hệ được tổ chức xoay quanh mã định danh khách hàng \texttt{SK\_ID\_CURR}:
-\begin{itemize}[topsep=2pt, itemsep=2pt, parsep=0pt]
-	\item \textbf{Thực thể hạt nhân (\texttt{application\_\{train|test\}.csv})}: Mỗi bản ghi đại diện cho một hồ sơ vay vốn, định danh đơn nhất bằng khóa chính \texttt{SK\_ID\_CURR}. Bảng lưu trữ biến mục tiêu phân loại rủi ro \texttt{TARGET} ($1$ biểu thị khách hàng trễ hạn thanh toán nghiêm trọng, $0$ biểu thị khoản vay tất toán đúng hạn) cùng các thuộc tính nhân khẩu học, thu nhập, tình trạng việc làm và thông số khoản tín dụng yêu cầu.
-	\item \textbf{Dữ liệu tín dụng liên ngân hàng (Credit Bureau)}:
-	      \begin{itemize}[topsep=0pt, itemsep=0pt, parsep=0pt]
-		      \item \texttt{bureau.csv}: Lưu vết toàn bộ các hợp đồng tín dụng trước đây của khách hàng tại các tổ chức tài chính khác được ghi nhận qua Trung tâm Thông tin Tín dụng. Quan hệ giữa khách hàng và các khoản vay ngoài là quan hệ một--nhiều ($1:N$) qua khóa \texttt{SK\_ID\_CURR}.
-		      \item \texttt{bureau\_balance.csv}: Ghi nhận trạng thái dư nợ và hành vi thanh toán hàng tháng của từng hợp đồng ngoài hệ thống, liên kết với \texttt{bureau.csv} thông qua khóa ngoại \texttt{SK\_ID\_BUREAU} ($1:N$).
-	      \end{itemize}
-	\item \textbf{Dữ liệu lịch sử nội bộ Home Credit}:
-	      \begin{itemize}[topsep=0pt, itemsep=0pt, parsep=0pt]
-		      \item \texttt{previous\_application.csv}: Lưu trữ toàn bộ các hồ sơ vay vốn trong quá khứ của khách hàng tại chính Home Credit, định danh bằng \texttt{SK\_ID\_PREV} và liên kết với bảng trung tâm bằng \texttt{SK\_ID\_CURR} ($1:N$).
-		      \item \texttt{POS\_CASH\_balance.csv}: Nhật ký dư nợ hàng tháng của các khoản vay điểm bán (Point of Sale) và tiền mặt trong quá khứ, liên kết qua cặp khóa (\texttt{SK\_ID\_PREV}, \texttt{SK\_ID\_CURR}).
-		      \item \texttt{installments\_payments.csv}: Dữ liệu giao dịch trả nợ thực tế cho từng kỳ thanh toán của các hợp đồng cũ, phản ánh số ngày trễ hạn (\texttt{DAYS\_INSTALMENT} so với \texttt{DAYS\_ENTRY\_PAYMENT}) và sai lệch số tiền phải trả so với số tiền thực nộp.
-		      \item \texttt{credit\_card\_balance.csv}: Biến động số dư và hành vi sử dụng hạn mức thẻ tín dụng hàng tháng của khách hàng trong hệ thống.
-	      \end{itemize}
-\end{itemize}
+\section{Nguồn dữ liệu và khám phá dữ liệu (EDA)}
+\label{sec:source-eda}
+Dữ liệu của hệ thống lấy từ bộ dữ liệu công khai \textit{Home Credit Default Risk} trên Kaggle.~\cite{homecredit2018} Bộ dữ liệu mô tả nghiệp vụ cho vay tiêu dùng với nhóm khách hàng có ít hoặc không có lịch sử tín dụng chính thức. Nguồn gồm $8$ tập tin CSV, tổng cộng khoảng $2{,}7$ GB và khoảng $58{,}5$ triệu dòng. Kho dùng thêm một nguồn mô phỏng là \texttt{application\_dates.csv}, chứa ngày nộp hồ sơ và ngày có kết quả (mục~\ref{sec:time}).
 
-\subsection{Mức độ Chi tiết (Granularity) và Lược đồ Quan hệ Nguồn}
-Đặc thù phân rã $1:N$ đa cấp từ các bảng lịch sử đặt ra yêu cầu kiến trúc cho quy trình ETL/ELT: các bảng hành vi cần được làm sạch, đồng bộ chiều thời gian tương đối và thực hiện kỹ thuật tổng hợp đặc trưng (\textit{aggregation}) trước khi tích hợp vào mô hình đa chiều và các thuật toán dự báo rủi ro tín dụng. Mối quan hệ giữa các thực thể dữ liệu nguồn được mô tả trong Hình~\ref{fig:hc_description}:
+\subsection{Thực thể và quan hệ nguồn}
+Mọi tập tin xoay quanh mã hồ sơ \texttt{SK\_ID\_CURR}. Bảng \texttt{application\_train.csv} có biến mục tiêu \texttt{TARGET}: giá trị $1$ nghĩa là khách hàng gặp khó khăn thanh toán theo định nghĩa của Home Credit, được coi là vỡ nợ. Các tập tin còn lại chứa lịch sử tín dụng của khách hàng. Một phần là lịch sử tại chính Home Credit. Phần còn lại là các khoản vay tại tổ chức khác do trung tâm thông tin tín dụng (\textit{Credit Bureau}) báo cáo; báo cáo gọi chúng là khoản tín dụng ngoài. Bảng~\ref{tab:source-files} liệt kê các nguồn, mức chi tiết và số dòng.
+
+\begin{table}[H]
+	\centering
+	\caption{Các tập tin nguồn}
+	\label{tab:source-files}
+	\footnotesize
+	\begin{tabular}{p{4.9cm} p{4.2cm} r p{4.6cm}}
+		\toprule
+		\textbf{Tập tin}                              & \textbf{Một dòng là}                         & \textbf{Số dòng} & \textbf{Dùng cho}                                    \\
+		\midrule
+		\texttt{application\_train.csv}               & một hồ sơ vay có \texttt{TARGET} (khoản vay lịch sử) & $307.511$        & \texttt{fact\_loan\_application} và các chiều  \\
+		\texttt{application\_test.csv}                & một hồ sơ vay chưa có kết quả (hồ sơ mới)    & $48.744$         & như trên, \mintinline[fontsize=\footnotesize]{sql}|is_train = false|        \\
+		\texttt{bureau.csv}                           & một khoản tín dụng ngoài                     & $1.716.428$      & \texttt{fact\_bureau\_credit}, \texttt{agg\_bureau}  \\
+		\texttt{bureau\_balance.csv}                  & một tháng của một khoản tín dụng ngoài       & $27.299.925$     & \texttt{agg\_bureau\_balance}                        \\
+		\texttt{previous\_application.csv}            & một hồ sơ vay trước đây tại Home Credit               & $1.670.214$      & \texttt{agg\_previous}                               \\
+		\texttt{installments\_payments.csv}           & một kỳ trả góp                               & $13.605.401$     & \texttt{agg\_installments}                           \\
+		\texttt{POS\_CASH\_balance.csv}               & một tháng của một khoản vay POS hoặc tiền mặt & $10.001.358$    & \texttt{agg\_pos}                                    \\
+		\texttt{credit\_card\_balance.csv}            & một tháng của một thẻ tín dụng               & $3.840.312$      & \texttt{agg\_cc}                                     \\
+		\midrule
+		\texttt{application\_dates.csv} (mô phỏng)    & một hồ sơ vay                                & $356.255$        & khóa ngày của \texttt{fact\_loan\_application}       \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+Các bảng lịch sử có quan hệ một--nhiều nhiều cấp với hồ sơ vay. Vì vậy ETL phải gộp chúng về một dòng mỗi khách trước khi nạp vào mô hình đa chiều. Hình~\ref{fig:hc_description} mô tả quan hệ giữa tám tập tin Kaggle.
 
 \begin{figure}[H]
 	\centering
 	\mermaidfile[width=0.92\linewidth, keepaspectratio]{diagrams/hc_description.mmd}
-	\caption{Lược đồ Quan hệ Bộ Dữ liệu Home Credit Nguồn}
+	\caption{Lược đồ quan hệ của dữ liệu nguồn Home Credit}
 	\label{fig:hc_description}
 \end{figure}
 
-\subsection{Khám phá Dữ liệu và Tính Toàn vẹn}
-Trước khi thiết kế kiến trúc kho dữ liệu, nhóm thực hiện phân tích khám phá dữ liệu (EDA) toàn diện trên toàn bộ $356.255$ bản ghi ứng dụng và các bảng vệ tinh nhằm phát hiện các dị biệt cấu trúc, giá trị khuyết và bất thường trong thống kê:
+\subsection{Khám phá dữ liệu}
+\label{sec:eda}
+Trước khi thiết kế kho, nhóm khám phá dữ liệu để tìm giá trị khuyết, giá trị dị biệt và ngoại lai. Các thống kê phân phối tính trên mọi hồ sơ ($356.255$). Các chỉ số cần \texttt{TARGET} chỉ tính trên khoản vay lịch sử ($307.511$).
 
-\paragraph{1. Mất cân bằng nhãn mục tiêu (\textit{Target Imbalance}):}
-Tập huấn luyện gồm $307.511$ hồ sơ, có $282.686$ hồ sơ trả nợ đúng hạn ($\text{TARGET} = 0$, chiếm $91{,}93\%$) và $24.825$ hồ sơ phát sinh nợ xấu nghiêm trọng ($\text{TARGET} = 1$, chiếm $8{,}07\%$). Tỷ lệ mất cân bằng xấp xỉ $11{,}4 : 1$ đòi hỏi mô hình phân loại phải sử dụng trọng số hiệu chỉnh lớp (\textit{balanced class weight}) hoặc kỹ thuật lấy mẫu phù hợp để tránh thiên lệch về lớp đa số. Tập kiểm thử gồm $48.744$ hồ sơ hoàn toàn để trống nhãn mục tiêu ($\text{TARGET} = \text{NULL}$).
+\paragraph{Mất cân bằng nhãn:}
+Trong $307.511$ khoản vay lịch sử có $24.825$ khoản vỡ nợ (\mintinline[fontsize=\small]{sql}|TARGET = 1|), tức $8{,}07\%$. Tỷ lệ giữa hai lớp khoảng $11{,}4 : 1$. Mô hình dự báo không dùng trọng số lớp, vì xác suất vỡ nợ sau hiệu chỉnh cần khớp tỷ lệ vỡ nợ quan sát được (Chương~\ref{part:ch4}). Hồ sơ mới không có \texttt{TARGET}.
 
-\paragraph{2. Dị biệt giá trị Sentinel trong \texttt{DAYS\_EMPLOYED}:}
-Kiểm tra biến số ngày làm việc ghi nhận $55.374$ bản ghi ($18{,}01\%$ tập train) mang giá trị dương cố định $365.243$ ngày (khoảng $1.000$ năm). Phân tích chéo cho thấy toàn bộ đều thuộc nhóm hưu trí (\textit{Pensioner}) hoặc không có việc làm. Tỷ lệ vỡ nợ của nhóm dị biệt này chỉ là $5{,}40\%$, thấp đáng kể so với $8{,}66\%$ của nhóm đang làm việc bình thường. Quy tắc làm sạch R1 chuyển giá trị $365.243$ về \mintinline[fontsize=\small]{sql}|NULL| và flag \mintinline[fontsize=\small]{sql}|is_employed_anomaly = True| để bảo toàn giá trị thông tin nghiệp vụ.
+\paragraph{Giá trị dị biệt trong \texttt{DAYS\_EMPLOYED}:}
+Có $64.648$ hồ sơ ($18{,}15\%$ mọi hồ sơ) mang giá trị cố định $365.243$ ngày, tức khoảng $1.000$ năm. Tất cả thuộc nhóm hưu trí (\mintinline[fontsize=\small]{sql}|'Pensioner'|, $64.625$ hồ sơ) hoặc không có việc làm (\mintinline[fontsize=\small]{sql}|'Unemployed'|, $23$ hồ sơ). Trên khoản vay lịch sử, nhóm này có tỷ lệ vỡ nợ $5{,}40\%$, thấp hơn $8{,}66\%$ của nhóm còn lại. Quy tắc R1 đổi giá trị này thành \mintinline[fontsize=\small]{sql}|NULL| và bật cờ \texttt{is\_employed\_anomaly} để giữ lại thông tin.
 
-\paragraph{3. Giá trị ngoại lai trong Thu nhập (\texttt{AMT\_INCOME\_TOTAL}):}
-Thu nhập khách hàng có giá trị nhỏ nhất là $25.650$, trung vị là $153.000$ và trung bình là $170.116$. Tuy nhiên, giá trị lớn nhất ghi nhận lên tới $117.000.000$ đơn vị tiền tệ. Có $320$ bản ghi vượt ngưỡng phân vị $99{,}9\%$ ($900.000$). Khi tính toán các tỷ lệ đòn bẩy tài chính như Debt-to-Income (DTI) hay Credit-to-Income (CTI), nếu sử dụng trực tiếp thu nhập ngoại lai sẽ làm sai lệch nghiêm trọng phân phối. Do đó, quy tắc R4 thực hiện cắt ngọn (\textit{capping}) tại ngưỡng phân vị $99{,}9\%$ trước khi tính các tỷ lệ.
+\paragraph{Ngoại lai trong \texttt{AMT\_INCOME\_TOTAL}:}
+Thu nhập nhỏ nhất là $25.650$, trung vị $153.000$ và trung bình $170.116$ (đơn vị tiền gốc). Giá trị lớn nhất lên tới $117.000.000$. Có $320$ hồ sơ vượt phân vị $99{,}9\%$ ($900.000$). Quy tắc R4 gắn cờ các hồ sơ này và dùng thu nhập đã cắt ngọn khi tính các tỷ lệ nợ trên thu nhập.
 
-\paragraph{4. Tỷ lệ dữ liệu khuyết thiếu (\textit{Missing Value Analysis}):}
-\begin{itemize}[topsep=0pt, itemsep=0.5pt]
-	\item \texttt{OCCUPATION\_TYPE}: Khuyết $31{,}44\%$ do người vay không khai báo hoặc làm việc tự do. Được quy đổi về giá trị chuẩn hóa \mintinline[fontsize=\small]{sql}|'Unknown'| (R2).
-	\item \texttt{EXT\_SOURCE\_1..3}: Điểm đánh giá tín dụng chuẩn hóa từ các nguồn dữ liệu ngoài bị khuyết lần lượt là $54{,}43\%$, $0{,}19\%$ và $19{,}55\%$. Bằng cách tính giá trị trung bình cộng của các nguồn khả dụng (\texttt{ext\_source\_mean}, quy tắc R8), tỷ lệ khuyết giảm chỉ còn $0{,}05\%$.
-	\item \texttt{CODE\_GENDER}: Có 4 bản ghi bất thường \mintinline[fontsize=\small]{sql}|'XNA'|, chuẩn hóa về \mintinline[fontsize=\small]{sql}|'Unknown'| (R3).
+\paragraph{Giá trị khuyết:}
+\begin{itemize}[topsep=0pt, itemsep=1pt]
+	\item \textbf{\texttt{OCCUPATION\_TYPE}:} Cột khuyết $31{,}44\%$ và được quy về \mintinline[fontsize=\small]{sql}|'Unknown'| theo quy tắc R2.
+	\item \textbf{\texttt{EXT\_SOURCE\_1..3}:} Ba điểm tín dụng ngoài khuyết lần lượt $54{,}43\%$, $0{,}19\%$ và $19{,}55\%$. Trung bình các điểm có giá trị (\texttt{ext\_source\_mean}, quy tắc R8) chỉ còn khuyết $0{,}05\%$.
+	\item \textbf{\texttt{CODE\_GENDER}:} Có $4$ hồ sơ mang giá trị \mintinline[fontsize=\small]{sql}|'XNA'|, được quy về \mintinline[fontsize=\small]{sql}|'Unknown'| theo quy tắc R3.
 \end{itemize}
 
-\paragraph{5. Độ bao phủ của dữ liệu lịch sử quan hệ $1:N$:}
-Trong $356.255$ người nộp đơn, $305.811$ khách hàng ($85{,}8\%$) có ít nhất một khoản tín dụng được ghi nhận tại Credit Bureau (bình quân $5{,}6$ khoản vay ngoài mỗi khách). Về lịch sử nội bộ, $338.857$ khách hàng ($95{,}1\%$) từng có ít nhất một đơn vay tại Home Credit trong quá khứ, và $339.587$ khách hàng có dữ liệu lịch sử thanh toán trả góp. Bảng~\ref{tab:eda-summary} tổng hợp các đặc trưng phân bố chính từ quá trình EDA:
+\paragraph{Độ phủ của lịch sử tín dụng:}
+Có $305.811$ khách hàng ($85{,}8\%$ mọi hồ sơ) có ít nhất một khoản tín dụng ngoài, bình quân $5{,}6$ khoản mỗi khách. Có $338.857$ khách hàng ($95{,}1\%$) từng nộp hồ sơ tại Home Credit và $339.587$ khách hàng có lịch sử trả góp. Bảng~\ref{tab:eda-summary} tóm tắt các thuộc tính chính và cách xử lý.
 
 \begin{table}[H]
 	\centering
-	\caption{Kết quả EDA trên Tập Hồ sơ Gốc}
+	\caption{Kết quả khám phá dữ liệu và cách xử lý}
 	\label{tab:eda-summary}
 	\footnotesize
-	\begin{tabular}{l | c c c p{5.6cm}}
+	\begin{tabular}{p{3.6cm} r r p{2.6cm} p{5.2cm}}
 		\toprule
-		\textbf{Thuộc tính}                                        & \textbf{Trung vị} & \textbf{Trung bình} & \textbf{Khuyết/Dị biệt}                                  & \textbf{Xử lý trong Pipeline}                                                                                                     \\
+		\textbf{Thuộc tính}                                 & \textbf{Trung vị} & \textbf{Trung bình} & \textbf{Khuyết / dị biệt}                        & \textbf{Xử lý trong ETL}                                                              \\
 		\midrule
-		\mintinline[fontsize=\footnotesize]{sql}|TARGET| (Train)   & $0$               & $0{,}0807$          & $0\%$                                                    & Giữ nhãn train ($8{,}07\%$ default).                                                                                              \\
-		\mintinline[fontsize=\footnotesize]{sql}|DAYS_EMPLOYED|    & $-1.213$          & $63.815$            & $18{,}01\%$ sentinel                                     & \mintinline[fontsize=\footnotesize]{sql}|is_employed_anomaly|, $365243\rightarrow$\mintinline[fontsize=\footnotesize]{sql}|NULL|. \\
-		\mintinline[fontsize=\footnotesize]{sql}|AMT_INCOME_TOTAL| & $153.000$         & $170.116$           & $320$ ngoại lai                                          & Cắt ngọn phân vị $99{,}9\%$ khi tính DTI.                                                                                         \\
-		\mintinline[fontsize=\footnotesize]{sql}|OCCUPATION_TYPE|  & N/A               & N/A                 & $31{,}44\%$ khuyết                                       & Điền nhãn phân loại \mintinline[fontsize=\footnotesize]{sql}|'Unknown'|.                                                          \\
-		\mintinline[fontsize=\footnotesize]{sql}|EXT_SOURCE_1..3|  & $0{,}506$         & $0{,}501$           & $0{,}05\%$ tổ hợp                                        & Tổng hợp đặc trưng \mintinline[fontsize=\footnotesize]{sql}|ext_source_mean|.                                                     \\
-		\mintinline[fontsize=\footnotesize]{sql}|CODE_GENDER|      & N/A               & N/A                 & $4$ dòng \mintinline[fontsize=\footnotesize]{sql}|'XNA'| & Chuẩn hóa về \mintinline[fontsize=\footnotesize]{sql}|'Unknown'|.                                                                 \\
+		\texttt{TARGET} (khoản vay lịch sử)                 & $0$               & $0{,}0807$          & $0\%$                                            & Giữ nhãn; hồ sơ mới mang \mintinline[fontsize=\footnotesize]{sql}|NULL|.              \\
+		\texttt{DAYS\_EMPLOYED}                             & $-1.224$          & $64.317$            & $18{,}15\%$ dị biệt                              & R1: $365.243 \rightarrow$ \mintinline[fontsize=\footnotesize]{sql}|NULL|, cờ \texttt{is\_employed\_anomaly}. \\
+		\texttt{AMT\_INCOME\_TOTAL}                         & $153.000$         & $170.116$           & $320$ ngoại lai                                  & R4: cắt ngọn tại phân vị $99{,}9\%$ khi tính tỷ lệ.                                   \\
+		\texttt{OCCUPATION\_TYPE}                           & --                & --                  & $31{,}44\%$ khuyết                               & R2: quy về \mintinline[fontsize=\footnotesize]{sql}|'Unknown'|.                       \\
+		\texttt{EXT\_SOURCE\_1..3} (\texttt{ext\_source\_mean}) & $0{,}524$     & $0{,}509$           & $0{,}05\%$ khuyết sau khi gộp                    & R8: trung bình các điểm có giá trị.                                                   \\
+		\texttt{CODE\_GENDER}                               & --                & --                  & $4$ dòng \mintinline[fontsize=\footnotesize]{sql}|'XNA'| & R3: quy về \mintinline[fontsize=\footnotesize]{sql}|'Unknown'|.                \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-\section{Mô hình Đa chiều (Star Schema)}
-Để đáp ứng yêu cầu phân tích kinh doanh đa chiều, hệ thống chuyển đổi cấu trúc quan hệ chuẩn hóa cao (3NF/denormalized) của dữ liệu nguồn sang mô hình chòm sao sự kiện (\textit{Fact Constellation / Galaxy Schema}) gồm 2 bảng sự kiện (Fact) và 6 bảng thứ nguyên (Dimension).
+\section{Mô hình đa chiều (star schema)}
+\label{sec:star-schema}
+Kho tổ chức theo mô hình chòm sao sự kiện (\textit{fact constellation}), gồm $4$ bảng sự kiện (\textit{fact}) và $8$ bảng chiều (\textit{dimension}).~\cite{kimball2013} Hai bảng sự kiện chính là \texttt{fact\_loan\_application} và \texttt{fact\_bureau\_credit}. Hai bảng sự kiện còn lại, \texttt{fact\_risk\_assessment} và \texttt{fact\_rule\_hit}, lưu kết quả chấm điểm của hệ hỗ trợ quyết định (DSS). Bảng~\ref{tab:bus-matrix} cho biết mỗi bảng sự kiện dùng những chiều nào; tên chiều được lược tiền tố \texttt{dim\_}.
 
 \begin{table}[H]
 	\centering
-	\caption{Ma trận Quy trình Nghiệp vụ (Bus Matrix)}
+	\caption{Ma trận bảng sự kiện và bảng chiều (\textit{bus matrix})}
 	\label{tab:bus-matrix}
 	\footnotesize
-	\begin{tabular}{l | c c c c c c}
+	\begin{tabular}{l c c c c c c c c}
 		\toprule
-		                                 & \textbf{Customer} & \textbf{History} & \textbf{Contract} & \textbf{Region} & \textbf{Bureau} & \textbf{Time}                             \\
+		                                  & \textbf{customer} & \textbf{\makecell{credit\_\\history}} & \textbf{contract} & \textbf{region} & \textbf{\makecell{bureau\_\\category}} & \textbf{time} & \textbf{\makecell{risk\_\\grade}} & \textbf{rule} \\
 		\midrule
-		\texttt{fact\_loan\_application} & \checkmark        & \checkmark       & \checkmark        & \checkmark      &                 & \checkmark (Ngày snapshot)                \\
-		\texttt{fact\_bureau\_credit}    & \checkmark        &                  &                   &                 & \checkmark      & \checkmark $\times 2$ (Ngày mở, tất toán) \\
+		\texttt{fact\_loan\_application}  & \checkmark        & \checkmark               & \checkmark        & \checkmark      &                           & \checkmark $\times 2$  &                        &               \\
+		\texttt{fact\_bureau\_credit}     & \checkmark        &                          &                   &                 & \checkmark                & \checkmark $\times 2$  &                        &               \\
+		\texttt{fact\_risk\_assessment}   &                   &                          &                   &                 &                           &                        & \checkmark $\times 3$  &               \\
+		\texttt{fact\_rule\_hit}          &                   &                          &                   &                 &                           &                        & \checkmark             & \checkmark    \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-Hai bảng Fact dùng chung \texttt{dim\_customer} và \texttt{dim\_time}, cho phép thực hiện kỹ thuật phân tích liên chiều (\textit{drill-across}). Ví dụ: chuyên viên rủi ro có thể lọc hồ sơ vay theo nhóm tuổi tại \texttt{fact\_loan\_application}, sau đó đối chiếu sang tổng số hợp đồng tín dụng ngoài hệ thống tại \texttt{fact\_bureau\_credit} của cùng nhóm khách hàng thông qua khóa \texttt{customer\_key}.
+Trên \texttt{fact\_loan\_application}, chiều thời gian đóng hai vai trò: ngày nộp hồ sơ và ngày có kết quả, cả hai đều là ngày mô phỏng. Trên \texttt{fact\_bureau\_credit}, hai vai trò là ngày mở và ngày tất toán khoản tín dụng ngoài. Bảng \texttt{fact\_risk\_assessment} nối $1:1$ với \texttt{fact\_loan\_application} và tham chiếu \texttt{dim\_risk\_grade} ba lần: hạng điểm, hạng luật và hạng cuối. Bảng \texttt{fact\_rule\_hit} nối với hồ sơ qua \texttt{fact\_risk\_assessment}.
 
-\subsection{Sơ đồ Quan hệ Mô hình Đa chiều (Star Schema ERD)}
-Hình~\ref{fig:star_schema} biểu diễn cấu trúc chi tiết các khóa chính (PK), khóa ngoại (FK) và các trường đo lường (\textit{measures}) của mô hình:
+Hai bảng sự kiện chính dùng chung \texttt{dim\_customer} và \texttt{dim\_time} (chiều dùng chung, \textit{conformed dimension}). Nhờ đó, kho hỗ trợ phân tích liên bảng sự kiện (\textit{drill-across}).~\cite{kimball2013} Ví dụ, người dùng lọc hồ sơ theo nhóm tuổi trên \texttt{fact\_loan\_application}, rồi đếm khoản tín dụng ngoài của đúng nhóm khách đó trên \texttt{fact\_bureau\_credit} qua khóa \texttt{customer\_key}.
+
+\subsection{Sơ đồ mô hình đa chiều}
+Hình~\ref{fig:star_schema} thể hiện các bảng sự kiện, bảng chiều và khóa liên kết giữa chúng.
 
 \begin{figure}[H]
 	\centering
 	\mermaidfile[width=\linewidth, keepaspectratio]{diagrams/star_schema.mmd}
-	\caption{Sơ đồ Chòm sao Đa chiều (Fact Constellation Schema)}
+	\caption{Mô hình chòm sao sự kiện của kho dữ liệu}
 	\label{fig:star_schema}
 \end{figure}
 
-\subsection{Mức độ Chi tiết (Grain) và Cấu trúc}
-\paragraph{1. Bảng sự kiện \texttt{fact\_loan\_application}:}
-\begin{itemize}[topsep=0pt, itemsep=1pt]
-	\item \textbf{Grain:} Mỗi dòng đại diện cho \textbf{một hồ sơ nộp đơn vay vốn} của khách hàng (\texttt{SK\_ID\_CURR}). Bảng chứa toàn bộ $356.255$ hồ sơ (gồm $307.511$ hồ sơ train và $48.744$ hồ sơ test phục vụ DSS).
-	\item \textbf{Measures:} Các thước đo tài chính cốt lõi gồm \texttt{amt\_income\_total}, \texttt{amt\_credit}, \texttt{amt\_annuity}, \texttt{amt\_goods\_price}, các tỷ lệ tài chính \texttt{debt\_to\_income}, \texttt{credit\_to\_income}, điểm tín dụng \texttt{ext\_source\_mean}, chỉ số hành vi lịch sử \texttt{max\_dpd\_days}, \texttt{late\_payment\_ratio}, \texttt{prev\_approval\_rate}.
-\end{itemize}
-
-\paragraph{2. Bảng sự kiện \texttt{fact\_bureau\_credit}:}
-\begin{itemize}[topsep=0pt, itemsep=1pt]
-	\item \textbf{Grain:} Mỗi dòng đại diện cho \textbf{một khoản tín dụng ngoài hệ thống} do Credit Bureau báo cáo (\texttt{SK\_ID\_BUREAU}), bao gồm $1.716.428$ bản ghi.
-	\item \textbf{Measures:} Quy mô hạn mức \texttt{amt\_credit\_sum}, dư nợ hiện tại \texttt{amt\_credit\_sum\_debt}, số tiền đang quá hạn \texttt{amt\_credit\_sum\_overdue}, số ngày quá hạn \texttt{credit\_day\_overdue}, và thời hạn khoản vay \texttt{credit\_duration\_days}.
-\end{itemize}
-
-\paragraph{3. Các bảng thứ nguyên (Dimensions):}
-\begin{itemize}[topsep=0pt, itemsep=1pt]
-	\item \texttt{dim\_customer}: Thông tin nhân khẩu học (giới tính, nhóm tuổi, học vấn, tình trạng hôn nhân, nhà ở, nghề nghiệp, số con). Quản lý thay đổi theo chuẩn SCD Type 1 do dữ liệu là ảnh chụp tĩnh. Khóa thay thế \texttt{customer\_key} sinh bằng \mintinline[fontsize=\footnotesize]{sql}|ROW_NUMBER()|.
-	\item \texttt{dim\_credit\_history} (Mini-dimension): Lịch sử thô có hàng chục triệu dòng. Kỹ thuật mini-dimension gộp toàn bộ hành vi quá khứ thành $207$ hồ sơ định hình sẵn (\textit{binned profiles}) gồm: \texttt{bureau\_active\_bucket}, \texttt{max\_dpd\_bucket}, cờ \texttt{has\_current\_overdue}, cờ \texttt{has\_bad\_debt}, và \texttt{prev\_approval\_bucket}; giúp truy vấn lọc cực nhanh mà không làm phình bảng \texttt{dim\_customer}.
-	\item \texttt{dim\_bureau\_category} (Junk dimension): Gom tổ hợp $3$ thuộc tính phân loại rời rạc gồm trạng thái tín dụng (\texttt{credit\_active}), loại khoản vay (\texttt{credit\_type}) và loại tiền tệ (\texttt{credit\_currency}) thành một bảng duy nhất chỉ $66$ dòng, giúp bảng fact tiết kiệm $1{,}7$ triệu chuỗi văn bản lặp lại.
-	\item \texttt{dim\_contract}: Loại hợp đồng (\textit{Cash loans} / \textit{Revolving loans}), người đi kèm, ngày trong tuần và khung giờ duyệt hồ sơ ($401$ dòng).
-	\item \texttt{dim\_region}: Điểm đánh giá khu vực sinh sống và làm việc cùng mật độ dân số ($82$ dòng).
-	\item \texttt{dim\_time}: Bảng lịch chuẩn hóa ($3.401$ dòng ngày) đóng hai vai trò phân tích trên \texttt{fact\_bureau\_credit}.
-\end{itemize}
+\subsection{Mức chi tiết và cấu trúc các bảng}
+Bảng~\ref{tab:dw-tables} liệt kê $12$ bảng của lược đồ \texttt{dw}, mức chi tiết (\textit{grain}) và số dòng trên dữ liệu thật. Hai bảng sự kiện của DSS rỗng sau \texttt{hcdw etl}; lệnh \texttt{hcdw score} xóa và ghi lại toàn bộ hai bảng này.
 
 \begin{table}[H]
 	\centering
-	\caption{Quyết định Thiết kế Kiến trúc Kho Dữ liệu}
-	\label{tab:design-decisions}
-	\small
-	\begin{tabular}{l p{10cm}}
+	\caption{Các bảng của kho dữ liệu}
+	\label{tab:dw-tables}
+	\footnotesize
+	\begin{tabular}{p{4.2cm} p{3.6cm} p{5.6cm} r}
 		\toprule
-		\textbf{Quyết định}                                                       & \textbf{Căn cứ}                                                                                                         \\
+		\textbf{Bảng}                       & \textbf{Loại}                         & \textbf{Một dòng là}                                                   & \textbf{Số dòng} \\
 		\midrule
-		Star Schema thay vì Snowflake                                             & Tối ưu hiệu năng: bảng fact chỉ join $1$ lần duy nhất tới mỗi dimension, không tạo thêm tầng chuẩn hóa phụ.             \\
+		\texttt{dim\_time}                  & chiều đóng nhiều vai trò              & một ngày lịch                                                          & $4.402$          \\
+		\texttt{dim\_customer}              & chiều                                 & một khách hàng                                                         & $356.255$        \\
+		\texttt{dim\_credit\_history}       & chiều thu nhỏ (\textit{mini-dimension})      & một tổ hợp thuộc tính lịch sử tín dụng đã chia nhóm                    & $207$            \\
+		\texttt{dim\_contract}              & chiều                                 & một tổ hợp loại hợp đồng, người đi kèm, ngày và khung giờ nộp           & $401$            \\
+		\texttt{dim\_region}                & chiều                                 & một tổ hợp hạng vùng, mật độ dân số và cờ nơi ở                        & $82$             \\
+		\texttt{dim\_bureau\_category}      & chiều gom (\textit{junk dimension})          & một tổ hợp trạng thái, loại tín dụng và loại tiền                      & $66$             \\
+		\texttt{dim\_risk\_grade}           & chiều của DSS                         & một hạng trong thang A--E                                              & $5$              \\
+		\texttt{dim\_rule}                  & chiều của DSS                         & một luật thẩm định                                                     & $6$              \\
 		\midrule
-		Mini-dimension cho lịch sử tín dụng                                       & Dữ liệu gốc có hơn $27$ triệu dòng. Gom thành $207$ bucket giúp phân khúc tức thì và giữ bảng khách hàng gọn.           \\
-		\midrule
-		Junk dimension cho Bureau                                                 & Gom trạng thái, loại tín dụng và tiền tệ vào bảng $66$ dòng; fact chỉ lưu khóa ngoại số nguyên, giảm bộ nhớ đệm và I/O. \\
-		\midrule
-		Surrogate Key bằng \mintinline[fontsize=\footnotesize]{sql}|ROW_NUMBER()| & Cho phép tái sinh hoàn toàn nhất quán khi chạy Full Refresh định kỳ trên tập dữ liệu snapshot.                          \\
-		\midrule
-		Full Refresh vào cache                                                    & Tính sẵn sàng cao: ETL nạp vào \texttt{hc.duckdb.building}, chỉ hoán đổi nguyên tử khi vượt mọi kiểm định chất lượng.   \\
+		\texttt{fact\_loan\_application}    & sự kiện                               & một hồ sơ vay (\texttt{SK\_ID\_CURR})                                  & $356.255$        \\
+		\texttt{fact\_bureau\_credit}       & sự kiện                               & một khoản tín dụng ngoài (\texttt{SK\_ID\_BUREAU})                     & $1.716.428$      \\
+		\texttt{fact\_risk\_assessment}     & sự kiện của DSS                       & một hồ sơ đã chấm                                                      & $356.255$        \\
+		\texttt{fact\_rule\_hit}            & sự kiện của DSS                       & một luật bị vi phạm của một hồ sơ                                      & $108.874$        \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-\section{Giả định Trục Thời gian}
-Bộ dữ liệu Home Credit hoàn toàn \textbf{không chứa ngày dương lịch thực tế}. Mọi thuộc tính thời gian đều được biểu diễn dưới dạng số ngày hoặc số tháng âm tính lùi từ ngày nộp hồ sơ (\textit{negative offsets}), ví dụ: \mintinline[fontsize=\footnotesize]{sql}|DAYS_BIRTH = -15000| (số ngày từ khi sinh đến lúc nộp đơn) hoặc \mintinline[fontsize=\footnotesize]{sql}|DAYS_CREDIT = -500| (khoản vay mở trước ngày nộp đơn $500$ ngày).
+\paragraph{Bảng \texttt{fact\_loan\_application}:}
+Bảng chứa mọi hồ sơ, gồm $307.511$ khoản vay lịch sử và $48.744$ hồ sơ mới (cờ \texttt{is\_train}). Các thước đo gồm \texttt{amt\_income}, \texttt{amt\_credit}, \texttt{amt\_annuity}, \texttt{amt\_goods\_price}, các tỷ lệ \texttt{debt\_to\_income}, \texttt{credit\_to\_income}, \texttt{credit\_to\_goods} và điểm \texttt{ext\_source\_mean}. Bảng còn có các chỉ số lịch sử \texttt{max\_dpd\_days}, \texttt{late\_payment\_ratio}, \texttt{prev\_approval\_rate}, \texttt{cnt\_bureau\_active} và \texttt{cnt\_prev\_applications}. Hai khóa ngày là \texttt{application\_date\_key} và \texttt{outcome\_date\_key}.
 
-\subsection{Ngày Mốc Tham chiếu Cố định (\textit{Anchor Date})}
-Để khôi phục trục thời gian lịch thực tế phục vụ phân tích xu hướng đa chiều theo năm, quý, tháng, hệ thống thiết lập một \textbf{ngày mốc tham chiếu giả định} trong cấu hình hệ thống (\texttt{configs/settings.yaml}): \mintinline[fontsize=\small]{sql}|anchor_date='2018-05-17'|. Ngày lịch thực tế $D$ của bất kỳ biến cố nào được xác định bởi: \(D = \text{anchor\_date} + \text{offset\_days}\).
+\paragraph{Bảng \texttt{fact\_bureau\_credit}:}
+Các thước đo gồm hạn mức \texttt{amt\_credit\_sum}, dư nợ \texttt{amt\_credit\_sum\_debt}, số tiền quá hạn \texttt{amt\_credit\_sum\_overdue}, số ngày quá hạn \texttt{credit\_day\_overdue} và thời hạn \texttt{credit\_duration\_days}. Hai khóa ngày là \texttt{open\_date\_key} và \texttt{close\_date\_key}.
 
-Hệ quả: Do mọi hồ sơ vay trong \texttt{fact\_loan\_application} được tiếp nhận tại thời điểm nộp đơn, toàn bộ các đơn vay đều mang cùng một khóa ngày \mintinline[fontsize=\small]{sql}|application_date_key=20180517|. Do đó, các phân tích biến động theo chuỗi thời gian được tập trung khai thác trên bảng sự kiện \texttt{fact\_bureau\_credit}.
-
-\subsection{Thứ nguyên Đóng hai Vai trò (\textit{Role-Playing Dimension})}
-Bảng thứ nguyên \texttt{dim\_time} được phát sinh bao phủ khoảng thời gian từ $3.000$ ngày trong quá khứ đến $400$ ngày trong tương lai ($3.401$ ngày). Bảng này đóng hai vai trò phân tích độc lập trên \texttt{fact\_bureau\_credit}:
+\paragraph{Các bảng chiều:}
 \begin{itemize}[topsep=0pt, itemsep=1pt]
-	\item \textbf{Ngày mở khoản vay (\texttt{open\_date\_key}):} Bằng $\text{anchor\_date} + \texttt{DAYS\_CREDIT}$. Giá trị này luôn tồn tại và tra cứu chính xác theo \texttt{dim\_time.day\_offset}.
-	\item \textbf{Ngày tất toán khoản vay (\texttt{close\_date\_key}):} Bằng $\text{anchor\_date} + \texttt{DAYS\_ENDDATE\_FACT}$. Chỉ áp dụng cho các khoản vay đã đóng.
+	\item \textbf{\texttt{dim\_customer}:} Bảng chứa thuộc tính nhân khẩu học như giới tính, nhóm tuổi, loại thu nhập, học vấn, nhà ở và nghề nghiệp. Bảng theo chiều thay đổi chậm loại $1$ (\textit{SCD type 1}) vì dữ liệu chỉ có một ảnh chụp.
+	\item \textbf{\texttt{dim\_credit\_history}:} Đây là chiều thu nhỏ (\textit{mini-dimension}) gộp hàng chục triệu dòng lịch sử thành $207$ tổ hợp.~\cite{kimball2013} Khóa \mintinline[fontsize=\small]{sql}|UNIQUE| gồm \texttt{bureau\_active\_bucket}, \texttt{max\_dpd\_bucket}, \texttt{has\_current\_overdue}, \texttt{has\_bad\_debt}, \texttt{prev\_approval\_bucket} và \texttt{credit\_history\_status}. Thuộc tính \texttt{credit\_history\_status} nhận ba giá trị \mintinline[fontsize=\small]{sql}|'No bureau'|, \mintinline[fontsize=\small]{sql}|'Clean history'|, \mintinline[fontsize=\small]{sql}|'Current overdue'| và là thuộc tính đầu tiên của luật phân khúc \texttt{BR-SEG-01} trong DSS.
+	\item \textbf{\texttt{dim\_bureau\_category}:} Đây là chiều gom (\textit{junk dimension}) cho ba mã văn bản của khoản tín dụng ngoài. Nhờ bảng $66$ dòng này, bảng sự kiện chỉ lưu một khóa số nguyên thay cho chuỗi văn bản lặp lại $1{,}7$ triệu lần.
+	\item \textbf{\texttt{dim\_contract} và \texttt{dim\_region}:} Hai bảng chứa thuộc tính của hợp đồng và của vùng sinh sống, mỗi dòng là một tổ hợp giá trị.
+	\item \textbf{\texttt{dim\_risk\_grade} và \texttt{dim\_rule}:} Hai bảng nạp từ mục \texttt{dss} của \texttt{configs/settings.yaml}. Bảng hạng chứa ngưỡng, quyết định và hạn mức của mỗi hạng; bảng luật chứa nhóm luật, nhãn và điều kiện SQL.
+	\item \textbf{\texttt{dim\_time}:} Bảng lịch đóng nhiều vai trò trên cả hai bảng sự kiện chính, trình bày ở mục~\ref{sec:time}.
 \end{itemize}
 
-Trong dữ liệu nguồn có một số giá trị \texttt{DAYS\_ENDDATE\_FACT} bất hợp lý (ví dụ: ngày đóng diễn ra trước ngày mở, hoặc giá trị âm vượt quá $40.000$ ngày -- tương đương hơn $100$ năm trước). quy trình ETL xử lý triệt để dị biệt này: nếu ngày đóng không hợp lệ hoặc nằm ngoài dải lịch, hệ thống gán \mintinline[fontsize=\small]{sql}|close_date_key=NULL| thay vì kéo dãn lịch vô lý. Khóa ngoại \texttt{close\_date\_key} cho phép mang giá trị \mintinline[fontsize=\small]{sql}|NULL|, bảo toàn tính toàn vẹn tham chiếu.
+\paragraph{Phần DSS:}
+Bảng \texttt{fact\_risk\_assessment} lưu xác suất vỡ nợ \texttt{pd}, ba hạng \texttt{score\_grade}, \texttt{rule\_grade}, \texttt{final\_grade}, quyết định \texttt{decision} và hạn mức khuyến nghị \texttt{recommended\_credit}. Ba ràng buộc \mintinline[fontsize=\small]{sql}|CHECK| giữ cho kết quả nhất quán:
+\begin{itemize}[topsep=0pt, itemsep=1pt]
+	\item \textbf{Hạng cuối:} \mintinline[fontsize=\small]{sql}|final_grade >= score_grade| bảo đảm hạng cuối không tốt hơn hạng điểm.
+	\item \textbf{Hạ hạng:} \mintinline[fontsize=\small]{sql}|downgraded = (final_grade <> score_grade)| bảo đảm cờ hạ hạng khớp hai hạng.
+	\item \textbf{Vi phạm luật:} \mintinline[fontsize=\small]{sql}|(rule_grade IS NULL) = (n_rule_hits = 0)| bảo đảm hồ sơ không vi phạm luật nào thì không có hạng luật.
+\end{itemize}
+Lược đồ \texttt{mart} có thêm \texttt{mart.segment\_risk} ($225$ phân khúc) và \texttt{mart.rule\_stats}, tính trên khoản vay lịch sử. Cách dùng các bảng này được trình bày ở Chương~\ref{part:ch4}.
+
+Bảng~\ref{tab:design-decisions} tóm tắt các quyết định thiết kế chính và lý do.
+
+\begin{table}[H]
+	\centering
+	\caption{Các quyết định thiết kế kho dữ liệu}
+	\label{tab:design-decisions}
+	\footnotesize
+	\begin{tabular}{p{4.6cm} p{11cm}}
+		\toprule
+		\textbf{Quyết định}                                         & \textbf{Lý do}                                                                                                                            \\
+		\midrule
+		Lược đồ hình sao thay vì bông tuyết (\textit{snowflake})                         & Mỗi truy vấn chỉ cần một phép nối tới mỗi chiều. Số chiều ít nên không cần chuẩn hóa thêm.                                               \\
+		Chiều thu nhỏ cho lịch sử tín dụng                          & Lịch sử gốc có hàng chục triệu dòng. Gộp thành $207$ tổ hợp giúp lọc nhanh và giữ \texttt{dim\_customer} gọn.                               \\
+		Chiều gom cho khoản tín dụng ngoài                          & Bảng sự kiện chỉ lưu khóa và thước đo. Lọc theo trạng thái hay loại tín dụng vẫn chỉ cần một phép nối.                                    \\
+		\texttt{dim\_time} đóng nhiều vai trò                       & Mọi ngày dùng chung một bảng lịch. Ngày tất toán không dùng được thì để \mintinline[fontsize=\footnotesize]{sql}|NULL|.                   \\
+		Thước đo chi tiết đặt trên bảng sự kiện                     & Nhóm giá trị nằm ở chiều để cắt lát; số chính xác nằm ở bảng sự kiện để tính toán và huấn luyện mô hình.                                  \\
+		Khóa thay thế bằng \mintinline[fontsize=\footnotesize]{sql}|ROW_NUMBER()| & Mỗi lần nạp lại toàn bộ sinh ra đúng các khóa như cũ, vì dữ liệu là ảnh chụp tĩnh.                                          \\
+		Kết quả chấm điểm là bảng sự kiện riêng                     & ETL và chấm điểm chạy độc lập; chấm lại không phải nạp lại kho.                                                                          \\
+		Hạng và luật là chiều nạp từ cấu hình                       & Đổi ngưỡng hay chính sách chỉ cần sửa \texttt{configs/settings.yaml}; SQL và mã nguồn không viết cứng giá trị.                            \\
+		Nạp lại toàn bộ vào tập tin tạm                             & Nguồn là tập tin tĩnh và nạp lại chỉ mất khoảng $15$ giây. Kho đang dùng chỉ bị thay khi mọi kiểm tra chất lượng đều đạt.                  \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\section{Giả định về trục thời gian}
+\label{sec:time}
+Bộ dữ liệu Kaggle không có ngày dương lịch. Mọi cột thời gian là số ngày hoặc số tháng tính lùi từ ngày nộp hồ sơ, ví dụ \mintinline[fontsize=\small]{sql}|DAYS_BIRTH|, \mintinline[fontsize=\small]{sql}|DAYS_CREDIT| và \mintinline[fontsize=\small]{sql}|MONTHS_BALANCE|. Kho dùng hai giả định để dựng lại trục lịch.
+
+\subsection{Ngày mốc giả định}
+Khóa \texttt{time.anchor\_date} trong \texttt{configs/settings.yaml} đặt một ngày mốc giả định là 17/05/2018. Ngày lịch của một sự kiện bằng ngày mốc cộng độ lệch tính theo ngày.
+
+\subsection{Ngày nộp hồ sơ và ngày có kết quả mô phỏng}
+\textbf{Ngày nộp hồ sơ và ngày có kết quả là dữ liệu mô phỏng.} Chúng đến từ tập tin \texttt{data/synthetic/application\_dates.csv}, do lệnh \texttt{hcdw synth-dates} sinh ra, đóng vai một hệ thống nguồn thứ hai. Quy tắc sinh như sau:
+\begin{itemize}[topsep=0pt, itemsep=1pt]
+	\item \textbf{Ngày nộp hồ sơ:} Khoản vay lịch sử có ngày nộp rải đều trong khoảng [mốc $-\,1.080$ ngày, mốc $-\,360$ ngày]. Hồ sơ mới có ngày nộp rải đều trong khoảng [mốc $-\,360$ ngày, mốc].
+	\item \textbf{Ngày có kết quả:} Khoản vay vỡ nợ có kết quả sau ngày nộp $1$--$12$ tháng, chọn ngẫu nhiên đều. Khoản vay trả tốt có kết quả đúng $12$ tháng sau ngày nộp. Hồ sơ mới không có ngày kết quả.
+	\item \textbf{Tính độc lập:} Mỗi ngày là hàm tất định của hạt giống ngẫu nhiên (\textit{seed}) và \texttt{SK\_ID\_CURR}, độc lập với mọi cột khác.
+\end{itemize}
+Trên dữ liệu thật, khoản vay lịch sử nộp từ 02/06/2015 đến 22/05/2017, còn hồ sơ mới nộp từ 22/05/2017 đến 17/05/2018. Vì các ngày này là mô phỏng, \textbf{mọi xu hướng theo tháng, quý hay năm trong kho không có ý nghĩa nghiệp vụ}. Nếu không có tập tin nguồn, ETL đặt mọi hồ sơ vào ngày mốc và để ngày kết quả là \mintinline[fontsize=\small]{sql}|NULL|.
+
+\subsection{Chiều thời gian đóng nhiều vai trò (role-playing dimension)}
+Bảng \texttt{dim\_time} có $4.402$ dòng, từ 03/06/2007 đến 21/06/2019. Bảng đóng hai vai trò trên mỗi bảng sự kiện chính.~\cite{kimball2013} Các vai trò như sau:
+\begin{itemize}[topsep=0pt, itemsep=1pt]
+	\item \textbf{\texttt{application\_date\_key} và \texttt{outcome\_date\_key}:} Đây là ngày nộp hồ sơ và ngày có kết quả trên \texttt{fact\_loan\_application}. Ngày kết quả là \mintinline[fontsize=\small]{sql}|NULL| với hồ sơ mới.
+	\item \textbf{\texttt{open\_date\_key}:} Ngày mở khoản tín dụng ngoài bằng ngày nộp hồ sơ của khách cộng \texttt{DAYS\_CREDIT}. Độ lệch của Kaggle tính từ ngày nộp hồ sơ, nên ngày mở dịch theo ngày nộp mô phỏng của từng khách.
+	\item \textbf{\texttt{close\_date\_key}:} Ngày tất toán bằng ngày nộp hồ sơ cộng \texttt{DAYS\_ENDDATE\_FACT}, chỉ áp dụng cho khoản đã đóng.
+\end{itemize}
+Nguồn có một số giá trị \texttt{DAYS\_ENDDATE\_FACT} vô lý, như hơn $100$ năm trước hoặc trước ngày mở. ETL để \texttt{close\_date\_key} là \mintinline[fontsize=\small]{sql}|NULL| cho các dòng đó thay vì kéo dài lịch. Kết quả là $1.079.129$ trên $1.079.273$ khoản đã đóng có ngày tất toán dùng được. Mọi khóa ngày được tra theo \texttt{dim\_time.day\_offset}, nên khóa ngoại luôn trỏ tới một dòng có thật.
+
+Mã nguồn~\ref{sql:dim_time} là toàn bộ tập tin \texttt{src/sql/transform/20\_dim\_time.sql}. Các tham số \texttt{\{\{anchor\_date\}\}}, \texttt{\{\{history\_days\}\}} và \texttt{\{\{future\_days\}\}} được điền từ \texttt{configs/settings.yaml} khi nạp. Cận dưới của lịch phủ mọi ngày nộp, ngày kết quả và ngày mở khoản tín dụng ngoài sớm nhất.
 
 \begin{listing}[H]
 	\footnotesize
-	\begin{minted}[linenos]{sql}
+	\begin{minted}[linenos, breaklines]{sql}
+-- Calendar around the assumed snapshot date. The range always covers every application and outcome
+-- date and the oldest bureau credit (bureau offsets count from the applicant's application date).
 INSERT INTO dw.dim_time
-WITH bounds AS (
+WITH cal AS (
     SELECT
-        LEAST(-3000, COALESCE((SELECT MIN(days_credit) FROM staging.bureau), 0)) AS lo, 400 AS hi),
-offsets AS (SELECT UNNEST(generate_series(lo, hi))::INTEGER AS day_offset FROM bounds),
-days AS (SELECT day_offset, DATE '2018-05-17' + day_offset AS d FROM offsets)
+        MIN(LEAST(application_offset, COALESCE(outcome_offset, application_offset)))    AS lo,
+        MAX(GREATEST(application_offset, COALESCE(outcome_offset, application_offset))) AS hi
+    FROM staging.application_calendar
+),
+bounds AS (
+    SELECT
+        LEAST(-{{history_days}}, COALESCE(cal.lo, 0),
+              COALESCE((SELECT MIN(COALESCE(c.application_offset, 0) + b.days_credit)
+                        FROM staging.bureau b
+                        LEFT JOIN staging.application_calendar c USING (sk_id_curr)), 0)) AS lo,
+        GREATEST({{future_days}}, COALESCE(cal.hi, 0))                                   AS hi
+    FROM cal
+),
+offsets AS (
+    SELECT UNNEST(generate_series(lo, hi))::INTEGER AS day_offset FROM bounds
+),
+days AS (
+    SELECT day_offset, DATE '{{anchor_date}}' + day_offset AS d FROM offsets
+)
 SELECT
-    CAST(strftime(d, '%Y%m%d') AS INTEGER) AS date_key,
-    d                                      AS full_date,
+    CAST(strftime(d, '%Y%m%d') AS INTEGER)              AS date_key,
+    d                                                   AS full_date,
     day_offset,
-    quarter(d)                             AS quarter,
-    year(d)                                AS year,
-    strftime(d, '%Y-%m')                   AS year_month,
-    dayofweek(d) IN (0, 6)                 AS is_weekend
+    datediff('month', DATE '{{anchor_date}}', d)        AS month_offset,
+    dayofmonth(d)                                       AS day_of_month,
+    month(d)                                            AS month_num,
+    monthname(d)                                        AS month_name,
+    quarter(d)                                          AS quarter,
+    year(d)                                             AS year,
+    strftime(d, '%Y-%m')                                AS year_month,
+    dayofweek(d) IN (0, 6)                              AS is_weekend
 FROM days
 ORDER BY day_offset;
 \end{minted}
-	\caption{Truy vấn Phát sinh Chiều Thời gian \texttt{dim\_time} Tự động}
+	\caption{Truy vấn sinh bảng \texttt{dim\_time}}
 	\label{sql:dim_time}
 \end{listing}
 
-\section{Quy trình ETL và Ánh xạ Dữ liệu}
-Quy trình ETL được cài đặt bằng Python 3.12 (dùng Pandas cho các quy tắc xử lý chuỗi phức tạp và DuckDB SQL cho các tác vụ tổng hợp dữ liệu quy mô lớn), vận hành theo mô hình 5 giai đoạn liên tiếp:
+Mã nguồn~\ref{sql:fact_bureau_credit} là toàn bộ tập tin \texttt{src/sql/transform/31\_fact\_bureau\_credit.sql}. Truy vấn tra ngày mở và ngày tất toán theo ngày nộp hồ sơ của từng khách trong \texttt{staging.application\_calendar}.
+
+\begin{listing}[H]
+	\footnotesize
+	\begin{minted}[linenos, breaklines]{sql}
+-- DAYS_* are offsets from the applicant's application date (DAYS_CREDIT is negative: days before it):
+-- open_date  = application date + DAYS_CREDIT
+-- close_date = application date + DAYS_ENDDATE_FACT (closed credits only)
+-- The application date comes from staging.application_calendar (the snapshot date when unknown).
+-- Both dates are looked up in dim_time by day_offset, so a key always points at an existing row.
+-- A close date outside the calendar (the source has a few absurd values, e.g. 100+ years ago) or
+-- before the open date is treated as unusable and left NULL.
+INSERT INTO dw.fact_bureau_credit
+SELECT
+    b.sk_id_bureau,
+    c.customer_key,
+    g.bureau_category_key,
+    t_open.date_key                                              AS open_date_key,
+    t_close.date_key                                             AS close_date_key,
+    b.amt_credit_sum,
+    b.amt_credit_sum_debt,
+    b.amt_credit_sum_overdue,
+    GREATEST(COALESCE(b.credit_day_overdue, 0), 0),
+    CASE WHEN t_close.date_key IS NOT NULL
+         THEN (b.days_enddate_fact - b.days_credit)::INTEGER END AS credit_duration_days,
+    bb.max_status,
+    COALESCE(bb.months_reported, 0)
+FROM staging.bureau b
+JOIN dw.dim_customer c USING (sk_id_curr)
+JOIN dw.dim_bureau_category g
+     ON  g.credit_active   = COALESCE(b.credit_active, 'Unknown')
+     AND g.credit_type     = COALESCE(b.credit_type, 'Unknown')
+     AND g.credit_currency = COALESCE(b.credit_currency, 'Unknown')
+JOIN staging.application_calendar cal ON cal.sk_id_curr = b.sk_id_curr
+JOIN dw.dim_time t_open ON t_open.day_offset = cal.application_offset + b.days_credit
+LEFT JOIN dw.dim_time t_close
+     ON  t_close.day_offset = cal.application_offset + b.days_enddate_fact::INTEGER
+     AND b.days_enddate_fact >= b.days_credit
+LEFT JOIN staging.agg_bureau_balance bb USING (sk_id_bureau)
+WHERE b.sk_id_bureau IS NOT NULL;
+\end{minted}
+	\caption{Truy vấn nạp bảng \texttt{fact\_bureau\_credit}}
+	\label{sql:fact_bureau_credit}
+\end{listing}
+
+\section{Quy trình ETL và ánh xạ dữ liệu}
+\label{sec:etl}
+Quy trình ETL viết bằng Python 3.11+, dùng pandas cho các quy tắc làm sạch và DuckDB SQL cho phần gộp và nạp dữ liệu. Lệnh \texttt{hcdw etl} chạy toàn bộ quy trình trong khoảng $15$ giây trên $2{,}7$ GB dữ liệu thật. Hình~\ref{fig:etl_pipeline} cho thấy các bước của quy trình.
 
 \begin{figure}[H]
 	\centering
-	\mermaidfile{diagrams/etl_pipeline.mmd}
-	\caption{Kiến trúc ETL 5 Giai đoạn Tự động Hóa}
+	\mermaidfile[width=\linewidth, keepaspectratio]{diagrams/etl_pipeline.mmd}
+	\caption{Quy trình ETL}
 	\label{fig:etl_pipeline}
 \end{figure}
 
-Sơ đồ dòng chảy dữ liệu (\textit{Data Lineage}) từ 8 tập tin gốc Kaggle qua các bảng Staging trung gian đến các bảng đích trong kho dữ liệu được mô tả chi tiết trong Hình~\ref{fig:data_lineage}:
+Mọi bước ghi vào tập tin tạm \texttt{hc.duckdb.building} theo thứ tự sau:
+\begin{enumerate}[topsep=0pt, itemsep=1pt]
+	\item \textbf{Sinh nguồn mô phỏng (tùy chọn):} Lệnh \texttt{hcdw synth-dates} đọc \texttt{data/raw} và ghi \texttt{data/synthetic/application\_dates.csv}.
+	\item \textbf{Trích xuất (\textit{extract}):} Mã \texttt{extract.py} đọc $8$ tập tin CSV và nguồn mô phỏng vào lược đồ \texttt{staging}. Bước này chỉ lấy cột cần dùng và ép kiểu bằng \mintinline[fontsize=\small]{sql}|TRY_CAST|.
+	\item \textbf{Làm sạch (\textit{clean}):} Mã \texttt{clean.py} áp dụng các quy tắc R1--R10 và ghi \texttt{staging.application\_clean}.
+	\item \textbf{Gộp (\textit{aggregate}):} Hai tập tin \texttt{10\_agg\_credit\_profile.sql} và \texttt{11\_application\_calendar.sql} gộp các bảng con thành một dòng mỗi khách và tính độ lệch ngày so với ngày mốc.
+	\item \textbf{Nạp chiều của DSS:} Bước này nạp \texttt{dim\_risk\_grade}, \texttt{dim\_rule} từ cấu hình và tạo rỗng hai bảng sự kiện của DSS.
+	\item \textbf{Nạp chiều:} Các tập tin \texttt{transform/2x\_*.sql} nạp sáu bảng chiều từ \texttt{staging}.
+	\item \textbf{Nạp bảng sự kiện:} Các tập tin \texttt{transform/3x\_*.sql} nạp hai bảng sự kiện chính.
+	\item \textbf{Tạo khung nhìn phân tích:} Các tập tin \texttt{marts/*.sql} tạo các khung nhìn (\textit{view}) trong lược đồ \texttt{mart}: \texttt{v\_application\_wide}, \texttt{segment\_risk}, \texttt{rule\_stats} và các khung nhìn KPI.
+	\item \textbf{Kiểm tra chất lượng:} Mã \texttt{quality.py} chạy $50$ kiểm tra và ghi \texttt{dq\_report.json} (mục~\ref{sec:dq}).
+	\item \textbf{Công bố (\textit{publish}):} Mã \texttt{pipeline.py} chỉ thay \texttt{hc.duckdb} bằng tập tin tạm khi mọi bước chạy xong và mọi kiểm tra đều đạt.
+\end{enumerate}
+Với tùy chọn \texttt{-{}-score}, sau bước công bố, ETL chạy tiếp \texttt{hcdw train} và \texttt{hcdw score}; cả quy trình mất khoảng $1{,}5$ phút. Hai bước này được trình bày ở Chương~\ref{part:ch4}.
+
+Hình~\ref{fig:data_lineage} cho thấy mỗi bảng trong kho đến từ nguồn nào. Dữ liệu đi từ tập tin Kaggle và nguồn mô phỏng, qua \texttt{staging} và các bảng gộp, tới các bảng của mô hình đa chiều.
 
 \begin{figure}[H]
 	\centering
 	\mermaidfile[width=\linewidth, keepaspectratio]{diagrams/data_lineage.mmd}
-	\caption{Sơ đồ Truy xuất Nguồn Dữ liệu (Data Lineage)}
+	\caption{Nguồn gốc dữ liệu (\textit{data lineage})}
 	\label{fig:data_lineage}
 \end{figure}
 
-\subsection*{Quy tắc Làm sạch Dữ liệu}
-Module \texttt{src/hcdw/etl/clean.py} triển khai 10 quy tắc chuẩn hóa dữ liệu:
+\subsection{Quy tắc làm sạch dữ liệu}
+Mã \texttt{src/hcdw/etl/clean.py} cài đặt $10$ quy tắc làm sạch:
 \begin{enumerate}[label=\textit{R\arabic*}, topsep=0pt, itemsep=1pt, leftmargin=*]
-	\item \textit{Xử lý Sentinel:} \mintinline[fontsize=\small]{sql}|DAYS_EMPLOYED = 365243| được gán về \mintinline[fontsize=\small]{sql}|NULL|, bật cờ \mintinline[fontsize=\small]{sql}|is_employed_anomaly=True|.
-	\item \textit{Chuẩn hóa Rỗng:} Các chuỗi \mintinline[fontsize=\small]{sql}|'XNA'|, \mintinline[fontsize=\small]{sql}|'XAP'|, rỗng chuyển về nhãn đồng nhất \mintinline[fontsize=\small]{sql}|'Unknown'|.
-	\item \textit{Chuẩn hóa Giới tính:} \texttt{CODE\_GENDER} ngoài tập $\{M, F\}$ được chuyển thành \mintinline[fontsize=\small]{sql}|'Unknown'|.
-	\item \textit{Cắt ngọn Thu nhập Ngoại lai:} Khách hàng có thu nhập trên phân vị $99{,}9\%$ được gắn cờ \mintinline[fontsize=\small]{sql}|is_income_outlier = True|; các tỷ lệ tài chính được tính dựa trên thu nhập đã cắt ngọn.
-	\item \textit{Quy đổi Năm:} \mintinline[fontsize=\small]{sql}|age_years=-DAYS_BIRTH/365.25|, \mintinline[fontsize=\small]{sql}|years_employed=-DAYS_EMPLOYED/365.25|.
-	\item \textit{Phân khoảng Bucket:} Chia khoảng tuổi ($18-24, 25-34, \dots$) và khung thu nhập ($<100k, 100k-150k, \dots$) theo cấu hình hệ thống.
-	\item \textit{Tính Tỷ lệ Đòn bẩy:} \mintinline[fontsize=\small]{sql}|debt_to_income=annuity/income|, \texttt{credit\_to\_income}, \texttt{credit\_to\_goods}.
-	\item \textit{Tổ hợp Điểm Tín dụng Ngoài:} \texttt{ext\_source\_mean} là trung bình cộng của các biến \texttt{EXT\_SOURCE\_1..3} có giá trị thực tế.
-	\item \textit{Phân nhóm Mật độ \& Thời gian:} Sinh \texttt{appr\_hour\_band} và \texttt{population\_density\_band}; đổi các cờ $0/1$ sang kiểu boolean chuẩn.
-	\item \textit{Chuẩn hóa Hạng Vùng:} Điểm xếp hạng vùng ngoài khoảng $1..3$ (tập test có giá trị $-1$) được đưa về \mintinline[fontsize=\small]{sql}|NULL|.
+	\item \textbf{Giá trị dị biệt:} \mintinline[fontsize=\small]{sql}|DAYS_EMPLOYED = 365243| được đổi thành \mintinline[fontsize=\small]{sql}|NULL| và bật cờ \texttt{is\_employed\_anomaly}.
+	\item \textbf{Giá trị rỗng:} Các giá trị \mintinline[fontsize=\small]{sql}|'XNA'|, \mintinline[fontsize=\small]{sql}|'XAP'|, \mintinline[fontsize=\small]{sql}|'Unknown'| và chuỗi rỗng được quy về \mintinline[fontsize=\small]{sql}|'Unknown'|.
+	\item \textbf{Giới tính:} Giá trị \texttt{CODE\_GENDER} ngoài $\{M, F\}$ được quy về \mintinline[fontsize=\small]{sql}|'Unknown'|.
+	\item \textbf{Ngoại lai thu nhập:} Thu nhập trên phân vị $99{,}9\%$ được gắn cờ \texttt{is\_income\_outlier}; các tỷ lệ dùng thu nhập đã cắt ngọn.
+	\item \textbf{Quy đổi năm:} \mintinline[fontsize=\small]{sql}|age_years = -DAYS_BIRTH / 365.25| và \mintinline[fontsize=\small]{sql}|years_employed = -DAYS_EMPLOYED / 365.25|.
+	\item \textbf{Chia nhóm:} Nhóm tuổi và khung thu nhập lấy theo \texttt{configs/settings.yaml}, ví dụ nhóm tuổi \mintinline[fontsize=\small]{sql}|'18-24'| và khung thu nhập \mintinline[fontsize=\small]{sql}|'<100k'|.
+	\item \textbf{Tỷ lệ:} \mintinline[fontsize=\small]{sql}|debt_to_income = annuity / income|, cùng với \texttt{credit\_to\_income} và \texttt{credit\_to\_goods}.
+	\item \textbf{Điểm tín dụng ngoài:} \texttt{ext\_source\_mean} là trung bình các điểm \texttt{EXT\_SOURCE\_1..3} có giá trị.
+	\item \textbf{Nhóm phụ:} Quy tắc này sinh \texttt{appr\_hour\_band}, \texttt{population\_density\_band} và đổi các cờ $0/1$ sang kiểu logic.
+	\item \textbf{Hạng vùng:} Hạng vùng ngoài khoảng $1$--$3$ được đổi thành \mintinline[fontsize=\small]{sql}|NULL|; \texttt{application\_test.csv} có một giá trị $-1$.
 \end{enumerate}
+
+Mã nguồn~\ref{py:clean_application} trích nguyên văn các dòng $79$--$108$ của \texttt{src/hcdw/etl/clean.py}, gồm các quy tắc R1, R4--R8.
 
 \begin{listing}[H]
 	\footnotesize
-	\begin{minted}[linenos, breaklines]{python}
-def clean_application(df: pd.DataFrame, settings: Settings) -> pd.DataFrame:
-    cfg = settings.raw["cleaning"]
-    sentinel = int(cfg["days_employed_sentinel"])
-    out = pd.DataFrame(index=df.index)
+	\begin{minted}[linenos, breaklines, firstnumber=79]{python}
+    # R1 + R5: ages and employment length
+    days_emp = df["days_employed"]
+    out["is_employed_anomaly"] = (days_emp == sentinel).fillna(False).astype(bool)
+    days_emp = days_emp.where(days_emp != sentinel)
+    out["years_employed"] = (-days_emp / 365.25).clip(lower=0)
+    out["age_years"] = -df["days_birth"] / 365.25
 
-    out["sk_id_curr"] = df["sk_id_curr"].astype("int64")
-    out["target"] = df["target"].astype("Int64")
-    out["is_train"] = df["is_train"].astype(bool)
+    # R4: income outliers
+    income = df["amt_income_total"].astype(float)
+    cap = float(income.quantile(float(cfg["income_outlier_quantile"])))
+    out["amt_income_total"] = income
+    out["is_income_outlier"] = (income > cap).fillna(False).astype(bool)
+    income_capped = income.clip(upper=cap)
 
-    # R1: DAYS_EMPLOYED sentinel
-    emp = df["days_employed"].astype("float64")
-    out["is_employed_anomaly"] = emp == sentinel
-    emp_valid = emp.where(~out["is_employed_anomaly"], np.nan)
-    out["years_employed"] = (-emp_valid / 365.25).round(1)
+    # R6: buckets
+    out["age_bucket"] = _bucket(out["age_years"], *settings.bucket("age_years"))
+    out["income_bracket"] = _bucket(income, *settings.bucket("income"))
 
-    # R4 & R7: Income capping & financial ratios
-    income = df["amt_income_total"].astype("float64")
-    cap = income.quantile(float(cfg["income_outlier_quantile"]))
-    out["is_income_outlier"] = income > cap
-    inc_for_ratio = income.clip(upper=cap)
-    out["debt_to_income"] = (df["amt_annuity"] / inc_for_ratio).round(4)
-    out["ext_source_mean"] = df[["ext_source_1", "ext_source_2", "ext_source_3"]].mean(axis=1).round(4)
-    return out
+    # Amounts + R7 ratios
+    out["amt_credit"] = df["amt_credit"]
+    out["amt_annuity"] = df["amt_annuity"]
+    out["amt_goods_price"] = df["amt_goods_price"]
+    out["debt_to_income"] = df["amt_annuity"] / income_capped
+    out["credit_to_income"] = df["amt_credit"] / income_capped
+    out["credit_to_goods"] = df["amt_credit"] / df["amt_goods_price"].replace(0, np.nan)
+
+    # R8
+    for c in ("ext_source_1", "ext_source_2", "ext_source_3"):
+        out[c] = df[c]
+    out["ext_source_mean"] = df[["ext_source_1", "ext_source_2", "ext_source_3"]].mean(axis=1, skipna=True)
 \end{minted}
-	\caption{Trích đoạn Xử lý Làm sạch Dữ liệu}
+	\caption{Trích đoạn hàm \texttt{clean\_application}}
 	\label{py:clean_application}
 \end{listing}
 
-\subsection*{Gộp \texorpdfstring{($1:N$)}{(1:N)} tạo Hồ sơ Tín dụng}
-Các tập tin vệ tinh ghi nhận hàng chục triệu dòng biến động tài chính được tổng hợp về mức độ chi tiết một dòng cho mỗi khách hàng (\texttt{SK\_ID\_CURR}) thông qua truy vấn DuckDB SQL (\texttt{10\_agg\_credit\_profile.sql}):
+\subsection{Gộp quan hệ một--nhiều thành hồ sơ tín dụng}
+Tập tin \texttt{src/sql/transform/10\_agg\_credit\_profile.sql} gộp các bảng con về một dòng mỗi khách:
 \begin{itemize}[topsep=0pt, itemsep=1pt]
-	\item \texttt{bureau\_balance} ($27{,}3$ triệu dòng) $\to$ \texttt{agg\_bureau\_balance} ($817.395$ dòng): trích xuất trạng thái trễ hạn tối đa \texttt{max\_status} và số tháng ghi nhận.
-	\item \texttt{bureau} ($1{,}7$ triệu dòng) $\to$ \texttt{agg\_bureau} ($305.811$ khách): đếm số khoản vay \texttt{Active}, \texttt{Bad debt}, tổng dư nợ và tính toán \texttt{has\_current\_overdue} (chỉ xét trên khoản vay đang hoạt động).
-	\item \texttt{previous\_application} ($1{,}67$ triệu dòng) $\to$ \texttt{agg\_previous}: tính tỷ lệ phê duyệt trong quá khứ \texttt{prev\_approval\_rate}.
-	\item \texttt{installments\_payments} ($13{,}6$ triệu dòng) $\to$ \texttt{agg\_installments}: tính tỷ lệ thanh toán trễ hạn \texttt{late\_payment\_ratio} và số ngày trễ tối đa.
+	\item \textbf{\texttt{bureau\_balance}:} $27{,}3$ triệu dòng được gộp thành $817.395$ dòng trong \texttt{agg\_bureau\_balance}, mỗi dòng là trạng thái trễ hạn tối đa và số tháng có báo cáo của một khoản tín dụng ngoài.
+	\item \textbf{\texttt{bureau}:} $1{,}7$ triệu dòng được gộp thành $305.811$ khách trong \texttt{agg\_bureau}. Cờ \texttt{has\_current\_overdue} chỉ xét các khoản đang hoạt động.
+	\item \textbf{\texttt{previous\_application}:} $1{,}67$ triệu dòng được gộp thành $338.857$ khách, kèm tỷ lệ được duyệt \texttt{prev\_approval\_rate}.
+	\item \textbf{\texttt{installments\_payments}:} $13{,}6$ triệu dòng được gộp thành $339.587$ khách, kèm tỷ lệ trả trễ \texttt{late\_payment\_ratio} và số ngày trễ tối đa.
+	\item \textbf{\texttt{POS\_CASH\_balance} và \texttt{credit\_card\_balance}:} Hai bảng được gộp thành $337.252$ và $103.558$ khách, kèm số ngày quá hạn tối đa và mức dùng hạn mức thẻ.
+	\item \textbf{\texttt{agg\_credit\_profile}:} Bảng cuối có $356.255$ dòng, một dòng mỗi hồ sơ. Bảng chứa \texttt{max\_dpd\_days}, các nhóm của chiều thu nhỏ và \texttt{credit\_history\_status}.
 \end{itemize}
+
+Mã nguồn~\ref{sql:agg_credit} trích nguyên văn các dòng $16$--$31$ của tập tin trên, phần gộp bảng \texttt{bureau}.
 
 \begin{listing}[H]
 	\footnotesize
-	\begin{minted}[linenos]{sql}
+	\begin{minted}[linenos, breaklines, firstnumber=16]{sql}
 CREATE OR REPLACE TABLE staging.agg_bureau AS
 SELECT
     b.sk_id_curr,
@@ -273,6 +431,9 @@ SELECT
     COUNT(*) FILTER (WHERE b.credit_active = 'Active')                AS cnt_bureau_active,
     COUNT(*) FILTER (WHERE b.credit_active = 'Bad debt')              AS cnt_bureau_bad_debt,
     SUM(CASE WHEN b.credit_active = 'Active' THEN b.amt_credit_sum_debt END) AS sum_active_debt,
+    SUM(b.amt_credit_sum_overdue)                                     AS sum_overdue,
+    MAX(b.credit_day_overdue)                                         AS max_credit_day_overdue,
+    -- "currently overdue" only makes sense for credits that are still open
     SUM(b.amt_credit_sum_overdue) FILTER (WHERE b.credit_active = 'Active') AS sum_active_overdue,
     MAX(b.credit_day_overdue) FILTER (WHERE b.credit_active = 'Active')     AS max_active_day_overdue,
     MAX(bb.max_status)                                                AS max_bb_status
@@ -280,89 +441,71 @@ FROM staging.bureau b
 LEFT JOIN staging.agg_bureau_balance bb USING (sk_id_bureau)
 GROUP BY b.sk_id_curr;
 \end{minted}
-	\caption{Truy vấn Hành vi Tín dụng Bureau}
+	\caption{Truy vấn gộp lịch sử tín dụng ngoài theo khách hàng}
 	\label{sql:agg_credit}
 \end{listing}
 
+\subsection{Ánh xạ cột từ nguồn sang kho}
+Bảng~\ref{tab:etl-mapping} liệt kê ánh xạ của các cột chính từ nguồn sang kho dữ liệu.
+
 \begin{table}[H]
 	\centering
-	\caption{Bảng Ánh xạ Cột Dữ liệu Nguồn sang Kho Dữ liệu Đích}
+	\caption{Ánh xạ cột từ nguồn sang kho dữ liệu}
 	\label{tab:etl-mapping}
 	\footnotesize
-	\begin{tabular}{c c p{7.2cm}}
+	\begin{tabular}{p{4.6cm} p{5.4cm} p{5.4cm}}
 		\toprule
-		\textbf{Nguồn - Kaggle}        & \textbf{Đích - Star Schema}                   & \textbf{Quy tắc \& Công thức}                                                                                    \\
+		\textbf{Nguồn}                                          & \textbf{Đích}                                                          & \textbf{Quy tắc}                                                                                    \\
 		\midrule
-		\texttt{SK\_ID\_CURR}          & \texttt{fact.application\_id}                 & Khóa tự nhiên định danh hồ sơ đơn vay.                                                                           \\
-		\texttt{TARGET}                & \texttt{fact.target}                          & Giữ nguyên giá trị $0/1$ (tập test gán \mintinline[fontsize=\footnotesize]{sql}|NULL|).                          \\
-		\texttt{AMT\_INCOME\_TOTAL}    & \texttt{dim\_customer.income\_bracket}        & Phân khoảng theo cấu hình; cắt ngọn khi tính DTI (R4, R6).                                                       \\
-		\texttt{DAYS\_BIRTH}           & \texttt{dim\_customer.age\_years}             & \mintinline[fontsize=\footnotesize]{sql}|-DAYS_BIRTH / 365.25|, phân nhóm tuổi (R5, R6).                         \\
-		\texttt{DAYS\_EMPLOYED}        & \texttt{dim\_customer.years\_employed}        & Xử lý sentinel $365243 \to \text{NULL}$, cờ \mintinline[fontsize=\footnotesize]{sql}|is_employed_anomaly|.       \\
-		\texttt{bureau.DAYS\_CREDIT}   & \texttt{fact\_bureau.open\_date\_key}         & $\text{anchor\_date} + \text{DAYS\_CREDIT}$, tra theo \texttt{dim\_time}.                                        \\
-		\texttt{DAYS\_ENDDATE\_FACT}   & \texttt{fact\_bureau.close\_date\_key}        & $\text{anchor\_date} + \text{DAYS\_ENDDATE\_FACT}$ (gán \mintinline[fontsize=\footnotesize]{sql}|NULL| nếu lỗi). \\
-		\texttt{bureau.CREDIT\_ACTIVE} & \texttt{dim\_bureau\_category.credit\_active} & Junk dimension; phân loại nợ nạp vào mini-dimension.                                                             \\
+		\texttt{SK\_ID\_CURR}                                   & \texttt{fact\_loan\_application.}\allowbreak\texttt{application\_id}, \texttt{dim\_customer.}\allowbreak\texttt{sk\_id\_curr} & Khóa tự nhiên của hồ sơ.                                                       \\
+		\texttt{TARGET}                                         & \texttt{fact\_loan\_application.}\allowbreak\texttt{target}                                & Hồ sơ mới mang \mintinline[fontsize=\footnotesize]{sql}|NULL|.                                       \\
+		\texttt{AMT\_INCOME\_TOTAL}                             & \texttt{fact.amt\_income}, \texttt{dim\_customer.}\allowbreak\texttt{income\_bracket}      & R4, R6.                                                                                             \\
+		\texttt{AMT\_ANNUITY} / \texttt{AMT\_INCOME\_TOTAL}     & \texttt{fact.debt\_to\_income}                                         & R7, dùng thu nhập đã cắt ngọn.                                                                      \\
+		\texttt{DAYS\_BIRTH}                                    & \texttt{dim\_customer.age\_years}, \texttt{age\_bucket}                & R5, R6.                                                                                             \\
+		\texttt{DAYS\_EMPLOYED}                                 & \texttt{dim\_customer.}\allowbreak\texttt{years\_employed}, \texttt{is\_employed\_anomaly} & R1, R5.                                                                                             \\
+		\texttt{APPLICATION\_DATE} (mô phỏng)                   & \texttt{fact\_loan\_application.}\allowbreak\texttt{application\_date\_key}                & Tra theo \texttt{dim\_time}; không có nguồn thì dùng ngày mốc.                                      \\
+		\texttt{OUTCOME\_DATE} (mô phỏng)                       & \texttt{fact\_loan\_application.}\allowbreak\texttt{outcome\_date\_key}                    & Rỗng thì là \mintinline[fontsize=\footnotesize]{sql}|NULL| (hồ sơ mới).                              \\
+		\texttt{bureau.DAYS\_CREDIT}                            & \texttt{fact\_bureau\_credit.}\allowbreak\texttt{open\_date\_key}                          & Ngày nộp hồ sơ của khách cộng \texttt{DAYS\_CREDIT}, tra theo \texttt{dim\_time.day\_offset}.       \\
+		\texttt{bureau.}\allowbreak\texttt{DAYS\_ENDDATE\_FACT}    & \texttt{fact\_bureau\_credit.}\allowbreak\texttt{close\_date\_key}, \texttt{credit\_duration\_days} & Ngày nộp hồ sơ cộng \texttt{DAYS\_ENDDATE\_FACT}; \mintinline[fontsize=\footnotesize]{sql}|NULL| nếu ngoài lịch hoặc trước ngày mở. \\
+		\texttt{CREDIT\_ACTIVE}, \texttt{CREDIT\_TYPE}, \texttt{CREDIT\_CURRENCY} & \texttt{dim\_bureau\_category}                        & Giá trị \mintinline[fontsize=\footnotesize]{sql}|NULL| quy về \mintinline[fontsize=\footnotesize]{sql}|'Unknown'|. \\
+		Có bản ghi \texttt{bureau}, khoản đang hoạt động quá hạn & \texttt{dim\_credit\_history.}\allowbreak\texttt{credit\_history\_status}                  & Biểu thức \mintinline[fontsize=\footnotesize]{sql}|CASE| trong \texttt{10\_agg\_credit\_profile.sql}. \\
+		Mục \texttt{dss} của \texttt{configs/settings.yaml}     & \texttt{dim\_risk\_grade}, \texttt{dim\_rule}                          & Nạp bằng tham số, không nối chuỗi.                                                                  \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-\section{Chất lượng Dữ liệu (Data Quality)}
-Để bảo đảm tính toàn vẹn tuyệt đối trước khi công bố dữ liệu vào môi trường phân tích, mô-đun \texttt{src/hcdw/etl/quality.py} thực hiện kiểm tra tự động $100\%$ các tiêu chí kỹ thuật và xuất báo cáo chuẩn JSON tại \texttt{data/warehouse/dq\_report.json}.
-
-Tận dụng khả năng tính toán vector hóa của DuckDB kết hợp tối ưu hóa bộ nhớ trong Pandas, toàn bộ quy trình ETL xử lý $2{,}6$ GB dữ liệu nguồn ($58{,}1$ triệu dòng) chỉ mất \textbf{$11{,}01$ giây} trên phần cứng máy trạm tiêu chuẩn:
-\begin{itemize}[topsep=0pt, itemsep=1pt]
-	\item \textbf{Trích xuất (Extract):} $4{,}36\text{ s}$ (đọc $8$ tập tin CSV và ép kiểu qua \texttt{TRY\_CAST}).
-	\item \textbf{Làm sạch (Clean):} $1{,}15\text{ s}$ (thực thi 10 quy tắc trên $356.255$ hồ sơ).
-	\item \textbf{Tổng hợp (Aggregate):} $0{,}64\text{ s}$ (gộp dữ liệu hành vi từ các bảng con).
-	\item \textbf{Nạp kho (Load):} $4{,}73\text{ s}$ (tạo surrogate keys và chèn dữ liệu vào 6 dim, 2 fact).
-	\item \textbf{Kiểm định chất lượng (Quality):} $0{,}13\text{ s}$ (quét toàn bộ ràng buộc PK/FK và đối soát).
-\end{itemize}
+\section{Chất lượng dữ liệu}
+\label{sec:dq}
+Mã \texttt{src/hcdw/etl/quality.py} chạy $50$ kiểm tra trên $12$ bảng của lược đồ \texttt{dw} và ghi kết quả vào \texttt{data/warehouse/dq\_report.json}. Bảng~\ref{tab:dq-results} gom các kiểm tra theo nhóm. Trên dữ liệu thật, cả $50$ kiểm tra đều đạt.
 
 \begin{table}[H]
 	\centering
-	\caption{Kết quả Kiểm định Cổng Chất lượng Dữ liệu (Data Quality Report)}
+	\caption{Các nhóm kiểm tra chất lượng dữ liệu}
 	\label{tab:dq-results}
 	\footnotesize
-	\begin{tabular}{l l c p{7cm}}
+	\begin{tabular}{p{2.4cm} r p{6.4cm} p{4.6cm}}
 		\toprule
-		\textbf{Nhóm Kiểm định}   & \textbf{Chỉ tiêu}         & \textbf{State} & \textbf{Chi tiết Thực nghiệm}                       \\
+		\textbf{Nhóm}        & \textbf{Số kiểm tra} & \textbf{Nội dung}                                                                                                                              & \textbf{Kết quả trên dữ liệu thật}                                   \\
 		\midrule
-		Khóa chính (PK)           & Tính duy nhất \& NOT NULL & \textbf{ĐẠT}   & $0$ trùng, $0$ NULL trên cả 8 bảng DW.              \\
-		\midrule
-		Khóa ngoại (FK)           & Toàn vẹn tham chiếu       & \textbf{ĐẠT}   & $0$ \textit{orphan rows} trên mọi liên kết.         \\
-		\midrule
-		Đầy đủ (Completeness)     & Số dòng bảng ứng dụng     & \textbf{ĐẠT}   & Tuyệt đối: $356.255$ staging vs $356.255$ fact.     \\
-		                          & Số dòng hợp đồng Bureau   & \textbf{ĐẠT}   & Tuyệt đối: $1.716.428$ staging vs $1.716.428$ fact. \\
-		\midrule
-		Đối soát Tài chính        & Tổng hạn mức              & \textbf{ĐẠT}   & Staging = Fact ($=209.395.079.986$).                \\
-		(\textit{Reconciliation}) & Tổng tín dụng Bureau      & \textbf{ĐẠT}   & Staging = Fact ($=609.318.042.486$).                \\
-		\midrule
-		Tính logic                & Nhãn mục tiêu tập test    & \textbf{ĐẠT}   & $0$ test chứa \texttt{TARGET}.                      \\
-		                          & Phủ ngày tất toán Bureau  & \textbf{ĐẠT}   & $1.079.129/1.079.273$ khoản đã đóng có ngày hợp lệ. \\
+		Khóa chính           & $12$                 & Khóa chính không trùng, không \mintinline[fontsize=\footnotesize]{sql}|NULL| trên mọi bảng \texttt{dw}.                                         & $0$ trùng, $0$ \mintinline[fontsize=\footnotesize]{sql}|NULL|.         \\
+		Khóa ngoại           & $17$                 & Không có dòng mồ côi; khóa ngoại cho phép \mintinline[fontsize=\footnotesize]{sql}|NULL| thì bỏ qua giá trị \mintinline[fontsize=\footnotesize]{sql}|NULL|. & $0$ dòng mồ côi.                              \\
+		Đầy đủ               & $2$                  & Số dòng của hai bảng sự kiện chính bằng số dòng nạp được ở \texttt{staging}.                                                                   & $356.255$ và $1.716.428$ dòng ở cả hai phía.                         \\
+		Đối soát             & $2$                  & Tổng \texttt{AMT\_CREDIT} và tổng \texttt{AMT\_CREDIT\_SUM} ở \texttt{staging} bằng ở bảng sự kiện.                                           & $209{,}4$ tỷ (đơn vị tiền gốc) và $609{,}3$ tỷ ở cả hai phía.        \\
+		Nghiệp vụ            & $1$                  & \texttt{TARGET} chỉ có ở khoản vay lịch sử.                                                                                                    & $0$ hồ sơ mới có \texttt{TARGET}.                                    \\
+		Nguồn ngày mô phỏng  & $6$                  & Mỗi hồ sơ có đúng một dòng; ngày đọc được; ngày kết quả không trước ngày nộp; không ngày nào sau ngày mốc; hồ sơ mới không có kết quả; không khoản tín dụng ngoài nào mở sau ngày nộp. & Đạt cả $6$ kiểm tra.          \\
+		DSS                  & $7$                  & Hai chiều DSS khớp cấu hình; số hồ sơ đã chấm bằng $0$ hoặc bằng số hồ sơ; hạng điểm khớp xác suất vỡ nợ; hạng luật là hạng xấu nhất; hạng cuối không tốt hơn hạng điểm; chính sách khớp hạng cuối; hạng của luật khớp tỷ lệ. & Đạt cả $7$ kiểm tra. \\
+		Thông tin            & $3$                  & Tỷ lệ bản ghi \texttt{bureau} nạp được, tỷ lệ khoản đã đóng có ngày tất toán, tỷ lệ vỡ nợ của khoản vay lịch sử. Nhóm này luôn đạt.              & $100\%$; $1.079.129 / 1.079.273$; $8{,}07\%$.                        \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-\begin{listing}[H]
-	\scriptsize
-	\begin{minted}[linenos]{json}
-{
-  "run_at": "2026-11-12T00:12:41",
-  "timings_sec": {
-    "extract": 4.36, "clean": 1.15, "aggregate": 0.64, "load": 4.73, "quality": 0.13
-  },
-  "data_quality": {
-    "passed": true,
-    "checks": [
-      {"name": "pk_unique:fact_loan_application", "passed": true, "detail": "0 duplicate, 0 null keys"},
-      {"name": "fk:fact_loan_application.customer_key->dim_customer", "passed": true, "detail": "0 orphan rows"},
-      {"name": "completeness:applications", "passed": true, "detail": "staging 356255 vs fact 356255"},
-      {"name": "reconcile:sum_amt_credit", "passed": true, "detail": "staging 209,395,079,986 vs fact 209,395,079,986"}
-    ]
-  }
-}
-\end{minted}
-	\caption{Trích Báo cáo Chất lượng Dữ liệu Tự động}
-	\label{json:dq_report}
-\end{listing}
+Khi ETL chạy, hai bảng sự kiện của DSS còn rỗng nên các kiểm tra DSS đạt mặc nhiên. Lệnh \texttt{hcdw score} chạy lại cả bộ kiểm tra sau khi chấm điểm. Ngoài ra, các ràng buộc khóa chính, khóa ngoại, \mintinline[fontsize=\small]{sql}|CHECK| và \mintinline[fontsize=\small]{sql}|NOT NULL| trong DDL chặn dữ liệu sai ngay lúc nạp.
 
-Toàn bộ các phép kiểm tra đạt tỷ lệ chính xác $100\%$, bảo đảm độ tin cậy tuyệt đối cho mô hình máy học và hệ thống báo cáo điều hành ở các chương tiếp theo.
+Kết quả kiểm tra là cổng công bố của kho. Nếu một bước lỗi hoặc một kiểm tra không đạt, ETL dừng trước bước thay kho:
+\begin{itemize}[topsep=0pt, itemsep=1pt]
+	\item \textbf{Kho đang dùng:} Tập tin \texttt{hc.duckdb} được giữ nguyên, nên trang web vẫn đọc kho đang dùng.
+	\item \textbf{Tập tin tạm:} Tập tin \texttt{hc.duckdb.building} bị xóa.
+	\item \textbf{Báo cáo:} Tập tin \texttt{dq\_report.json} vẫn được ghi, với trường \texttt{published} mang giá trị \texttt{false}.
+	\item \textbf{Mã thoát:} Lệnh kết thúc với mã $1$, nên một kịch bản tự động có thể phát hiện lỗi.
+\end{itemize}
+\endgroup

@@ -1,22 +1,24 @@
 import clsx from "clsx";
 import {
-  Boxes, Briefcase, Database, Gauge, History, Layers, LayoutDashboard, Menu, Moon, Network, Sun, X,
+  Boxes, Compass, Database, FileSearch, LayoutDashboard, Menu, Moon, Network, Scale, SlidersHorizontal,
+  Sun, X,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { compact } from "../lib/format";
 import { useMeta } from "../lib/meta";
 import { useTheme } from "../lib/theme";
-import { FilterBar } from "./FilterBar";
 
-export const NAV = [
-  { to: "/", label: "Overview", icon: LayoutDashboard, filters: true },
-  { to: "/portfolio", label: "Portfolio", icon: Briefcase, filters: true },
-  { to: "/drilldown", label: "Drill-down", icon: Layers, filters: true },
-  { to: "/credit-history", label: "Credit history", icon: History, filters: true },
-  { to: "/olap", label: "OLAP explorer", icon: Boxes, filters: true },
-  { to: "/simulator", label: "Risk simulator", icon: Gauge, filters: false },
-  { to: "/architecture", label: "Architecture", icon: Network, filters: false },
+type Group = "analytics" | "decision" | "hidden";
+/** Every routed page (the header needs its label); `hidden` pages are reachable by link, not the menu. */
+export const NAV: { to: string; label: string; icon: typeof LayoutDashboard; group: Group }[] = [
+  { to: "/", label: "Overview", icon: LayoutDashboard, group: "analytics" },
+  { to: "/analytics", label: "Analytics", icon: Boxes, group: "analytics" },
+  { to: "/explore", label: "Explorer", icon: Compass, group: "analytics" },
+  { to: "/applications-details", label: "Application details", icon: FileSearch, group: "decision" },
+  { to: "/playground", label: "Playground", icon: SlidersHorizontal, group: "decision" },
+  { to: "/grades", label: "Grades & model", icon: Scale, group: "hidden" },
+  { to: "/architecture", label: "Architecture", icon: Network, group: "hidden" },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {
@@ -49,7 +51,7 @@ export function Layout({ children }: { children: ReactNode }) {
               <Menu className="h-4 w-4" />
             </button>
             <div className="min-w-0 flex-1">
-              {page.filters ? <FilterBar /> : <p className="text-sm font-medium text-ink-2">{page.label}</p>}
+              <p className="text-sm font-medium text-ink-2">{page.label}</p>
             </div>
           </div>
         </header>
@@ -73,7 +75,7 @@ function Sidebar({ onClose }: { onClose: () => void }) {
     <>
       <div className="flex items-center justify-between px-5 pb-4 pt-5">
         <div className="flex items-center gap-2.5">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-accent text-white shadow-card">
+          <div className="grid h-9 w-9 place-items-center rounded-[10px] bg-band text-highlight">
             <svg viewBox="0 0 32 32" className="h-5 w-5" aria-hidden>
               <rect x="5" y="17" width="5" height="10" rx="1.5" fill="currentColor" />
               <rect x="13.5" y="11" width="5" height="16" rx="1.5" fill="currentColor" />
@@ -81,8 +83,8 @@ function Sidebar({ onClose }: { onClose: () => void }) {
             </svg>
           </div>
           <div>
-            <p className="text-[15px] font-semibold leading-tight text-ink">Home Credit DW</p>
-            <p className="text-[11px] text-ink-3">Credit-risk warehouse &amp; DSS</p>
+            <p className="text-[15px] font-extrabold leading-tight tracking-[-0.01em] text-ink">Risk Studio</p>
+            <p className="text-[11px] text-ink-3">by Home Credit data</p>
           </div>
         </div>
         <button className="rounded-md p-1 text-ink-3 hover:bg-raised lg:hidden" onClick={onClose} aria-label="Close menu">
@@ -90,22 +92,29 @@ function Sidebar({ onClose }: { onClose: () => void }) {
         </button>
       </div>
 
-      <nav className="flex-1 space-y-0.5 px-3" aria-label="Pages">
-        <p className="eyebrow px-2 pb-1.5 pt-2">Analytics</p>
-        {NAV.slice(0, 5).map((n) => <NavItem key={n.to} {...n} />)}
-        <p className="eyebrow px-2 pb-1.5 pt-4">Decision &amp; design</p>
-        {NAV.slice(5).map((n) => <NavItem key={n.to} {...n} />)}
+      <nav className="flex-1 space-y-0.5 px-3 pt-2" aria-label="Pages">
+        {NAV.filter((n) => n.group !== "hidden").map((n) => <NavItem key={n.to} {...n} />)}
       </nav>
 
-      <div className="m-3 rounded-xl border border-line bg-raised/50 p-3">
+      <Link to="/architecture" title="How the warehouse and DSS are built"
+        className="m-3 mb-1 block rounded-xl border border-line bg-raised/50 p-3 transition hover:border-accent/40">
         <div className="flex items-center gap-2 text-xs font-medium text-ink-2">
           <Database className="h-3.5 w-3.5 text-accent" />
           <span className="truncate">{meta.warehouse.name}</span>
           <span className="ml-auto rounded bg-surface px-1.5 py-0.5 text-[10px] uppercase text-ink-3">{meta.warehouse.target}</span>
         </div>
         <p className="num mt-1.5 text-[11px] text-ink-3">
-          {compact(factRows)} fact rows · snapshot {meta.warehouse.anchor_date}
+          {compact(factRows)} records · snapshot {meta.warehouse.anchor_date}
         </p>
+      </Link>
+      {/* Reference pages: reachable from here, not part of the main menu. */}
+      <div className="mx-3 mb-2 flex flex-wrap gap-x-4 gap-y-1 px-2 text-[12px]">
+        <Link to="/grades" className="inline-flex items-center gap-1 text-ink-2 hover:text-accent-ink">
+          <Scale className="h-3.5 w-3.5" aria-hidden /> Grades &amp; model
+        </Link>
+        <Link to="/architecture" className="inline-flex items-center gap-1 text-ink-2 hover:text-accent-ink">
+          <Network className="h-3.5 w-3.5" aria-hidden /> Architecture
+        </Link>
       </div>
 
       <div className="flex items-center justify-between border-t border-line px-5 py-3">
@@ -126,14 +135,14 @@ function NavItem({ to, label, icon: Icon }: { to: string; label: string; icon: t
       end={to === "/"}
       className={({ isActive }) =>
         clsx(
-          "group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition",
-          isActive ? "bg-accent-soft text-accent-ink" : "text-ink-2 hover:bg-raised hover:text-ink",
+          "group flex items-center gap-2.5 rounded-full px-3 py-2 text-[13.5px] font-medium transition",
+          isActive ? "bg-accent text-accent-on" : "text-ink-2 hover:bg-raised hover:text-ink",
         )
       }
     >
       {({ isActive }) => (
         <>
-          <Icon className={clsx("h-4 w-4", isActive ? "text-accent" : "text-ink-3 group-hover:text-ink-2")} />
+          <Icon className={clsx("h-4 w-4", isActive ? "text-accent-on" : "text-ink-3 group-hover:text-ink-2")} />
           {label}
         </>
       )}
