@@ -1,33 +1,23 @@
 sequenceDiagram
     autonumber
-    actor Analyst as Analyst<br/>browser user
-    participant React as React app<br/>shared filters · charts
-    participant FastAPI as FastAPI<br/>/api/* endpoints
-    participant Query as Query layer<br/>whitelist · lru_cache
-    participant DuckDB as DuckDB<br/>hc.duckdb · read-only
+    actor User as Người dùng
+    participant Web as React (Analytics)
+    participant Api as FastAPI
+    participant Db as DuckDB
+    participant Exp as Explorer
 
-    Analyst->>React: click bar "age 25-34"
-    activate React
-    Note over React: update shared filters (all pages)
-    React->>FastAPI: GET /api/by/income_type<br/>?age_bucket=25-34
-    activate FastAPI
-    Note over FastAPI: check names against the whitelist<br/>unknown dimension or filter -> 400
-    FastAPI->>Query: by_dimension(dim, filters)
-    activate Query
-    
-    alt result already cached
-        Note over Query: rows from memory · < 5 ms
-    else first request for these filters
-        Query->>DuckDB: SELECT ... GROUP BY 1
-        activate DuckDB
-        DuckDB-->>Query: rows · 50-200 ms
-        deactivate DuckDB
-        Note over Query: rows (cached for next time)
+    User->>Web: đổi chip, Interval, ▲▼ hoặc ⇄
+    Note over Web: trạng thái lưu ở ?state=
+    Web->>Api: POST /api/analytics/cube
+    alt thân yêu cầu sai
+        Api-->>Web: 422
+    else chiều hoặc thước đo lạ
+        Api-->>Web: 400
+    else yêu cầu hợp lệ
+        Api->>Db: một truy vấn GROUPING SETS
+        Db-->>Api: ô, tổng phụ, tổng chung
+        Api-->>Web: JSON
     end
-    
-    Query-->>FastAPI: 
-    deactivate Query
-    FastAPI-->>React: JSON · gzip
-    deactivate FastAPI
-    React-->>Analyst: charts, KPIs, tables re-render
-    deactivate React
+    Web-->>User: vẽ lại biểu đồ, bảng Cube
+    User->>Web: bấm một ô
+    Web->>Exp: khoan xuyên tới ô đó

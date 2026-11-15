@@ -1,9 +1,20 @@
--- Calendar around the assumed snapshot date. The range always covers the oldest bureau credit.
+-- Calendar around the assumed snapshot date. The range always covers every application and outcome
+-- date and the oldest bureau credit (bureau offsets count from the applicant's application date).
 INSERT INTO dw.dim_time
-WITH bounds AS (
+WITH cal AS (
     SELECT
-        LEAST(-{{history_days}}, COALESCE((SELECT MIN(days_credit) FROM staging.bureau), 0)) AS lo,
-        {{future_days}} AS hi
+        MIN(LEAST(application_offset, COALESCE(outcome_offset, application_offset)))    AS lo,
+        MAX(GREATEST(application_offset, COALESCE(outcome_offset, application_offset))) AS hi
+    FROM staging.application_calendar
+),
+bounds AS (
+    SELECT
+        LEAST(-{{history_days}}, COALESCE(cal.lo, 0),
+              COALESCE((SELECT MIN(COALESCE(c.application_offset, 0) + b.days_credit)
+                        FROM staging.bureau b
+                        LEFT JOIN staging.application_calendar c USING (sk_id_curr)), 0)) AS lo,
+        GREATEST({{future_days}}, COALESCE(cal.hi, 0))                                   AS hi
+    FROM cal
 ),
 offsets AS (
     SELECT UNNEST(generate_series(lo, hi))::INTEGER AS day_offset FROM bounds

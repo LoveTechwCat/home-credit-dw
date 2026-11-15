@@ -1,0 +1,332 @@
+% Risk Studio beamer theme (CO4031).
+% Reproduces the HTML deck (deck.css): a 1920x1080 px canvas, 128 px margins,
+% Be Vietnam Pro 400/600/800, the teal/ink palette and the footer band.
+%
+% Every slide is one full-page TikZ picture drawn by the `background'
+% template. Coordinates are CSS pixels measured from the top-left corner of
+% the page (x to the right, y downwards), so values can be copied straight
+% from the HTML/CSS. Drawing in the background (instead of with
+% `remember picture') keeps positions right under pgfpages, which the
+% "show notes on second screen" option uses.
+\mode<presentation>
+
+\RequirePackage{fontspec}
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta}
+
+% ---------------------------------------------------------------- canvas
+% 1 px of the 1920 px wide HTML canvas.
+\newlength\rspx
+\setlength\rspx{\dimexpr\paperwidth/1920\relax}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{}
+\setbeamertemplate{footline}{}
+\setbeamertemplate{frametitle}{}
+\setbeamersize{text margin left=0pt,text margin right=0pt}
+\usefonttheme{professionalfonts}
+
+% ---------------------------------------------------------------- fonts
+% Bundled in ./fonts so the deck builds without any installed font
+% (Overleaf included). Bold = SemiBold (600); \rsXB = ExtraBold (800).
+\setsansfont{BeVietnamPro}[
+  Path=fonts/, Extension=.ttf,
+  UprightFont=*-Regular, BoldFont=*-SemiBold, ItalicFont=*-Italic]
+\setmainfont{BeVietnamPro}[
+  Path=fonts/, Extension=.ttf,
+  UprightFont=*-Regular, BoldFont=*-SemiBold, ItalicFont=*-Italic]
+\newfontfamily\rsXBfamily{BeVietnamPro}[
+  Path=fonts/, Extension=.ttf, UprightFont=*-ExtraBold]
+
+% ---------------------------------------------------------------- colours
+% Exactly the values of deck.css.
+\definecolor{rsInk}{HTML}{10181C}
+\definecolor{rsPage}{HTML}{F4F6F5}
+\definecolor{rsPaper}{HTML}{FBFCFB}
+\definecolor{rsTeal}{HTML}{00756F}
+\definecolor{rsTealSoft}{HTML}{D3ECE9}
+\definecolor{rsTealDeep}{HTML}{00564F}
+\definecolor{rsMuted}{HTML}{4A585E}
+\definecolor{rsHair}{HTML}{DDE3E1}
+\definecolor{rsGA}{HTML}{1E7A3A}
+\definecolor{rsGB}{HTML}{557A12}
+\definecolor{rsGC}{HTML}{946300}
+\definecolor{rsGD}{HTML}{B54708}
+\definecolor{rsGE}{HTML}{B3261E}
+\definecolor{rsApprove}{HTML}{1E7A3A}
+\definecolor{rsReview}{HTML}{F2B705}
+\definecolor{rsReject}{HTML}{B3261E}
+\definecolor{rsRowHl}{HTML}{E6F2F0}
+\definecolor{rsFrameBg}{HTML}{DCE7E4}
+\definecolor{rsNodeLine}{HTML}{B9CBC7}
+\definecolor{rsConnector}{HTML}{5E7D78}
+\definecolor{rsBand}{HTML}{E6EEEC}
+\definecolor{rsOkBg}{HTML}{E3F1E7}
+\definecolor{rsBadBg}{HTML}{F8E4E2}
+\definecolor{rsFoot}{HTML}{5E6B70}
+\definecolor{rsFootDark}{HTML}{8FA5A1}
+\definecolor{rsMutedDark}{HTML}{B5C7C3}
+
+\setbeamercolor{background canvas}{bg=rsPage}
+\setbeamercolor{normal text}{fg=rsInk}
+
+% ---------------------------------------------------------------- type
+% \rsFont{size px}{line-height}{weight switch}{letter-spacing, % of size}
+% Sets size and leading like CSS and defines \rsstrut: a line box of
+% exactly line-height x size whose baseline sits where the browser puts it
+% (Be Vietnam Pro: ascent 1.0 em, descent 0.265 em, half-leading above).
+\newcommand\rsReg{\normalfont\mdseries}
+\newcommand\rsSemi{\normalfont\bfseries}
+\newcommand\rsXB{\rsXBfamily}
+\newcommand\rsFont[4]{%
+  #3\fontsize{#1\rspx}{\fpeval{#1*#2}\rspx}\selectfont
+  \if\relax\detokenize{#4}\relax\else\addfontfeature{LetterSpace=#4}\fi
+  \lineskiplimit=-\maxdimen \parindent=0pt \hyphenpenalty=10000
+  \edef\rsstrut{\noexpand\leavevmode\vrule width 0pt
+    height \fpeval{#1*(#2/2+0.3675)}\rspx\space
+    depth \fpeval{#1*(#2/2-0.3675)}\rspx\relax}}
+\newcommand\rsstrut{}
+
+% Type scale of deck.css: 112 / 60 / 36 / 28 / 24.
+\newcommand\fEyebrow{\rsFont{24}{1.35}{\rsSemi}{12.5}}
+\newcommand\fTitle{\rsFont{60}{1.1}{\rsXB}{-1.6667}}
+\newcommand\fBig{\rsFont{112}{1}{\rsXB}{-1.7857}}
+\newcommand\fNsixty{\rsFont{60}{1.1}{\rsXB}{-1.6667}}
+\newcommand\fHthree{\rsFont{36}{1.2}{\rsSemi}{}}
+\newcommand\fHthreeReg{\rsFont{36}{1.2}{\rsReg}{}}
+\newcommand\fBody{\rsFont{28}{1.35}{\rsReg}{}}
+\newcommand\fBodyS{\rsFont{28}{1.35}{\rsSemi}{}}
+\newcommand\fSmall{\rsFont{24}{1.35}{\rsReg}{}}
+\newcommand\fSmallS{\rsFont{24}{1.35}{\rsSemi}{}}
+\newcommand\fNodeT{\rsFont{28}{1.3}{\rsSemi}{}}
+\newcommand\fNodeS{\rsFont{24}{1.3}{\rsReg}{}}
+
+% Glyphs missing from Be Vietnam Pro (the browser falls back to a system
+% font for them), drawn at text size in the current colour.
+\newcommand\rsRA{\tikz[baseline=0pt,x=1em,y=1em]\draw[line width=.07em,
+  -{Straight Barb[length=.22em,width=.44em]}] (.05,.3) -- (.95,.3);}
+\newcommand\rsUp{\tikz[baseline=0pt,x=1em,y=1em]\fill
+  (.05,0) -- (.67,0) -- (.36,.62) -- cycle;\kern.05em}
+\newcommand\rsDown{\tikz[baseline=0pt,x=1em,y=1em]\fill
+  (.05,.62) -- (.67,.62) -- (.36,0) -- cycle;\kern.05em}
+\newcommand\rsSwap{\tikz[baseline=0pt,x=1em,y=1em,line width=.07em]{%
+  \draw[-{Straight Barb[length=.2em,width=.4em]}] (.05,.5) -- (.95,.5);
+  \draw[-{Straight Barb[length=.2em,width=.4em]}] (.95,.14) -- (.05,.14);}}
+
+% ---------------------------------------------------------------- slide kinds
+% light (default page), accent (teal statement slide), dark (cover/closing).
+\colorlet{rsFg}{rsInk}
+\colorlet{rsEyebrowC}{rsTeal}
+\colorlet{rsMutedC}{rsMuted}
+\colorlet{rsFootC}{rsFoot}
+\colorlet{rsBgC}{rsPage}
+\newcommand\rs@kind{light}
+\newcommand\rs@presenter{}
+\newcommand\rs@draw{}
+
+% \rsslide[kind]{presenter}{TikZ drawing} -- use once inside each frame.
+% Leave the presenter empty for no footer (cover and closing slides).
+\newcommand\rsslide[3][light]{%
+  \gdef\rs@kind{#1}\gdef\rs@presenter{#2}\gdef\rs@draw{#3}}
+
+\newcommand\rs@setkind{%
+  \def\rs@tmp{dark}\ifx\rs@kind\rs@tmp
+    \colorlet{rsBgC}{rsInk}\colorlet{rsFg}{rsPage}%
+    \colorlet{rsEyebrowC}{rsTealSoft}\colorlet{rsMutedC}{rsMutedDark}%
+    \colorlet{rsFootC}{rsFootDark}\fi
+  \def\rs@tmp{accent}\ifx\rs@kind\rs@tmp
+    \colorlet{rsBgC}{rsTeal}\colorlet{rsFg}{rsPage}%
+    \colorlet{rsEyebrowC}{rsTealSoft}\colorlet{rsMutedC}{rsTealSoft}%
+    \colorlet{rsFootC}{rsTealSoft}\fi}
+
+% Footer band (.foot): left 128, bottom 64, 24 px row, page number in a
+% 48 px right-aligned box.
+\newcommand\rs@footer{%
+  \if\relax\detokenize\expandafter{\rs@presenter}\relax\else
+    \rsT[text=rsFootC]{128}{983.6}{\fSmall}{Risk Studio · CO4031}%
+    \rsT[text=rsFootC,anchor=north east]{1720}{983.6}{\fSmall}%
+      {Trình bày: \rs@presenter}%
+    \rsT[text=rsFootC,anchor=north east]{1792}{983.6}{\fSmall}%
+      {\insertframenumber}%
+  \fi}
+
+\newif\ifrs@notepage
+\setbeamertemplate{background}{%
+  \ifrs@notepage\else
+  \begingroup\rs@setkind
+  \begin{tikzpicture}[x=\rspx,y=-\rspx,line join=round,
+      every node/.style={inner sep=0pt,outer sep=0pt,text=rsFg}]
+    \useasboundingbox (0,0) rectangle (1920,1080);
+    \fill[rsBgC] (0,0) rectangle (1920,1080);
+    \rs@draw
+    \rs@footer
+  \end{tikzpicture}%
+  \endgroup\fi}
+
+% Notes pages: plain text on white, without the slide drawing behind them.
+\setbeamertemplate{note page}{%
+  \global\rs@notepagetrue
+  \vskip 4mm
+  \hspace*{6mm}\begin{minipage}{\dimexpr\paperwidth-12mm\relax}
+    \rsFont{24}{1.4}{\rsSemi}{}\color{rsTeal}%
+    Slide \insertframenumber\ · \insertframetitle\par
+    \vskip 2mm
+    \rsFont{26}{1.45}{\rsReg}{}\color{rsInk}\raggedright\insertnote\par
+  \end{minipage}\vfill}
+\AddToHook{shipout/after}{\global\rs@notepagefalse}
+
+% ---------------------------------------------------------------- primitives
+% Text whose top-left corner (top of the CSS line box) is at (x,y).
+% \rsT[tikz options]{x}{y}{font}{text}          one line
+% \rsTw[tikz options]{x}{y}{width}{font}{text}  wraps at width px
+\newcommand\rsT[5][]{%
+  \node[anchor=north west,#1] at (#2,#3) {#4\rsstrut#5\rsstrut};}
+\newcommand\rsTw[6][]{%
+  \node[anchor=north west,text width=\fpeval{#4}\rspx,align=flush left,#1]
+    at (#2,#3) {#5\rsstrut#6\rsstrut\par};}
+
+% Eyebrow + title (.head) at the top-left margin.
+\newcommand\rsHead[2]{%
+  \rsT[text=rsEyebrowC]{128}{128}{\fEyebrow}{\MakeUppercase{#1}}%
+  \rsT{128}{172.4}{\fTitle}{#2}}
+
+% \rsBox[extra draw options]{x}{y}{w}{h}{radius}{fill}{border}{border px}
+% CSS border-box: the border is drawn inside the given rectangle.
+\newcommand\rsBox[9][]{%
+  \ifdim#9pt=0pt
+    \fill[#7,rounded corners=#6\rspx] (#2,#3) rectangle ++(#4,#5);
+  \else
+    \filldraw[fill=#7,draw=#8,line width=#9\rspx,
+      rounded corners={(#6-#9/2)*\rspx},#1]
+      ({#2+#9/2},{#3+#9/2}) rectangle ++({#4-#9},{#5-#9});
+  \fi}
+\newcommand\rsCard[4]{\rsBox{#1}{#2}{#3}{#4}{16}{rsPaper}{rsHair}{1}}
+\newcommand\rsCardSoft[4]{\rsBox{#1}{#2}{#3}{#4}{16}{rsTealSoft}{none}{0}}
+
+% Decision / scope pill: \rsPill[min width px]{x}{y}{kind}{text}
+% kind: approve, review, reject, scopeall, scopehist.
+\tikzset{
+  rs pill approve/.style={fill=rsApprove,text=rsPaper},
+  rs pill review/.style={fill=rsReview,text=rsInk},
+  rs pill reject/.style={fill=rsReject,text=rsPaper},
+  rs pill scopeall/.style={fill=rsTealSoft,text=rsTealDeep},
+  rs pill scopehist/.style={fill=rsInk,text=rsPage}}
+\newcommand\rsPill[5][0]{%
+  \node[anchor=north west,rs pill #4,inner xsep=18\rspx,inner ysep=6\rspx,
+    rounded corners=22\rspx,minimum width=#1\rspx]
+    at (#2,#3) {\fSmallS\rsstrut#5\rsstrut};}
+
+% Grade chip (.chip): \rsChip{x}{y}{colour}{letter}; 56 px, white text.
+\newcommand\rsChip[4]{%
+  \fill[#3,rounded corners=12\rspx] (#1,#2) rectangle ++(56,56);
+  \node[anchor=base,text=rsPaper] at ({#1+28},{#2+38.29})
+    {\rsFont{28}{1}{\rsXB}{}#4};}
+
+% Colour bars of the cover and closing slides (96 x 12, gap 12).
+\newcommand\rsGradeBars[2]{%
+  \foreach \c [count=\i from 0] in {rsGA,rsGB,rsGC,rsGD,rsGE}
+    \fill[\c,rounded corners=6\rspx] ({#1+108*\i},#2) rectangle ++(96,12);}
+
+% Diagram node (.node): \rsNode{kind}{x}{y}{w}{h}{title}{subtitle}
+% kind: plain, key, ok, bad, sim (dashed), gate (3 px teal border).
+\newcommand\rsNode[7]{%
+  \begingroup
+  \def\rs@nb{2}\colorlet{rs@nf}{rsPaper}\colorlet{rs@nl}{rsNodeLine}%
+  \colorlet{rs@nt}{rsInk}\colorlet{rs@ns}{rsMuted}\def\rs@nd{}%
+  \def\rs@k{#1}%
+  \def\rs@tmp{key}\ifx\rs@tmp\rs@k
+    \colorlet{rs@nf}{rsTeal}\colorlet{rs@nl}{rsTeal}%
+    \colorlet{rs@nt}{rsPage}\colorlet{rs@ns}{rsTealSoft}\fi
+  \def\rs@tmp{ok}\ifx\rs@tmp\rs@k
+    \colorlet{rs@nf}{rsOkBg}\colorlet{rs@nl}{rsGA}\fi
+  \def\rs@tmp{bad}\ifx\rs@tmp\rs@k
+    \colorlet{rs@nf}{rsBadBg}\colorlet{rs@nl}{rsGE}\fi
+  \def\rs@tmp{sim}\ifx\rs@tmp\rs@k
+    \def\rs@nd{dash pattern=on 6\rspx off 4\rspx}\fi
+  \def\rs@tmp{gate}\ifx\rs@tmp\rs@k
+    \def\rs@nb{3}\colorlet{rs@nl}{rsTeal}\fi
+  \expandafter\rsBox\expandafter[\rs@nd]{#2}{#3}{#4}{#5}{14}{rs@nf}{rs@nl}{\rs@nb}%
+  \rsT[text=rs@nt]{#2+\rs@nb+20}{#3+\rs@nb+14}{\fNodeT}{#6}%
+  \rsTw[text=rs@ns]{#2+\rs@nb+20}{#3+\rs@nb+54.4}{#4-2*\rs@nb-40}{\fNodeS}{#7}%
+  \endgroup}
+
+% Connector (x-connector): 3 px #5E7D78 line with a triangular head.
+\tikzset{
+  rs conn/.style={draw=rsConnector,line width=3\rspx,line cap=butt,
+    -{Triangle[length=0pt 5,width=0pt 5]}},
+  rs conn both/.style={rs conn,{Triangle[length=0pt 5,width=0pt 5]}-{Triangle[length=0pt 5,width=0pt 5]}},
+  rs dashed/.style={dash pattern=on 9\rspx off 6\rspx}}
+
+% Screenshot frame (.frame): backdrop, 20 px padding, image fitted
+% (object-fit: contain) and centred. \rsShot{x}{y}{w}{h}{file}
+\newcommand\rsShot[5]{%
+  \fill[rsFrameBg,rounded corners=16\rspx] (#1,#2) rectangle ++(#3,#4);
+  \node[anchor=center] at ({#1+#3/2},{#2+#4/2})
+    {\includegraphics[width=\fpeval{#3-40}\rspx,height=\fpeval{#4-40}\rspx,
+      keepaspectratio]{#5}};}
+
+% ---------------------------------------------------------------- tables
+% \rsTable{x}{y}{font}{pad-x}{col widths px}{col aligns l|r}
+% then \rsRow[th|hl|plain]{height}{cell & cell & ...} for each row;
+% cells are vertically centred, padded 12 px / pad-x px, rows separated by
+% a hairline. Header rows are SemiBold on teal-soft.
+\ExplSyntaxOn
+\seq_new:N \l__rs_colw_seq
+\seq_new:N \l__rs_cola_seq
+\seq_new:N \l__rs_cells_seq
+\fp_new:N \g__rs_ty_fp
+\tl_new:N \g__rs_tx_tl
+\tl_new:N \g__rs_tw_tl
+\tl_new:N \g__rs_tfont_tl
+\tl_new:N \g__rs_tpad_tl
+\NewDocumentCommand \rsTable { m m m m m m }
+  {
+    \tl_gset:Nn \g__rs_tx_tl {#1}
+    \fp_gset:Nn \g__rs_ty_fp {#2}
+    \tl_gset:Nn \g__rs_tfont_tl {#3}
+    \tl_gset:Nn \g__rs_tpad_tl {#4}
+    \seq_gset_from_clist:Nn \g__rs_colw_seq {#5}
+    \seq_gset_from_clist:Nn \g__rs_cola_seq {#6}
+    \tl_gset:Nx \g__rs_tw_tl { \fp_eval:n { \seq_use:Nn \g__rs_colw_seq {+} } }
+  }
+\seq_new:N \g__rs_colw_seq
+\seq_new:N \g__rs_cola_seq
+\NewDocumentCommand \rsRow { O{plain} m m }
+  {
+    \str_case:nn {#1}
+      {
+        {th} { \fill[rsTealSoft] (\g__rs_tx_tl,\fp_use:N \g__rs_ty_fp)
+                 rectangle ++(\g__rs_tw_tl,#2); }
+        {hl} { \fill[rsRowHl] (\g__rs_tx_tl,\fp_use:N \g__rs_ty_fp)
+                 rectangle ++(\g__rs_tw_tl,#2); }
+      }
+    \fill[rsHair] (\g__rs_tx_tl,\fp_eval:n {\g__rs_ty_fp+#2-1})
+      rectangle ++(\g__rs_tw_tl,1);
+    \seq_set_split:Nnn \l__rs_cells_seq { & } {#3}
+    \fp_set:Nn \l_tmpa_fp { \g__rs_tx_tl }
+    \int_step_inline:nn { \seq_count:N \l__rs_cells_seq }
+      {
+        \tl_set:Nx \l_tmpa_tl { \seq_item:Nn \g__rs_colw_seq {##1} }
+        \tl_set:Nx \l_tmpb_tl
+          { \str_if_eq:eeTF { \seq_item:Nn \g__rs_cola_seq {##1} } {r}
+              { flush~right } { flush~left } }
+        \__rs_cell:eeeeee
+          { \fp_eval:n { \l_tmpa_fp + \g__rs_tpad_tl } }
+          { \fp_eval:n { \g__rs_ty_fp + (#2)/2 } }
+          { \fp_eval:n { \l_tmpa_tl - 2*\g__rs_tpad_tl } }
+          { \l_tmpb_tl }
+          { \str_if_eq:nnTF {#1} {th} { \exp_not:N \rsSemi } { } }
+          { \seq_item:Nn \l__rs_cells_seq {##1} }
+        \fp_add:Nn \l_tmpa_fp { \l_tmpa_tl }
+      }
+    \fp_gadd:Nn \g__rs_ty_fp { #2 }
+  }
+\cs_new_protected:Nn \__rs_cell:nnnnnn
+  {
+    \node[anchor=west,text~width=#3\rspx,align=#4]
+      at (#1,#2) {\g__rs_tfont_tl #5 \rsstrut #6 \rsstrut\par};
+  }
+\cs_generate_variant:Nn \__rs_cell:nnnnnn { eeeeee }
+\ExplSyntaxOff
+
+\mode<all>

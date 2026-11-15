@@ -1,38 +1,13 @@
 flowchart LR
-    subgraph Strategic["Cấp chiến lược<br>Executive / CRO"]
-        S1[Phân bổ hạn mức và vốn]
-        S2[Hoạch định dự phòng ECL]
-        S3[Định hướng danh mục và khẩu vị rủi ro]
+    subgraph G_EXEC["Ban điều hành"]
+        LV_MON["Giám sát: sức khỏe danh mục"] --> PG_MON["Overview (KPI)"]
     end
 
-    subgraph Tactical["Cấp chiến thuật<br>Risk Manager"]
-        T1[Điều chỉnh ngưỡng Green / Red]
-        T2[Quản lý knock-out rules]
-        T3[Giám sát OLAP và chất lượng danh mục]
+    subgraph G_UW["Chuyên viên thẩm định"]
+        LV_OPR["Tác nghiệp: quyết định từng hồ sơ"] --> PG_OPR["Application details"]
     end
 
-    subgraph Operational["Cấp tác nghiệp<br>Credit Underwriter"]
-        O1[Green: Auto-Approve]
-        O2[Yellow: Manual Review]
-        O3[Red: Auto-Reject]
+    subgraph G_RISK["Trưởng phòng rủi ro"]
+        LV_STR["Chiến lược: ngưỡng hạng, chính sách"] --> PG_STR["Overview, Analytics, Playground"]
+        LV_TAC["Chiến thuật: rà soát phân khúc, luật"] --> PG_TAC["Explorer, Analytics"]
     end
-
-
-
-    DW[(Data Warehouse)] --> OLAP[OLAP cubes<br/>và dashboard]
-    OLAP --> T3
-    OLAP --> S1
-    OLAP --> S2
-
-    Applicant[Hồ sơ vay] --> PDModel[Mô hình PD]
-    PDModel --> Score[Điểm rủi ro và lý do giải thích]
-    Score --> O1
-    Score --> O2
-    Score --> O3
-
-    O2 --> Underwriter[Chuyên viên thẩm định]
-    Underwriter -->|Kết quả và ghi chú| DW
-
-    T1 -.->|Cập nhật ngưỡng| Score
-    T2 -.->|Cập nhật quy tắc| Score
-    S3 -.->|Khẩu vị và giới hạn| T1

@@ -3,36 +3,61 @@
 @tailwind utilities;
 
 /* Design tokens as "r g b" triplets so Tailwind can add alpha (bg-accent/10).
-   Chart colours live in src/lib/theme.tsx (same values, hex) because SVG needs literal colours. */
+   Chart colours live in src/lib/theme.tsx (same values, hex) because SVG needs literal colours.
+   Naming: page = background, raised = sunken areas, ink-2/ink-3 = muted text, accent-ink = accent-coloured
+   text that stays readable on accent-soft, accent-on = text placed ON a solid accent fill. */
 :root {
   color-scheme: light;
-  --page: 246 246 243;
-  --surface: 252 252 251;
-  --raised: 240 239 236;
-  --line: 225 224 217;
-  --ink: 23 23 22;
-  --ink-2: 82 81 78;
-  --ink-3: 120 118 112;
-  --accent: 42 120 214;
-  --accent-soft: 230 240 252;
-  --accent-ink: 28 92 171;
-  --good: 12 163 12;
-  --warn: 250 178 25;
-  --bad: 208 59 59;
+  --page: 238 242 241;        /* #EEF2F1 */
+  --surface: 255 255 255;     /* #FFFFFF */
+  --raised: 226 233 232;      /* #E2E9E8 sunken */
+  --line: 201 213 212;        /* #C9D5D4 */
+  --ink: 21 35 43;            /* #15232B */
+  --ink-2: 82 100 108;        /* #52646C muted */
+  --ink-3: 82 100 108;        /* muted (kept equal: lighter greys fail contrast on the bg) */
+  --accent: 0 117 111;        /* #00756F teal */
+  --accent-soft: 211 236 233; /* #D3ECE9 */
+  --accent-ink: 0 106 101;    /* #006A65: accent text, a step darker so it passes 4.5:1 on accent-soft */
+  --accent-on: 255 255 255;   /* text on solid accent */
+  --highlight: 242 183 5;     /* #F2B705 amber */
+  --highlight-soft: 252 239 194;
+  --good: 30 122 58;          /* #1E7A3A */
+  --good-soft: 221 241 227;
+  --warn: 242 183 5;          /* warning = highlight */
+  --warn-soft: 252 239 194;
+  --warn-ink: 21 35 43;       /* ink on highlight-soft */
+  --bad: 179 38 30;           /* #B3261E */
+  --bad-soft: 248 222 219;
+  --band: 12 59 57;           /* #0C3B39 hero band */
+  --band-ink: 234 246 244;
+  --band-muted: 169 207 202;
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --page: 17 17 16;
-  --surface: 26 26 25;
-  --raised: 37 37 35;
-  --line: 51 51 47;
-  --ink: 240 239 236;
-  --ink-2: 195 194 183;
-  --ink-3: 150 148 141;
-  --accent: 57 135 229;
-  --accent-soft: 22 38 59;
-  --accent-ink: 134 182 239;
+  --page: 16 24 28;           /* #10181C */
+  --surface: 23 34 39;        /* #172227 */
+  --raised: 12 19 22;         /* #0C1316 */
+  --line: 42 58 64;           /* #2A3A40 */
+  --ink: 228 236 236;         /* #E4ECEC */
+  --ink-2: 154 176 180;       /* #9AB0B4 */
+  --ink-3: 154 176 180;
+  --accent: 60 196 182;       /* #3CC4B6 */
+  --accent-soft: 22 58 55;    /* #163A37 */
+  --accent-ink: 60 196 182;
+  --accent-on: 6 36 33;       /* #062421 */
+  --highlight: 242 193 78;    /* #F2C14E */
+  --highlight-soft: 58 49 21;
+  --good: 127 214 155;        /* #7FD69B */
+  --good-soft: 21 48 30;
+  --warn: 242 193 78;
+  --warn-soft: 58 49 21;
+  --warn-ink: 228 236 236;
+  --bad: 255 138 128;         /* #FF8A80 */
+  --bad-soft: 58 26 24;
+  --band: 10 36 34;           /* #0A2422 */
+  --band-ink: 228 236 236;
+  --band-muted: 143 185 179;
 }
 
 html,
@@ -46,28 +71,126 @@ body {
   font-size: 14px;
 }
 
+h1 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+}
+
 @layer components {
   .card {
-    @apply rounded-xl border border-line bg-surface shadow-card;
+    @apply rounded-[14px] border border-line bg-surface;
   }
   .card-pad {
-    @apply p-4 sm:p-5;
+    @apply p-5;
   }
+  /* Card titles and small section labels: 13px / 600 uppercase, muted. */
   .eyebrow {
-    @apply text-[11px] font-semibold uppercase tracking-wider text-ink-3;
+    @apply text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3;
+  }
+  /* Section kicker: same shape as a card title, in the accent colour. */
+  .kicker {
+    @apply text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-ink;
+  }
+  .card-title {
+    @apply text-[13px] font-semibold uppercase leading-tight tracking-[0.08em] text-ink-2;
+  }
+  .big-num {
+    @apply font-extrabold tracking-[-0.02em];
+    font-variant-numeric: tabular-nums;
   }
   .btn {
-    @apply inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-1.5 text-sm font-medium text-ink-2 transition hover:bg-raised hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50;
+    @apply inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-line bg-surface px-3.5 py-1.5 text-sm font-medium text-ink transition hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50;
   }
   .btn-primary {
-    @apply border-transparent bg-accent text-white hover:bg-accent-ink hover:text-white;
+    @apply border-transparent bg-accent text-accent-on hover:bg-accent/90;
   }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-line bg-surface px-3 py-1 text-[12.5px] font-semibold text-ink-2 transition hover:border-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50;
+  }
+  .chip[aria-pressed="true"] {
+    @apply border-accent text-ink;
+  }
+  /* "Add filter" / "Add columns": the entry points of the Explorer, so they stand out from plain chips. */
+  .btn-add {
+    @apply inline-flex items-center gap-2 rounded-full border-[1.5px] border-accent/70 bg-accent/10 px-3.5 py-1.5 text-[13px] font-semibold text-accent transition hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50;
+  }
+  .btn-add[aria-expanded="true"] {
+    @apply border-accent bg-accent text-accent-on hover:bg-accent;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[12.5px] font-semibold;
+  }
+  .pill-ok { @apply bg-good-soft text-good; }
+  .pill-warn { @apply bg-highlight-soft text-ink; }
+  .pill-bad { @apply bg-bad-soft text-bad; }
+  .pill-neutral { @apply bg-raised text-ink-2; }
   .input {
-    @apply w-full rounded-lg border border-line bg-surface px-3 py-1.5 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/25;
+    @apply w-full rounded-[10px] border-[1.5px] border-line bg-surface px-3 py-1.5 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/25;
+  }
+  .callout {
+    @apply rounded-r-lg border-l-[5px] border-accent bg-raised/60 p-3;
+  }
+  .highlight-box {
+    @apply rounded-xl bg-highlight-soft p-3;
   }
   .num {
     font-variant-numeric: tabular-nums;
   }
+  /* Data tables: muted uppercase headers on a 1.5px rule, 1px row lines, no line under the last row. */
+  .table {
+    @apply w-full border-collapse text-left text-[13px];
+  }
+  .table th {
+    @apply px-2.5 text-ink-2;
+  }
+  .table thead th {
+    @apply border-b-[1.5px] border-line py-2 text-[12px] font-semibold uppercase tracking-[0.06em];
+  }
+  .table td,
+  .table tbody th {
+    @apply border-b border-line px-2.5 py-[9px] align-top;
+  }
+  .table tbody tr:last-child td,
+  .table tbody tr:last-child th {
+    @apply border-b-0;
+  }
+  .table tbody tr:hover {
+    @apply bg-raised/40;
+  }
+}
+
+/* Overview waffle entrance (once per page load; the reduced-motion rule below shows the final state).
+   Only transform / opacity are animated. */
+@keyframes waffle-in {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes waffle-dot {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.waffle-fill {
+  animation: waffle-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.waffle-dot-in {
+  animation: waffle-dot 0.45s ease-out both;
 }
 
 /* Recharts: keep focus rings off SVG paths after clicks. */

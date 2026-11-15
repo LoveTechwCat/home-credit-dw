@@ -16,10 +16,14 @@ data/raw/*
 data/fixture/
 data/warehouse/*
 !data/warehouse/.gitkeep
+# Simulated dates are regenerated with `hcdw synth-dates`
+data/synthetic/*
+!data/synthetic/.gitkeep
 
 # Models (commit only metrics / feature lists, not binaries)
 models/*.pkl
 models/*.joblib
+models/*.parquet
 
 # LaTeX build output
 reports/latex/*.aux

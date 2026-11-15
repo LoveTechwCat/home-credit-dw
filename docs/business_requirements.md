@@ -77,12 +77,16 @@ Các câu hỏi nghiệp vụ hệ thống phải trả lời được:
 | Q4 | Một hồ sơ cụ thể có hạng điểm, hạng luật và hạng cuối là gì, nên xử lý ra sao và vì sao? |
 | Q5 | Nếu đổi chính sách (ngưỡng hạng, quyết định và hạn mức của từng hạng) thì tỷ lệ duyệt và tỷ lệ vỡ nợ của nhóm được duyệt thay đổi ra sao? |
 
+Q2 gồm cả câu hỏi "Rủi ro đang dồn vào phân khúc nào, và chính sách nào sẽ xử lý được?", với hai trường hợp:
+- **Rủi ro còn lại:** hồ sơ vỡ nợ nằm trong nhóm tự động duyệt. Đây là rủi ro cần giảm trước.
+- **Giảm duyệt thủ công:** giả định chuyên viên thẩm định luôn quyết đúng. Khi đó hồ sơ thẩm định thêm mà trả nợ tốt có thể chuyển sang tự động duyệt, hồ sơ thẩm định thêm mà vỡ nợ có thể chuyển sang tự động từ chối.
+
 ## 3. Người dùng và quyết định cần hỗ trợ
 
 | Người dùng | Cấp quyết định | Quyết định | Hệ thống hỗ trợ bằng |
 |---|---|---|---|
-| Trưởng phòng quản lý rủi ro tín dụng | Chiến lược, chiến thuật | Đặt ngưỡng hạng A–E, các luật và chính sách cho từng hạng (quyết định, hạn mức tối đa) | Dashboard danh mục, phân tích OLAP theo hạng và theo các chiều khách hàng, mô phỏng chính sách |
-| Chuyên viên thẩm định | Tác nghiệp | Duyệt, chuyển thẩm định thêm hay từ chối một hồ sơ; cho vay bao nhiêu | Trang chấm điểm hồ sơ (PD, hạng điểm, hạng luật, hạng cuối, đề xuất, hạn mức; giải thích bằng SHAP và danh sách luật bị vi phạm); mô phỏng what-if |
+| Trưởng phòng quản lý rủi ro tín dụng | Chiến lược, chiến thuật | Đặt ngưỡng hạng A–E, các luật và chính sách cho từng hạng (quyết định, hạn mức tối đa) | Dashboard danh mục, khám phá phân khúc (rủi ro còn lại, hồ sơ thẩm định thêm có thể tự động hoá), phân tích OLAP theo hạng và theo các chiều khách hàng, mô phỏng chính sách |
+| Chuyên viên thẩm định | Tác nghiệp | Duyệt, chuyển thẩm định thêm hay từ chối một hồ sơ; cho vay bao nhiêu | Trang Application details (PD, hạng điểm, hạng luật, hạng cuối, đề xuất, hạn mức; giải thích bằng SHAP và danh sách luật bị vi phạm) |
 | Ban điều hành | Giám sát | Theo dõi sức khoẻ danh mục và hiệu quả của chính sách | Các KPI tổng hợp trên dashboard |
 
 Thẩm định tín dụng là một quyết định **bán cấu trúc** (Turban và cộng sự, 2005):
@@ -122,7 +126,7 @@ Hồ sơ ─┬─► Điểm rủi ro (PD của mô hình) ──► Hạng đi
 | D | 13% – 20% | Rủi ro cao |
 | E | ≥ 20% | Rủi ro rất cao |
 
-Hạng A dành cho những hồ sơ rất tin tưởng nên có ngưỡng chặt nhất (dưới 1%). Hạng E dành cho những hồ sơ có rủi ro từ 20% trở lên. Khoảng 1%–20% ở giữa được chia đều cho ba hạng B, C, D, mỗi hạng rộng khoảng 6–7 điểm phần trăm. Các ngưỡng này là giá trị ban đầu và sẽ được chỉnh bằng mô phỏng chính sách (Q5, BR-09).
+Hạng A dành cho những hồ sơ rất tin tưởng nên có ngưỡng chặt nhất (dưới 1%). Hạng E dành cho những hồ sơ có rủi ro từ 20% trở lên. Khoảng 1%–20% ở giữa được chia đều cho ba hạng B, C, D, mỗi hạng rộng khoảng 6–7 điểm phần trăm. Ngưỡng khác có thể được thử bằng mô phỏng chính sách (Q5, BR-09).
 
 **Hạng điểm.** Mô hình ước lượng tỷ lệ rủi ro (PD) của riêng hồ sơ từ dữ liệu trong kho, gồm điểm EXT_SOURCE, khoản vay, thu nhập, lịch sử trả góp, hồ sơ cũ…, và không dùng giới tính. PD được quy về hạng theo bảng trên. PD phải được **hiệu chỉnh (calibration)** để khớp với tỷ lệ vỡ nợ thực tế, vì ngưỡng hạng là xác suất thật.
 
@@ -135,14 +139,14 @@ Luật gồm hai nhóm:
 - **Luật phân khúc:** dựa trên tỷ lệ vỡ nợ lịch sử của phân khúc khách hàng. Phân khúc được xác định bởi các thuộc tính ổn định, dễ giải thích, ví dụ lịch sử tín dụng, tuổi, nguồn thu nhập, vùng.
 - **Luật nghiệp vụ:** dựa trên hành vi tín dụng trong quá khứ, ví dụ bị từ chối nhiều lần hoặc thường xuyên trả trễ.
 
-Danh sách luật cụ thể, các thuộc tính phân khúc và điều kiện vi phạm sẽ được xác định ở phần thiết kế DSS.
+Danh sách luật cụ thể, các thuộc tính phân khúc và điều kiện vi phạm nằm ở phần thiết kế DSS ([dss_design.md](dss_design.md) §1–§2).
 
 **Hạng cuối.**
 - Hạng cuối là hạng **xấu hơn** trong hai hạng: hạng điểm và hạng luật.
 - Nếu hồ sơ không vi phạm luật nào, hạng cuối chính là hạng điểm.
 - Vì vậy hạng A chỉ đạt được khi điểm cá nhân rất tốt **và** hồ sơ không vi phạm luật nào.
 
-Cách gộp này thận trọng và dễ giải thích, ví dụ "hạng điểm B nhưng bị hạ xuống D vì vi phạm một luật hạng D". Vì cách gộp làm tỷ lệ duyệt giảm, các ngưỡng sẽ được chỉnh lại bằng mô phỏng chính sách.
+Cách gộp này thận trọng và dễ giải thích, ví dụ "hạng điểm B nhưng bị hạ xuống D vì vi phạm một luật hạng D". Vì cách gộp làm tỷ lệ duyệt giảm, các ngưỡng được hiệu chỉnh bằng mô phỏng chính sách.
 
 | Hạng điểm | Hạng luật | Hạng cuối | Lý do |
 |:---:|:---:|:---:|---|
@@ -153,7 +157,7 @@ Cách gộp này thận trọng và dễ giải thích, ví dụ "hạng điểm
 
 Các thuộc tính phân khúc đồng thời là các chiều phân tích OLAP, ví dụ để trả lời "nhóm nào có nhiều hồ sơ hạng D, E".
 
-### 4.2. Chính sách theo hạng (dự kiến)
+### 4.2. Chính sách theo hạng
 
 | Hạng | Quyết định | Hạn mức tối đa (tiền vay / thu nhập) |
 |:---:|---|---|
@@ -163,11 +167,11 @@ Các thuộc tính phân khúc đồng thời là các chiều phân tích OLAP,
 | D | Thẩm định thêm | Giảm dần |
 | E | Từ chối | – |
 
-Ngưỡng hạng, quyết định và hạn mức cụ thể của từng hạng sẽ được chốt bằng mô phỏng chính sách khi xây dựng DSS. Khi chốt, cần cân bằng giữa tỷ lệ duyệt, tỷ lệ vỡ nợ của nhóm được duyệt và khối lượng hồ sơ phải thẩm định thêm.
+Ngưỡng hạng, quyết định và hạn mức cụ thể của từng hạng được chọn bằng mô phỏng chính sách, cân bằng giữa tỷ lệ duyệt, tỷ lệ vỡ nợ của nhóm được duyệt và khối lượng hồ sơ phải thẩm định thêm. Chính sách hiện hành: [dss_design.md](dss_design.md) §3.
 
 ### 4.3. Giải thích kết quả
 
-**Người đọc** là chuyên viên thẩm định, tức người review hồ sơ trên trang chấm điểm. Phần giải thích là công cụ nội bộ, không phải văn bản gửi cho khách hàng. Mục đích là giúp chuyên viên:
+**Người đọc** là chuyên viên thẩm định, tức người review hồ sơ trên trang Application details. Phần giải thích là công cụ nội bộ, không phải văn bản gửi cho khách hàng. Mục đích là giúp chuyên viên:
 - hiểu vì sao hệ thống đề xuất như vậy;
 - biết cần kiểm tra lại điểm nào, nhất là với hồ sơ Thẩm định thêm;
 - tự ra quyết định cuối cùng.
@@ -204,12 +208,12 @@ Hạng điểm: C (PD 9,5%)
 
 Hạng luật: E
   Luật phân khúc: "Không có bureau | 25–34 | Người làm công | Vùng 3"
-    tỷ lệ rủi ro (tỷ lệ vỡ nợ lịch sử của nhóm) 22,8% → E
+    tỷ lệ rủi ro (tỷ lệ vỡ nợ lịch sử của nhóm) ≥ 20% → E
 
 Hạng cuối: E. Bị hạ từ C xuống E do luật phân khúc.
 ```
 
-**Giải thích ở cấp danh mục.** Ngoài từng hồ sơ, hệ thống tổng hợp SHAP trên toàn danh mục để cho thấy yếu tố nào ảnh hưởng nhiều nhất tới rủi ro nói chung. Trưởng phòng rủi ro dùng phần này để:
+**Giải thích ở cấp danh mục.** Ngoài từng hồ sơ, hệ thống tổng hợp SHAP trên các khoản vay lịch sử để cho thấy yếu tố nào ảnh hưởng nhiều nhất tới rủi ro nói chung. Trưởng phòng rủi ro dùng phần này để:
 - kiểm tra logic của mô hình có hợp lý về nghiệp vụ không;
 - xác nhận giới tính không ảnh hưởng tới kết quả.
 
@@ -227,31 +231,40 @@ Hạng cuối: E. Bị hạ từ C xuống E do luật phân khúc.
 | BR-06 | **Hạng cuối** là hạng xấu hơn trong hai hạng: hạng điểm và hạng luật. Nếu không vi phạm luật nào, hạng cuối là hạng điểm. Mỗi hạng gắn một chính sách: quyết định (Duyệt / Thẩm định thêm / Từ chối) và hạn mức tối đa (tiền vay / thu nhập) | Q4 |
 | BR-07 | Kiểm tra thang hạng: tỷ lệ vỡ nợ thực tế phải tăng đều từ A đến E, cho cả hạng điểm, hạng luật và hạng cuối | Q2 |
 | BR-08 | Giải thích mỗi đề xuất cho chuyên viên thẩm định (mục 4.3), gồm ba phần: (1) **SHAP** cho hạng điểm: 3–5 yếu tố làm tăng rủi ro và 3–5 yếu tố làm giảm rủi ro, ghi tên nghiệp vụ, tên cột và giá trị của khách; (2) danh sách **luật bị vi phạm**, kèm tỷ lệ vỡ nợ lịch sử của nhóm vi phạm và hạng của luật; (3) **nguồn quyết định hạng cuối** và mức bị hạ hạng | Q4 |
-| BR-09 | Mô phỏng what-if cho một hồ sơ (đổi thu nhập, số tiền vay, …). Mô phỏng chính sách cho cả danh mục: đổi ngưỡng hạng, luật hoặc chính sách của từng hạng thì tỷ lệ duyệt và tỷ lệ vỡ nợ của nhóm được duyệt thay đổi thế nào | Q5 |
-| BR-10 | Giao diện web gồm: dashboard tổng quan, phân tích theo hạng, OLAP và trang thẩm định hồ sơ | Q1–Q5 |
-| BR-11 | Giải thích cấp danh mục: tổng hợp SHAP trên toàn danh mục để xếp hạng mức ảnh hưởng của các yếu tố, phục vụ kiểm tra logic mô hình và kiểm tra công bằng | Q1, Q3 |
+| BR-09 | Mô phỏng chính sách (what-if) cho cả danh mục: đổi ngưỡng hạng, bật/tắt từng luật và đổi ngưỡng của luật có tham số (chỉ mô phỏng), hoặc quyết định và hạn mức tối đa của từng hạng, rồi so sánh trước/sau 5 KPI trên mọi hồ sơ đã chấm (tỷ lệ vỡ nợ chỉ trên khoản vay lịch sử): tỷ lệ vỡ nợ của nhóm được duyệt, tiền vay được duyệt (sau hạn mức), dư nợ chịu rủi ro của nhóm được duyệt (Σ hạn mức khuyến nghị × PD), tỷ lệ duyệt và tỷ lệ chuyển thẩm định | Q5 |
+| BR-10 | Giao diện web gồm các trang chính: Overview (dashboard tổng quan), Analytics (OLAP: roll-up, drill-down, slice, dice, pivot và các truy vấn SQL mẫu, BR-03), Explorer (lọc nhóm hồ sơ, so với mọi hồ sơ, xem danh sách hồ sơ), Application details (chi tiết hồ sơ), Playground (mô phỏng chính sách); cuối menu có trang tham khảo Grades & model (hạng và mô hình) và Architecture (sơ đồ thiết kế) | Q1–Q5 |
+| BR-11 | Giải thích cấp danh mục: tổng hợp SHAP trên các khoản vay lịch sử để xếp hạng mức ảnh hưởng của các yếu tố, phục vụ kiểm tra logic mô hình và kiểm tra công bằng | Q1, Q3 |
 
 ### 5.2. Yêu cầu phi chức năng
 
 - **Hiệu năng:** truy vấn dashboard và chấm điểm một hồ sơ trả kết quả trong vài giây. ETL toàn bộ dữ liệu chạy được trên một máy cá nhân.
 - **Tái lập:** dựng lại toàn bộ kho dữ liệu từ dữ liệu gốc bằng một lệnh. Dữ liệu mẫu nộp kèm chạy được với cùng pipeline.
-- **Giải thích được:** mọi đề xuất đều kèm lý do, gồm các yếu tố SHAP và các luật bị vi phạm. Kết quả what-if cũng được giải thích lại theo giá trị mới. Các ngưỡng và luật được ghi rõ trong tài liệu.
+- **Giải thích được:** mọi đề xuất đều kèm lý do, gồm các yếu tố SHAP và các luật bị vi phạm. Các ngưỡng và luật được ghi rõ trong tài liệu.
 - **Công bằng:** không dùng giới tính làm căn cứ ra quyết định tín dụng.
 
 ## 6. KPI
 
+Năm KPI chính, theo dõi trên dashboard:
+
 | Mã | KPI | Công thức và ý nghĩa |
 |---|---|---|
 | KPI-01 | Tỷ lệ vỡ nợ | Số hồ sơ `TARGET = 1` / số hồ sơ có nhãn. Tính cho cả danh mục, từng hạng và từng nhóm thuộc tính |
-| KPI-02 | Phân bố hạng | Số hồ sơ và tỷ trọng của mỗi hạng A–E trong danh mục (theo hạng cuối), kèm % hồ sơ bị hạng luật hạ hạng |
-| KPI-03 | Dư nợ cấp mới | Tổng `AMT_CREDIT`, theo hạng hoặc theo nhóm thuộc tính |
-| KPI-04 | Dư nợ chịu rủi ro | Σ `AMT_CREDIT` × PD. Ước lượng phần tiền vay có nguy cơ mất |
-| KPI-05 | Tỷ lệ rủi ro | Xác suất hồ sơ vỡ nợ: PD đã hiệu chỉnh của hồ sơ, hoặc tỷ lệ vỡ nợ lịch sử của nhóm vi phạm một luật. Là căn cứ xếp hạng A–E cho cả hạng điểm và hạng luật |
-| KPI-06 | Tỷ lệ duyệt | Số hồ sơ được đề xuất Duyệt / tổng số hồ sơ, theo chính sách đang mô phỏng |
-| KPI-07 | Tỷ lệ vỡ nợ của nhóm được duyệt | Tỷ lệ vỡ nợ thực tế của các hồ sơ được đề xuất Duyệt |
-| KPI-08 | Tỷ lệ chuyển thẩm định | Số hồ sơ Thẩm định thêm / tổng số hồ sơ. Đo khối lượng công việc của chuyên viên |
-| KPI-09 | Độ phân biệt của mô hình | AUC của mô hình PD trên tập kiểm định |
-| KPI-10 | Gánh nặng nợ | Trả góp / thu nhập (DTI) và tiền vay / thu nhập. Chỉ số tham khảo |
+| KPI-02 | Dư nợ cấp mới | Tổng `AMT_CREDIT`, theo hạng hoặc theo nhóm thuộc tính |
+| KPI-03 | Dư nợ chịu rủi ro | Σ `AMT_CREDIT` × PD. Ước lượng phần tiền vay có nguy cơ mất |
+| KPI-04 | Tỷ lệ duyệt | Số hồ sơ được đề xuất Duyệt / tổng số hồ sơ, theo chính sách hiện hành (trên Playground: chính sách mô phỏng) |
+| KPI-05 | Tỷ lệ chuyển thẩm định | Số hồ sơ Thẩm định thêm / tổng số hồ sơ. Đo khối lượng công việc của chuyên viên |
+
+Trên dashboard tổng quan, 5 KPI tính trên mọi hồ sơ đã chấm; tỷ lệ vỡ nợ chỉ tính trên khoản vay lịch sử (chỉ chúng có kết quả trả nợ). Trên trang mô phỏng chính sách (BR-09), KPI-01..03 tính trên **nhóm được duyệt**: tỷ lệ vỡ nợ của nhóm được duyệt, tiền vay được duyệt sau hạn mức, và Σ hạn mức khuyến nghị × PD của nhóm được duyệt.
+
+**Chỉ số phụ** (giữ định nghĩa, dùng để kiểm tra và giải thích, không phải KPI theo dõi chính):
+
+| Mã | Chỉ số | Công thức và ý nghĩa |
+|---|---|---|
+| SM-1 | Phân bố hạng | Số hồ sơ và tỷ trọng của mỗi hạng A–E trong danh mục (theo hạng cuối), kèm % hồ sơ bị hạng luật hạ hạng |
+| SM-2 | Tỷ lệ vỡ nợ của nhóm được duyệt | Tỷ lệ vỡ nợ thực tế của các hồ sơ được đề xuất Duyệt |
+| SM-3 | Tỷ lệ rủi ro | Xác suất hồ sơ vỡ nợ: PD đã hiệu chỉnh của hồ sơ, hoặc tỷ lệ vỡ nợ lịch sử của nhóm vi phạm một luật. Là căn cứ xếp hạng A–E cho cả hạng điểm và hạng luật |
+| SM-4 | Độ phân biệt của mô hình | AUC của mô hình PD trên dự đoán out-of-fold 5-fold của tập train |
+| SM-5 | Gánh nặng nợ | Trả góp / thu nhập (DTI) và tiền vay / thu nhập. Chỉ số tham khảo |
 
 ## 7. Phạm vi và giả định
 
@@ -266,10 +279,10 @@ Hạng cuối: E. Bị hạ từ C xuống E do luật phân khúc.
 
 **Giả định:**
 
-- **Ngày mốc:** mọi hồ sơ được coi là nộp vào ngày 17/05/2018. Các cột ngày và tháng tương đối được quy đổi theo mốc này để dựng chiều thời gian.
+- **Ngày tháng:** dữ liệu gốc không có ngày thật, chỉ có số ngày hoặc tháng tính lùi từ ngày nộp hồ sơ. Ngày nộp hồ sơ và ngày có kết quả là dữ liệu mô phỏng, lấy từ một bộ sinh ngày riêng; các ngày còn lại (ngày sinh, ngày mở khoản vay bureau…) quy đổi theo ngày nộp của từng hồ sơ. Chi tiết ở [star_schema.md](star_schema.md) §4.
 - **Ý nghĩa nhãn:** `TARGET = 1` (khách gặp khó khăn trả nợ, theo định nghĩa của Home Credit) được coi là vỡ nợ.
-- **Dữ liệu lịch sử và hồ sơ mới:** tập train là dữ liệu lịch sử đã có kết quả, dùng để tính tỷ lệ vỡ nợ và huấn luyện mô hình. Tập test đóng vai trò các hồ sơ mới cần thẩm định.
-- **Danh mục:** trong tài liệu này, danh mục là toàn bộ khoản vay lịch sử đã có kết quả trả nợ, tức các hồ sơ trong tập train.
-- **Tổn thất:** dữ liệu không có tỷ lệ thu hồi sau vỡ nợ. Vì vậy KPI-04 giả định mất toàn bộ khoản vay khi vỡ nợ, tức một ước lượng thận trọng.
+- **Khoản vay lịch sử và hồ sơ mới:** tập train là các **khoản vay lịch sử** đã có kết quả, dùng để tính tỷ lệ vỡ nợ và huấn luyện mô hình. Tập test đóng vai trò các **hồ sơ mới** cần thẩm định.
+- **Danh mục:** trong tài liệu này, danh mục là **mọi hồ sơ (đã chấm)**, gồm khoản vay lịch sử và hồ sơ mới. Số hồ sơ, tỷ lệ quyết định, tiền vay và dư nợ chịu rủi ro tính trên mọi hồ sơ; chỉ số cần kết quả trả nợ (tỷ lệ vỡ nợ, độ phân biệt của mô hình) chỉ tính trên khoản vay lịch sử. Trên giao diện, ba phạm vi này có nhãn All applications / Historical loans / New applications.
+- **Tổn thất:** dữ liệu không có tỷ lệ thu hồi sau vỡ nợ. Vì vậy KPI-03 (dư nợ chịu rủi ro) giả định mất toàn bộ khoản vay khi vỡ nợ, tức một ước lượng thận trọng.
 - **Tiền tệ:** số tiền giữ nguyên đơn vị trong dữ liệu gốc, không quy đổi.
 - Dữ liệu chỉ dùng cho mục đích học tập, theo điều khoản của nguồn công bố.

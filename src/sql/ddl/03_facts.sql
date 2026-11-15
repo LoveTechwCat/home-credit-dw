@@ -8,7 +8,8 @@ CREATE TABLE dw.fact_loan_application (
     credit_history_key    INTEGER NOT NULL REFERENCES dw.dim_credit_history (credit_history_key),
     contract_key          INTEGER NOT NULL REFERENCES dw.dim_contract (contract_key),
     region_key            INTEGER NOT NULL REFERENCES dw.dim_region (region_key),
-    application_date_key  INTEGER NOT NULL REFERENCES dw.dim_time (date_key),
+    application_date_key  INTEGER NOT NULL REFERENCES dw.dim_time (date_key),  -- snapshot date if no source date
+    outcome_date_key      INTEGER REFERENCES dw.dim_time (date_key),           -- NULL: result not known (yet)
     is_train              BOOLEAN NOT NULL,
     target                INTEGER CHECK (target IN (0, 1)),   -- 1 = client with payment difficulties
     amt_income            DOUBLE  NOT NULL CHECK (amt_income > 0),

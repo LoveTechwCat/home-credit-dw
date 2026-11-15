@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 1240 580" width="1240" height="580" role="img" aria-labelledby="dg4-t dg4-d">
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 1240 950" width="1240" height="950" role="img" aria-labelledby="dg4-t dg4-d">
 <title id="dg4-t">Data lineage</title>
-<desc id="dg4-d">Eight Kaggle files are loaded into typed staging tables, cleaned and aggregated to one row per key, then loaded into the dimensions and facts of the star schema.</desc>
+<desc id="dg4-d">Eight Kaggle files and one simulated source, application_dates.csv, are loaded into typed staging tables, cleaned and aggregated to one row per key, then loaded into the dimensions and facts of the star schema. staging.application_calendar gives every application its application and outcome date and anchors the bureau dates, which are offsets from the application date. The decision-support tables come from configs/settings.yaml (dim_risk_grade, dim_rule) and from hcdw score, which reads the mart views and the trained model and writes fact_risk_assessment and fact_rule_hit.</desc>
 <style>
 .dg{--canvas:#fcfcfb;--bg:#ffffff;--line:#d6d5ce;--ink:#171716;--ink2:#52514e;--ink3:#8a8882;--acc:#2a78d6;--acc-soft:#eaf2fd;--acc-ink:#1c5cab;--org:#eb6834;--org-soft:#fdeee6;--teal:#1baf7a;--teal-soft:#e3f5ee;--ext:#efeeea;font-family:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
 @media (prefers-color-scheme:dark){.dg{--canvas:#1a1a19;--bg:#232321;--line:#3b3b37;--ink:#f0efec;--ink2:#c3c2b7;--ink3:#97958e;--acc:#3987e5;--acc-soft:#15263b;--acc-ink:#8dbaf0;--org:#d95926;--org-soft:#3a2117;--teal:#199e70;--teal-soft:#11302a;--ext:#2c2c2a}}
@@ -17,108 +17,147 @@
 .dg .fct{fill:var(--org-soft);stroke:var(--org);stroke-width:1.4}
 .dg .e{fill:none;stroke:var(--ink3);stroke-width:1.3;opacity:0.75}
 .dg .eb{fill:none;stroke:var(--acc);stroke-width:1.3;opacity:0.7}
+.dg .sim{stroke-dasharray:5 4}
 .dg .ah{fill:var(--ink3)}
 .dg .col{fill:none;stroke:var(--line);stroke-width:1;stroke-dasharray:3 5}
 .dg .lg{font-size:12.5px;fill:var(--ink2)}
+.dg .note{font-size:11.5px;fill:var(--ink3)}
 </style>
 <defs>
   <marker id="dg4-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker>
   <marker id="dg4-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--acc)"/></marker>
 </defs>
-<rect class="canvas" width="1240" height="580"/>
+<rect class="canvas" width="1240" height="950"/>
 
 <!-- Column headers -->
-<text x="20" y="30" class="h">Kaggle files</text><text x="20" y="48" class="hs">8 CSV · 58.5M rows</text>
-<text x="330" y="30" class="h">staging</text><text x="330" y="48" class="hs">typed copies, declared columns only</text>
-<text x="640" y="30" class="h">staging · transformed</text><text x="640" y="48" class="hs">cleaned, 1 row per key</text>
+<text x="20" y="30" class="h">Source files</text><text x="20" y="48" class="hs">8 Kaggle CSV + 1 simulated · 58.8M rows</text>
+<text x="310" y="30" class="h">staging</text><text x="310" y="48" class="hs">typed copies, declared columns only</text>
+<text x="600" y="30" class="h">staging · transformed</text><text x="600" y="48" class="hs">cleaned, 1 row per key</text>
 <text x="950" y="30" class="h">dw · star schema</text><text x="950" y="48" class="hs">2 facts · 6 dimensions</text>
 
 <!-- ===== Edges (behind nodes) ===== -->
 <!-- files -> staging -->
-<path class="e" d="M280,85 C305,85 305,105 328,105" marker-end="url(#dg4-a)"/>
-<path class="e" d="M280,125 C305,125 305,105 328,105" marker-end="url(#dg4-a)"/>
-<path class="e" d="M280,165 H328" marker-end="url(#dg4-a)"/>
-<path class="e" d="M280,205 H328" marker-end="url(#dg4-a)"/>
-<path class="e" d="M280,245 H328" marker-end="url(#dg4-a)"/>
-<path class="e" d="M280,285 H328" marker-end="url(#dg4-a)"/>
-<path class="e" d="M280,325 H328" marker-end="url(#dg4-a)"/>
-<path class="e" d="M280,365 H328" marker-end="url(#dg4-a)"/>
+<path class="e" d="M270,85 C290,85 290,105 308,105" marker-end="url(#dg4-a)"/>
+<path class="e" d="M270,125 C290,125 290,105 308,105" marker-end="url(#dg4-a)"/>
+<path class="e" d="M270,165 H308" marker-end="url(#dg4-a)"/>
+<path class="e" d="M270,205 H308" marker-end="url(#dg4-a)"/>
+<path class="e" d="M270,245 H308" marker-end="url(#dg4-a)"/>
+<path class="e" d="M270,285 H308" marker-end="url(#dg4-a)"/>
+<path class="e" d="M270,325 H308" marker-end="url(#dg4-a)"/>
+<path class="e" d="M270,365 H308" marker-end="url(#dg4-a)"/>
+<path class="e sim" d="M270,501 H308" marker-end="url(#dg4-a)"/>
 <!-- staging -> transformed -->
-<path class="e" d="M590,105 H638" marker-end="url(#dg4-a)"/>
-<path class="e" d="M590,165 H638" marker-end="url(#dg4-a)"/>
-<path class="e" d="M590,205 H638" marker-end="url(#dg4-a)"/>
-<path class="e" d="M590,245 H638" marker-end="url(#dg4-a)"/>
-<path class="e" d="M590,285 H638" marker-end="url(#dg4-a)"/>
-<path class="e" d="M590,325 H638" marker-end="url(#dg4-a)"/>
-<path class="e" d="M590,365 H638" marker-end="url(#dg4-a)"/>
-<path class="e" d="M590,105 C615,105 612,445 638,445" marker-end="url(#dg4-a)"/>
+<path class="e" d="M550,105 H598" marker-end="url(#dg4-a)"/>
+<path class="e" d="M550,165 H598" marker-end="url(#dg4-a)"/>
+<path class="e" d="M550,205 H598" marker-end="url(#dg4-a)"/>
+<path class="e" d="M550,245 H598" marker-end="url(#dg4-a)"/>
+<path class="e" d="M550,285 H598" marker-end="url(#dg4-a)"/>
+<path class="e" d="M550,325 H598" marker-end="url(#dg4-a)"/>
+<path class="e" d="M550,365 H598" marker-end="url(#dg4-a)"/>
+<path class="e" d="M550,105 C592,105 588,445 598,445" marker-end="url(#dg4-a)"/>
+<path class="e sim" d="M550,501 H598" marker-end="url(#dg4-a)"/>
 <!-- agg_bureau_balance -> agg_bureau (rollup inside the column) -->
-<path class="e" d="M900,205 C918,205 918,165 902,165" marker-end="url(#dg4-a)"/>
+<path class="e" d="M860,205 C874,205 874,165 862,165" marker-end="url(#dg4-a)"/>
 <!-- aggregates bus -> agg_credit_profile -->
-<path class="e" d="M900,165 H930 M900,245 H930 M900,285 H930 M900,325 H930 M900,365 H930"/>
-<path class="e" d="M930,165 V445 H902" marker-end="url(#dg4-a)"/>
+<path class="e" d="M860,165 H880 M860,245 H880 M860,285 H880 M860,325 H880 M860,365 H880"/>
+<path class="e" d="M880,165 V445 H862" marker-end="url(#dg4-a)"/>
 <!-- transformed -> dw -->
-<path class="eb" d="M900,105 C925,105 925,85 948,85" marker-end="url(#dg4-b)"/>
-<path class="eb" d="M900,105 C925,105 925,125 948,125" marker-end="url(#dg4-b)"/>
-<path class="eb" d="M900,105 C925,105 925,165 948,165" marker-end="url(#dg4-b)"/>
-<path class="eb" d="M900,105 C935,105 925,225 948,225" marker-end="url(#dg4-b)"/>
-<path class="eb" d="M900,445 C940,445 930,225 948,225" marker-end="url(#dg4-b)"/>
-<path class="eb" d="M900,445 H948" marker-end="url(#dg4-b)"/>
-<path class="eb" d="M900,205 C912,205 910,214 910,226 V472"/>
-<!-- staging.bureau goes straight to the star schema (dates, junk dimension, bureau fact) -->
+<path class="eb" d="M860,105 C900,105 905,85 948,85" marker-end="url(#dg4-b)"/>
+<path class="eb" d="M860,105 C900,105 905,125 948,125" marker-end="url(#dg4-b)"/>
+<path class="eb" d="M860,105 C900,105 905,165 948,165" marker-end="url(#dg4-b)"/>
+<path class="eb" d="M860,105 C910,105 905,225 948,225" marker-end="url(#dg4-b)"/>
+<path class="eb" d="M860,445 C915,445 905,225 948,225" marker-end="url(#dg4-b)"/>
+<path class="eb" d="M860,445 H948" marker-end="url(#dg4-b)"/>
+<path class="eb" d="M860,205 C870,205 868,214 868,226 V472"/>
 <!-- staging.bureau bypasses the transformed column: down the gap, under it, then up into the star schema -->
-<path class="eb" d="M590,165 H620 a6,6 0 0 1 6,6 V466 a6,6 0 0 0 6,6 H934 a6,6 0 0 0 6,-6 V311 a6,6 0 0 1 6,-6 H948" marker-end="url(#dg4-b)"/>
-<path class="eb" d="M940,351 a6,6 0 0 1 6,-6 H948" marker-end="url(#dg4-b)"/>
-<path class="eb" d="M940,391 a6,6 0 0 1 6,-6 H948" marker-end="url(#dg4-b)"/>
-<text x="780" y="490" font-size="11.5" fill="var(--ink3)" text-anchor="middle">staging.bureau → dates, junk dimension, bureau fact (agg_bureau_balance adds DPD status)</text>
+<path class="eb" d="M550,165 H564 a6,6 0 0 1 6,6 V466 a6,6 0 0 0 6,6 H932 a6,6 0 0 0 6,-6 V311 a6,6 0 0 1 6,-6 H948" marker-end="url(#dg4-b)"/>
+<path class="eb" d="M938,351 a6,6 0 0 1 6,-6 H948" marker-end="url(#dg4-b)"/>
+<path class="eb" d="M938,391 a6,6 0 0 1 6,-6 H948" marker-end="url(#dg4-b)"/>
+<!-- application_calendar -> dim_time and both facts (application/outcome keys, bureau date anchor) -->
+<path class="eb sim" d="M860,501 H914 a6,6 0 0 0 6,-6 V231 a6,6 0 0 1 6,-6 H948" marker-end="url(#dg4-b)"/>
+<path class="eb sim" d="M920,311 a6,6 0 0 1 6,-6 H948" marker-end="url(#dg4-b)"/>
+<path class="eb sim" d="M920,391 a6,6 0 0 1 6,-6 H948" marker-end="url(#dg4-b)"/>
+<text x="620" y="548" class="note" text-anchor="middle">staging.bureau → dates, junk dimension and bureau fact; agg_bureau_balance adds the DPD status</text>
+<text x="620" y="564" class="note" text-anchor="middle">application_calendar places each application in time; bureau dates are offsets from its application date</text>
 
 <!-- ===== Nodes ===== -->
 <!-- files x=20 -->
-<rect class="file" x="20" y="70" width="260" height="30" rx="8"/><text x="34" y="90" class="n">application_train.csv</text>
-<rect class="file" x="20" y="110" width="260" height="30" rx="8"/><text x="34" y="130" class="n">application_test.csv</text>
-<rect class="file" x="20" y="150" width="260" height="30" rx="8"/><text x="34" y="170" class="n">bureau.csv</text>
-<rect class="file" x="20" y="190" width="260" height="30" rx="8"/><text x="34" y="210" class="n">bureau_balance.csv</text>
-<rect class="file" x="20" y="230" width="260" height="30" rx="8"/><text x="34" y="250" class="n">previous_application.csv</text>
-<rect class="file" x="20" y="270" width="260" height="30" rx="8"/><text x="34" y="290" class="n">installments_payments.csv</text>
-<rect class="file" x="20" y="310" width="260" height="30" rx="8"/><text x="34" y="330" class="n">POS_CASH_balance.csv</text>
-<rect class="file" x="20" y="350" width="260" height="30" rx="8"/><text x="34" y="370" class="n">credit_card_balance.csv</text>
+<rect class="file" x="20" y="70" width="250" height="30" rx="8"/><text x="34" y="90" class="n">application_train.csv</text>
+<rect class="file" x="20" y="110" width="250" height="30" rx="8"/><text x="34" y="130" class="n">application_test.csv</text>
+<rect class="file" x="20" y="150" width="250" height="30" rx="8"/><text x="34" y="170" class="n">bureau.csv</text>
+<rect class="file" x="20" y="190" width="250" height="30" rx="8"/><text x="34" y="210" class="n">bureau_balance.csv</text>
+<rect class="file" x="20" y="230" width="250" height="30" rx="8"/><text x="34" y="250" class="n">previous_application.csv</text>
+<rect class="file" x="20" y="270" width="250" height="30" rx="8"/><text x="34" y="290" class="n">installments_payments.csv</text>
+<rect class="file" x="20" y="310" width="250" height="30" rx="8"/><text x="34" y="330" class="n">POS_CASH_balance.csv</text>
+<rect class="file" x="20" y="350" width="250" height="30" rx="8"/><text x="34" y="370" class="n">credit_card_balance.csv</text>
+<rect class="file sim" x="20" y="486" width="250" height="30" rx="8"/><text x="34" y="506" class="n">application_dates.csv</text>
 
-<!-- staging x=330 -->
-<rect class="stg" x="330" y="90" width="260" height="30" rx="8"/><text x="344" y="110" class="n">application</text><text x="576" y="110" class="hs" text-anchor="end">train + test</text>
-<rect class="stg" x="330" y="150" width="260" height="30" rx="8"/><text x="344" y="170" class="n">bureau</text>
-<rect class="stg" x="330" y="190" width="260" height="30" rx="8"/><text x="344" y="210" class="n">bureau_balance</text>
-<rect class="stg" x="330" y="230" width="260" height="30" rx="8"/><text x="344" y="250" class="n">previous_application</text>
-<rect class="stg" x="330" y="270" width="260" height="30" rx="8"/><text x="344" y="290" class="n">installments_payments</text>
-<rect class="stg" x="330" y="310" width="260" height="30" rx="8"/><text x="344" y="330" class="n">pos_cash_balance</text>
-<rect class="stg" x="330" y="350" width="260" height="30" rx="8"/><text x="344" y="370" class="n">credit_card_balance</text>
+<!-- staging x=310 -->
+<rect class="stg" x="310" y="90" width="240" height="30" rx="8"/><text x="324" y="110" class="n">application</text><text x="536" y="110" class="hs" text-anchor="end">train + test</text>
+<rect class="stg" x="310" y="150" width="240" height="30" rx="8"/><text x="324" y="170" class="n">bureau</text>
+<rect class="stg" x="310" y="190" width="240" height="30" rx="8"/><text x="324" y="210" class="n">bureau_balance</text>
+<rect class="stg" x="310" y="230" width="240" height="30" rx="8"/><text x="324" y="250" class="n">previous_application</text>
+<rect class="stg" x="310" y="270" width="240" height="30" rx="8"/><text x="324" y="290" class="n">installments_payments</text>
+<rect class="stg" x="310" y="310" width="240" height="30" rx="8"/><text x="324" y="330" class="n">pos_cash_balance</text>
+<rect class="stg" x="310" y="350" width="240" height="30" rx="8"/><text x="324" y="370" class="n">credit_card_balance</text>
+<rect class="stg" x="310" y="486" width="240" height="30" rx="8"/><text x="324" y="506" class="n">application_dates</text>
 
-<!-- transformed x=640 -->
-<rect class="agg" x="640" y="90" width="260" height="30" rx="8"/><text x="654" y="110" class="n">application_clean</text><text x="886" y="110" class="hs" text-anchor="end">clean.py</text>
-<rect class="agg" x="640" y="150" width="260" height="30" rx="8"/><text x="654" y="170" class="n">agg_bureau</text>
-<rect class="agg" x="640" y="190" width="260" height="30" rx="8"/><text x="654" y="210" class="n">agg_bureau_balance</text>
-<rect class="agg" x="640" y="230" width="260" height="30" rx="8"/><text x="654" y="250" class="n">agg_previous</text>
-<rect class="agg" x="640" y="270" width="260" height="30" rx="8"/><text x="654" y="290" class="n">agg_installments</text>
-<rect class="agg" x="640" y="310" width="260" height="30" rx="8"/><text x="654" y="330" class="n">agg_pos</text>
-<rect class="agg" x="640" y="350" width="260" height="30" rx="8"/><text x="654" y="370" class="n">agg_cc</text>
-<rect class="agg" x="640" y="430" width="260" height="30" rx="8" stroke-width="2"/><text x="654" y="450" class="n" font-weight="700">agg_credit_profile</text><text x="886" y="450" class="hs" text-anchor="end">1 per applicant</text>
+<!-- transformed x=600 -->
+<rect class="agg" x="600" y="90" width="260" height="30" rx="8"/><text x="614" y="110" class="n">application_clean</text><text x="846" y="110" class="hs" text-anchor="end">clean.py</text>
+<rect class="agg" x="600" y="150" width="260" height="30" rx="8"/><text x="614" y="170" class="n">agg_bureau</text>
+<rect class="agg" x="600" y="190" width="260" height="30" rx="8"/><text x="614" y="210" class="n">agg_bureau_balance</text>
+<rect class="agg" x="600" y="230" width="260" height="30" rx="8"/><text x="614" y="250" class="n">agg_previous</text>
+<rect class="agg" x="600" y="270" width="260" height="30" rx="8"/><text x="614" y="290" class="n">agg_installments</text>
+<rect class="agg" x="600" y="310" width="260" height="30" rx="8"/><text x="614" y="330" class="n">agg_pos</text>
+<rect class="agg" x="600" y="350" width="260" height="30" rx="8"/><text x="614" y="370" class="n">agg_cc</text>
+<rect class="agg" x="600" y="430" width="260" height="30" rx="8" stroke-width="2"/><text x="614" y="450" class="n" font-weight="700">agg_credit_profile</text><text x="846" y="450" class="hs" text-anchor="end">per applicant</text>
+<rect class="agg" x="600" y="486" width="260" height="30" rx="8"/><text x="614" y="506" class="n">application_calendar</text><text x="846" y="506" class="hs" text-anchor="end">offsets</text>
 
 <!-- star schema x=950 -->
 <rect class="dim" x="950" y="70" width="270" height="30" rx="8"/><text x="964" y="90" class="n">dim_customer</text>
 <rect class="dim" x="950" y="110" width="270" height="30" rx="8"/><text x="964" y="130" class="n">dim_contract</text>
 <rect class="dim" x="950" y="150" width="270" height="30" rx="8"/><text x="964" y="170" class="n">dim_region</text>
 <rect class="fct" x="950" y="210" width="270" height="30" rx="8"/><text x="964" y="230" class="n" font-weight="700">fact_loan_application</text>
-<rect class="dim" x="950" y="290" width="270" height="30" rx="8"/><text x="964" y="310" class="n">dim_time</text><text x="1206" y="310" class="hs" text-anchor="end">calendar + bureau dates</text>
+<rect class="dim" x="950" y="290" width="270" height="30" rx="8"/><text x="964" y="310" class="n">dim_time</text><text x="1206" y="310" class="hs" text-anchor="end">app/outcome + bureau dates</text>
 <rect class="dim" x="950" y="330" width="270" height="30" rx="8"/><text x="964" y="350" class="n">dim_bureau_category</text>
 <rect class="fct" x="950" y="370" width="270" height="30" rx="8"/><text x="964" y="390" class="n" font-weight="700">fact_bureau_credit</text>
 <rect class="dim" x="950" y="430" width="270" height="30" rx="8"/><text x="964" y="450" class="n">dim_credit_history</text>
 
+<!-- ===== Decision-support tables ===== -->
+<path class="col" d="M20,588 H1220"/>
+<text x="20" y="616" class="h">Config</text><text x="20" y="634" class="hs">grades, policy, rules</text>
+<text x="600" y="616" class="h">mart · model</text><text x="600" y="634" class="hs">views over dw · hcdw train</text>
+<text x="950" y="616" class="h">dw · DSS tables</text><text x="950" y="634" class="hs">2 facts · 2 dimensions</text>
+
+<!-- settings.yaml -> grade and rule dimensions (loaded by the ETL) -->
+<path class="eb" d="M270,671 H912 C930,671 928,661 948,661" marker-end="url(#dg4-b)"/>
+<path class="eb" d="M912,671 C930,671 928,701 948,701" marker-end="url(#dg4-b)"/>
+<!-- the model is trained on the application mart -->
+<path class="e" d="M600,751 C578,751 578,801 598,801" marker-end="url(#dg4-a)"/>
+<text x="572" y="780" class="hs" text-anchor="end">hcdw train</text>
+<!-- hcdw score: mart + model -> DSS facts -->
+<path class="eb" d="M860,751 H900 M860,801 H900 M860,851 H900 M900,751 V851"/>
+<path class="eb" d="M900,771 H948" marker-end="url(#dg4-b)"/>
+<path class="eb" d="M900,821 H948" marker-end="url(#dg4-b)"/>
+<text x="900" y="884" class="hs" text-anchor="middle">hcdw score</text>
+
+<rect class="file" x="20" y="656" width="250" height="30" rx="8"/><text x="34" y="676" class="n">configs/settings.yaml</text>
+<rect class="stg" x="600" y="736" width="260" height="30" rx="8"/><text x="614" y="756" class="n">mart.v_application_wide</text>
+<rect class="file" x="600" y="786" width="260" height="30" rx="8"/><text x="614" y="806" class="n">models/model.pkl</text><text x="846" y="806" class="hs" text-anchor="end">LightGBM</text>
+<rect class="stg" x="600" y="836" width="260" height="30" rx="8"/><text x="614" y="856" class="n">mart.segment_risk · rule_stats</text>
+<rect class="dim" x="950" y="646" width="270" height="30" rx="8"/><text x="964" y="666" class="n">dim_risk_grade</text>
+<rect class="dim" x="950" y="686" width="270" height="30" rx="8"/><text x="964" y="706" class="n">dim_rule</text>
+<rect class="fct" x="950" y="756" width="270" height="30" rx="8"/><text x="964" y="776" class="n" font-weight="700">fact_risk_assessment</text>
+<rect class="fct" x="950" y="806" width="270" height="30" rx="8"/><text x="964" y="826" class="n" font-weight="700">fact_rule_hit</text>
+
 <!-- Legend -->
-<g transform="translate(20,530)">
-  <rect class="file" x="0" y="0" width="18" height="13" rx="3"/><text x="26" y="11" class="lg">Kaggle file</text>
-  <rect class="stg" x="130" y="0" width="18" height="13" rx="3"/><text x="156" y="11" class="lg">staging table</text>
-  <rect class="agg" x="270" y="0" width="18" height="13" rx="3"/><text x="296" y="11" class="lg">cleaned / aggregated</text>
-  <rect class="dim" x="450" y="0" width="18" height="13" rx="3"/><text x="476" y="11" class="lg">dimension</text>
-  <rect class="fct" x="570" y="0" width="18" height="13" rx="3"/><text x="596" y="11" class="lg">fact</text>
-  <path class="eb" d="M660,7 H700" marker-end="url(#dg4-b)"/><text x="710" y="11" class="lg">loads into the star schema</text>
+<g transform="translate(20,912)">
+  <rect class="file" x="0" y="0" width="18" height="13" rx="3"/><text x="26" y="11" class="lg">source / config file</text>
+  <rect class="stg" x="190" y="0" width="18" height="13" rx="3"/><text x="216" y="11" class="lg">staging table / mart view</text>
+  <rect class="agg" x="410" y="0" width="18" height="13" rx="3"/><text x="436" y="11" class="lg">cleaned / aggregated</text>
+  <rect class="dim" x="595" y="0" width="18" height="13" rx="3"/><text x="621" y="11" class="lg">dimension</text>
+  <rect class="fct" x="705" y="0" width="18" height="13" rx="3"/><text x="731" y="11" class="lg">fact</text>
+  <path class="eb" d="M780,7 H820" marker-end="url(#dg4-b)"/><text x="830" y="11" class="lg">loads into dw</text>
+  <path class="eb sim" d="M945,7 H985" marker-end="url(#dg4-b)"/><text x="995" y="11" class="lg">simulated dates</text>
 </g>
 </svg>

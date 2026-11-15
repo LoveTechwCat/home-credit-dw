@@ -1,0 +1,25 @@
+flowchart TD
+    APP["Hồ sơ"]
+    PDM["Mô hình PD: LightGBM + hiệu chỉnh"]
+    RUL["Luật: BR-SEG-01, BR-RF-01..05"]
+    SCG["Hạng điểm: PD sang A-E"]
+    RLG["Hạng luật: luật xấu nhất"]
+    FIN["Hạng cuối A-E: hạng xấu hơn"]
+
+    subgraph POLICY["Chính sách theo hạng cuối, hạn mức 8x-0x thu nhập"]
+        direction TB
+        P_APR["A, B: Duyệt"]
+        P_REV["C, D: Thẩm định thêm"]
+        P_REJ["E: Từ chối"]
+    end
+
+    EXPL["Giải thích: SHAP, luật vi phạm"]
+
+    APP --> PDM
+    APP --> RUL
+    PDM --> SCG
+    RUL --> RLG
+    SCG --> FIN
+    RLG --> FIN
+    FIN --> POLICY
+    FIN ---> EXPL

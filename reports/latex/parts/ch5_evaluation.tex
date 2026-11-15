@@ -1,5 +1,112 @@
 \part{Đánh giá và hướng phát triển}
+\label{part:ch5}
+
+Chương này đối chiếu kết quả với mục tiêu của đề bài và các yêu cầu nghiệp vụ, nêu các hạn chế đã biết và đề xuất hướng khắc phục.
+
+%======================================================================
 \section{Kết quả đạt được}
+\label{sec:eval-results}
+
+Năm mục tiêu đầu của đề bài đều có sản phẩm tương ứng trong báo cáo và mã nguồn:
+\begin{itemize}[topsep=0pt, itemsep=1pt]
+	\item \textbf{Phân tích yêu cầu:} Chương~\ref{part:ch1} phát biểu bài toán, người dùng, các câu hỏi Q1--Q5, yêu cầu BR-01..11 và các KPI.
+	\item \textbf{Thiết kế kho dữ liệu:} Chương~\ref{part:ch2} trình bày mô hình đa chiều gồm $4$ bảng sự kiện và $8$ bảng chiều, cùng quy trình ETL có cổng chất lượng.
+	\item \textbf{Hiện thực hệ thống:} Chương~\ref{part:ch3} trình bày kho DuckDB, API FastAPI và giao diện web bảy trang, có các phép OLAP trên trang \textbf{Analytics}.
+	\item \textbf{Phát triển DSS:} Chương~\ref{part:ch4} trình bày thang A--E, mô hình PD, luật, chính sách theo hạng, phần giải thích và mô phỏng chính sách.
+	\item \textbf{Đánh giá:} Chương này đối chiếu kết quả, nêu hạn chế và hướng phát triển.
+\end{itemize}
+
+Bảng~\ref{tab:lo-coverage} đối chiếu các chuẩn đầu ra của học phần với nội dung báo cáo.
+
+\begin{table}[H]
+	\centering
+	\caption{Đối chiếu chuẩn đầu ra học phần}
+	\label{tab:lo-coverage}
+	\footnotesize
+	\begin{tabular}{l p{0.29\textwidth} p{0.48\textwidth}}
+		\toprule
+		\textbf{Chuẩn đầu ra} & \textbf{Nội dung} & \textbf{Thể hiện trong báo cáo} \\
+		\midrule
+		L.O.1.1 & Khái niệm kho dữ liệu và DSS & Định nghĩa kho dữ liệu (mục~\ref{sec:problem}); vai trò đề xuất của DSS (mục~\ref{sec:dss-problem}) \\
+		L.O.1.2 & Vai trò của kho dữ liệu trong DSS & Mô hình học từ kho, kết quả chấm điểm ghi ngược vào kho (mục~\ref{sec:dss-problem}) \\
+		L.O.1.3 & Ví dụ thực tế & Thẩm định tín dụng tiêu dùng trên dữ liệu Home Credit (mục~\ref{sec:ch1-context}) \\
+		L.O.2.1 & Quy trình và nguyên lý thiết kế kho & Mô hình đa chiều và quy trình ETL (mục~\ref{sec:star-schema}, mục~\ref{sec:etl}) \\
+		L.O.2.2 & Vấn đề trong thiết kế kho & Các quyết định thiết kế (Bảng~\ref{tab:design-decisions}); trục thời gian mô phỏng (mục~\ref{sec:time}) \\
+		L.O.2.3 & Thiết kế và hiện thực kho & Chương~\ref{part:ch2} và Chương~\ref{part:ch3} \\
+		L.O.3.1 & Khái niệm và đặc tính của MSS, DSS & Quyết định bán cấu trúc (mục~\ref{sec:semi-structured}) \\
+		L.O.3.2 & Các giai đoạn ra quyết định & Mô hình Simon (Bảng~\ref{tab:simon-phases}, mục~\ref{sec:dss-problem}) \\
+		L.O.3.3 & Mô hình hóa trong DSS & Mô hình PD, luật và mô phỏng chính sách (mục~\ref{sec:dss-model}, \ref{sec:dss-rules}, \ref{sec:dss-simulation}) \\
+		L.O.4.1 & Nguyên tắc phân tích, thiết kế DSS & Yêu cầu BR-04 đến BR-09 (mục~\ref{sec:requirements}) và thiết kế ở Chương~\ref{part:ch4} \\
+		L.O.4.2 & Phân tích, thiết kế, hiện thực một DSS đơn giản & Toàn bộ Chương~\ref{part:ch4} \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+Bảng~\ref{tab:br-coverage} đối chiếu từng yêu cầu chức năng với phần hiện thực.
+
+\begin{table}[H]
+	\centering
+	\caption{Mức đáp ứng các yêu cầu chức năng}
+	\label{tab:br-coverage}
+	\footnotesize
+	\begin{tabular}{l p{0.3\textwidth} p{0.52\textwidth}}
+		\toprule
+		\textbf{Mã} & \textbf{Yêu cầu} & \textbf{Hiện thực và bằng chứng} \\
+		\midrule
+		BR-01 & Tích hợp $8$ bảng nguồn & ETL nạp $8$ tập tin Kaggle và nguồn ngày mô phỏng; lịch sử tín dụng gộp về cấp khách hàng (Chương~\ref{part:ch2}) \\
+		BR-02 & Làm sạch và kiểm tra chất lượng & Quy tắc làm sạch R1--R10; $50/50$ kiểm tra chất lượng đạt, ghi vào \texttt{dq\_report.json} sau mỗi lần ETL \\
+		BR-03 & Phân tích đa chiều, OLAP & Trang \textbf{Analytics}: cắt lát, cắt khối, cuộn lên, khoan xuống, xoay và $6$ truy vấn SQL mẫu (Chương~\ref{part:ch3}) \\
+		BR-04 & Hạng điểm từ PD đã hiệu chỉnh & LightGBM OOF và hiệu chỉnh đơn điệu; AUC $0{,}7586$ (mục~\ref{sec:dss-model}) \\
+		BR-05 & Hạng luật & BR-SEG-01 và BR-RF-01..05, hạng theo tỷ lệ vỡ nợ của nhóm vi phạm (mục~\ref{sec:dss-rules}) \\
+		BR-06 & Hạng cuối và chính sách & Hạng xấu hơn trong hai hạng; quyết định và hạn mức theo hạng (mục~\ref{sec:dss-policy}) \\
+		BR-07 & Tỷ lệ vỡ nợ tăng dần từ A tới E & Đạt cho hạng điểm, hạng luật và hạng cuối (Bảng~\ref{tab:grade-distribution}) \\
+		BR-08 & Giải thích từng đề xuất & SHAP, luật vi phạm và câu tóm tắt hạ hạng trên \textbf{Application details} (mục~\ref{sec:dss-explain}) \\
+		BR-09 & Mô phỏng chính sách & Trang \textbf{Playground}: ngưỡng, quyết định, hạn mức, bật/tắt và ngưỡng luật; năm KPI hiện hành so với mô phỏng (mục~\ref{sec:dss-simulation}) \\
+		BR-10 & Giao diện web & Bảy trang: \textbf{Overview}, \textbf{Analytics}, \textbf{Explorer}, \textbf{Application details}, \textbf{Playground}, \textbf{Grades \& model}, \textbf{Architecture} \\
+		BR-11 & Giải thích cấp danh mục & Trung bình $|\text{SHAP}|$ trên khoản vay lịch sử, khối \textbf{What drives the score} trên \textbf{Grades \& model} \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+Các yêu cầu phi chức năng cũng được đáp ứng:
+\begin{itemize}[topsep=0pt, itemsep=1pt]
+	\item \textbf{Hiệu năng:} \texttt{hcdw etl} nạp $2{,}7$ GB CSV trong khoảng $15$ giây; \texttt{hcdw etl -{}-score} chạy cả ETL, huấn luyện và chấm điểm trong khoảng $1{,}5$ phút. Chấm một hồ sơ qua API mất $17$ ms, một lần mô phỏng chính sách mất khoảng $37$ ms.
+	\item \textbf{Tái lập:} Một lệnh dựng lại toàn bộ kho từ dữ liệu gốc. Kho đang dùng chỉ được thay khi mọi kiểm tra chất lượng đạt.
+	\item \textbf{Giải thích được:} Mọi đề xuất kèm yếu tố SHAP và luật vi phạm; ngưỡng, luật và chính sách nằm trong \texttt{configs/settings.yaml}.
+	\item \textbf{Công bằng:} Giới tính không phải đặc trưng của mô hình và không phải điều kiện của luật.
+\end{itemize}
+
+Với chính sách hiện hành, hệ thống duyệt $51{,}86\%$ mọi hồ sơ (đã chấm). Tỷ lệ vỡ nợ của nhóm được duyệt là $3{,}37\%$, so với $8{,}07\%$ của toàn bộ khoản vay lịch sử.
+
+%======================================================================
 \section{Hạn chế}
+\label{sec:eval-limits}
+
+Các hạn chế dưới đây đến từ dữ liệu và từ các lựa chọn thiết kế:
+\begin{itemize}[topsep=0pt, itemsep=1pt]
+	\item \textbf{Ngày mô phỏng:} Dữ liệu gốc không có ngày thật. Ngày nộp hồ sơ và ngày có kết quả lấy từ bộ sinh ngày riêng \texttt{hcdw synth-dates}, nên mọi xu hướng theo thời gian không mang ý nghĩa nghiệp vụ.
+	\item \textbf{Giả định của KPI-03:} Dữ liệu không có tỷ lệ thu hồi sau vỡ nợ, nên dư nợ chịu rủi ro giả định mất toàn bộ khoản vay khi vỡ nợ. Số tiền giữ nguyên đơn vị gốc, không quy đổi tiền tệ.
+	\item \textbf{Hạng A hiếm:} Không phân khúc nào có tỷ lệ vỡ nợ dưới $1\%$. Hạng A chỉ có khi mô hình cho PD dưới $1\%$, tức $3{,}13\%$ khoản vay lịch sử theo hạng điểm và $2{,}91\%$ mọi hồ sơ theo hạng cuối.
+	\item \textbf{Khối lượng thẩm định thêm lớn:} Hạng C và D đều chuyển thẩm định thêm, chiếm $39{,}54\%$ mọi hồ sơ (đã chấm). Đây là lựa chọn thận trọng nhưng tạo nhiều việc cho chuyên viên.
+	\item \textbf{Đánh đổi của luật:} So với chỉ dùng hạng điểm, luật làm tỷ lệ duyệt giảm khoảng $10$ điểm phần trăm ($61{,}74\%$ xuống $51{,}86\%$). Đổi lại, tỷ lệ vỡ nợ của nhóm được duyệt chỉ giảm khoảng $0{,}15$ điểm phần trăm ($3{,}52\%$ xuống $3{,}37\%$). Khoản vay bị hạ hạng vẫn vỡ nợ gần mức của hạng điểm, ví dụ $4{,}61\%$ với nhóm từ B xuống D.
+	\item \textbf{Hiệu chỉnh chưa được kiểm định:} Bộ hiệu chỉnh đơn điệu được khớp và được đo trên cùng PD OOF. Bảng hiệu chỉnh và điểm Brier vì vậy chỉ cho thấy độ khớp. Hồ sơ mới không có nhãn nên không dùng để kiểm định được.
+	\item \textbf{Rò rỉ nhỏ ở tỷ lệ luật:} Tỷ lệ của phân khúc và của luật tính trên toàn bộ khoản vay lịch sử, kể cả chính khoản vay được chấm. Với nhóm từ $500$ khoản vay, một khoản vay làm tỷ lệ lệch tối đa $0{,}2$ điểm phần trăm.
+	\item \textbf{Phân khúc sát ngưỡng:} Một số phân khúc hạng D chỉ cao hơn ngưỡng $13\%$ dưới $0{,}1$ điểm phần trăm, ví dụ $13{,}09\%$ và $13{,}03\%$. Dữ liệu đổi một chút có thể đưa chúng về hạng C.
+	\item \textbf{Phân tích giả định (\textit{what-if}) không đơn điệu:} Mô hình cây không có ràng buộc đơn điệu. Trên mẫu $30$ hồ sơ, tăng thu nhập $50\%$ làm PD tăng ở $1/30$ hồ sơ, giảm tiền vay $30\%$ làm PD tăng ở $4/30$ hồ sơ.
+	\item \textbf{Không nạp thời gian thực:} Mỗi lần ETL dựng lại toàn bộ kho. DuckDB chỉ cho một tiến trình ghi, nên phải tắt \texttt{hcdw serve} trước khi chạy \texttt{hcdw etl} hoặc \texttt{hcdw score}.
+\end{itemize}
+
+%======================================================================
 \section{Hướng phát triển}
-\section{Phân công công việc}
+\label{sec:eval-future}
+
+Mỗi đề xuất dưới đây ứng với một hạn chế ở mục~\ref{sec:eval-limits}:
+\begin{itemize}[topsep=0pt, itemsep=1pt]
+	\item \textbf{Ngày thật và nạp tăng dần:} Với dữ liệu có ngày nộp và ngày kết quả thật, kho có thể nạp tăng dần (\textit{incremental load}) theo ngày thay vì dựng lại toàn bộ. Khi đó các xu hướng theo thời gian mới có ý nghĩa nghiệp vụ.
+	\item \textbf{Tỷ lệ thu hồi:} Nếu có dữ liệu thu hồi sau vỡ nợ, KPI-03 có thể nhân thêm tỷ lệ tổn thất thay vì giả định mất toàn bộ.
+	\item \textbf{Kiểm định hiệu chỉnh:} Tách riêng một phần khoản vay lịch sử làm tập giữ riêng (\textit{holdout}), khớp bộ hiệu chỉnh trên phần còn lại và đo bảng hiệu chỉnh, điểm Brier trên tập giữ riêng.
+	\item \textbf{Tỷ lệ luật ngoài phần:} Tính tỷ lệ của phân khúc và của luật theo từng phần của kiểm định chéo, như PD OOF, để loại phần rò rỉ nhỏ ở hạng luật.
+	\item \textbf{Đánh giá lại từng luật:} So tỷ lệ vỡ nợ của chính nhóm bị luật hạ hạng với ngưỡng của hạng luật gán. Luật trùng nhiều thông tin với mô hình có thể được tắt hoặc đổi ngưỡng; trang \textbf{Playground} đo được tác động của các thay đổi này.
+	\item \textbf{Giảm khối lượng thẩm định thêm:} Dùng \textbf{Playground} và \textbf{Explorer} để tìm nhóm hồ sơ hạng C có tỷ lệ vỡ nợ thấp, rồi thử chính sách riêng cho nhóm đó. Cần kết quả thẩm định thực tế để kiểm chứng.
+	\item \textbf{Ràng buộc đơn điệu:} Thêm ràng buộc đơn điệu (\textit{monotone constraints}) của LightGBM cho các đặc trưng như thu nhập và số tiền vay, để phân tích giả định luôn đi đúng hướng nghiệp vụ.
+\end{itemize}

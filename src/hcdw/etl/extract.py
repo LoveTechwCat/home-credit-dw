@@ -26,8 +26,11 @@ SOURCES: dict[str, list[str]] = {
     "installments_payments": ["installments_payments"],
     "pos_cash_balance": ["POS_CASH_balance"],
     "credit_card_balance": ["credit_card_balance"],
+    "application_dates": ["application_dates"],  # optional: calendar dates of applications/outcomes
 }
 REQUIRED = {"application_train"}
+# What the warehouse falls back to when an optional source is missing (logged).
+MISSING_EFFECT = {"application_dates": "every application sits on the snapshot date, without outcome date"}
 
 
 def find_source_file(source_dir: Path, stem: str) -> Path | None:
@@ -76,8 +79,12 @@ def load_file(con: duckdb.DuckDBPyConnection, table: str, path: Path, is_train: 
     return after - before
 
 
-def extract(con: duckdb.DuckDBPyConnection, source_dir: Path) -> dict[str, int]:
-    """(Re)create staging tables and load every source file. Returns rows loaded per file."""
+def extract(con: duckdb.DuckDBPyConnection, source_dir: Path,
+            extra_source_dirs: list[Path] | tuple[Path, ...] = ()) -> dict[str, int]:
+    """(Re)create staging tables and load every source file. Returns rows loaded per file.
+
+    A file is looked up in source_dir first, then in extra_source_dirs (sources that come from another
+    system and are not stored next to the main extract)."""
     source_dir = Path(source_dir)
     if not source_dir.is_dir():
         raise FileNotFoundError(f"Source folder not found: {source_dir}")
@@ -88,10 +95,14 @@ def extract(con: duckdb.DuckDBPyConnection, source_dir: Path) -> dict[str, int]:
     for table, stems in SOURCES.items():
         for stem in stems:
             path = find_source_file(source_dir, stem)
+            for extra in extra_source_dirs:
+                if path is None and Path(extra).is_dir():
+                    path = find_source_file(Path(extra), stem)
             if path is None:
                 if stem in REQUIRED:
                     raise FileNotFoundError(f"{stem}.csv not found in {source_dir}")
-                log.warning("%s not found in %s - staging.%s gets no rows from it", stem, source_dir, table)
+                log.warning("%s not found in %s - staging.%s gets no rows from it%s", stem, source_dir, table,
+                            f"; {MISSING_EFFECT[stem]}" if stem in MISSING_EFFECT else "")
                 continue
             is_train = (stem == "application_train") if table == "application" else None
             counts[stem] = load_file(con, table, path, is_train=is_train)

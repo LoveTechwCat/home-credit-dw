@@ -1,36 +1,25 @@
-flowchart LR
-    subgraph Sources["Nguồn dữ liệu Home Credit"]
-        A1[application_train / test]
-        A2[bureau + bureau_balance]
-        A3[previous_application]
-        A4[POS_CASH_balance]
-        A5[credit_card_balance]
-        A6[installments_payments]
+flowchart TD
+    ALL["Mọi hồ sơ đã chấm: 356.255"]
+    HIST["Khoản vay lịch sử: 307.511"]
+    NEW["Hồ sơ mới: 48.744"]
+
+    subgraph SCOPE_ALL["Tính trên mọi hồ sơ"]
+        direction LR
+        K02["KPI-02 Dư nợ cấp mới"]
+        K03["KPI-03 Dư nợ chịu rủi ro"]
+        K04["KPI-04 Tỷ lệ duyệt"]
+        K05["KPI-05 Tỷ lệ chuyển thẩm định"]
+        SM1["SM-1 Phân bố hạng"]
     end
 
-    Sources --> ETL[ETL / ELT Pipeline]
-    ETL --> Staging[Staging và Data Quality]
-    Staging --> DW[(Galaxy Schema DW)]
-
-    subgraph DWModel["Mô hình đa chiều"]
-        F1[fact_loan_application]
-        F2[fact_bureau_credit]
-        D1[dim_customer]
-        D2[dim_credit_metrics]
-        D3[dim_region]
-        D4[dim_contract]
-        D5[dim_bureau_category]
-        D6[dim_time]
+    subgraph SCOPE_HIST["Chỉ trên khoản vay lịch sử"]
+        direction LR
+        K01["KPI-01 Tỷ lệ vỡ nợ"]
+        SM2["SM-2 Vỡ nợ nhóm được duyệt"]
+        SM34["SM-3 Tỷ lệ luật, SM-4 AUC"]
     end
 
-    DW --> DWModel
-    DWModel --> OLAP[OLAP: slice, dice,<br/>drill-down, roll-up]
-    OLAP --> KPI1[DR, AR, STP, MRR]
-    OLAP --> KPI2[EL = PD x EAD x LGD]
-
-    DW --> Features[Feature Store / Feature Engineering]
-    Features --> ML[Mô hình PD]
-    ML --> Metrics[ROC-AUC >= 0.75<br/>Gini >= 0.50]
-    ML --> Triage[Triage Engine<br/>Green / Yellow / Red]
-    Triage --> KPI3[Inference latency <= 200 ms]
-    Triage --> Ops[Auto-approve,<br/>manual review, auto-reject]
+    ALL --> HIST
+    ALL --> NEW
+    ALL ---> SCOPE_ALL
+    HIST -->|"có kết quả trả nợ"| SCOPE_HIST

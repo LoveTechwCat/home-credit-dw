@@ -15,8 +15,3 @@ export function useMeta(): Meta {
   if (!ctx) throw new Error("useMeta outside MetaProvider");
   return ctx;
 }
-
-export function useDimLabel(): (dim: string) => string {
-  const meta = useMeta();
-  return (dim) => meta.dimensions.find((d) => d.key === dim)?.label ?? dim;
-}

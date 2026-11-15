@@ -1,94 +1,101 @@
 erDiagram
-    dim_contract {
-        string contract_key PK
-        string contract_type
-        string accompanied_by
-        string appr_weekday
-        string appr_hour_band
+    dim_risk_grade {
+        string grade PK "A-E"
+        string decision
+        double max_credit_to_income
     }
 
-    dim_region {
-        string region_key PK
-        string region_rating_client
-        string region_rating_city
-        string density_band
+    dim_contract {
+        int contract_key PK
+        string contract_type
     }
 
     dim_credit_history {
-        string credit_history_key PK
-        string bureau_active_bucket
+        int credit_history_key PK
+        string credit_history_status
         string max_dpd_bucket
-        string has_current_overdue
-        string has_bad_debt
-        string prev_approval_bucket
+    }
+
+    dim_region {
+        int region_key PK
+        int region_rating_client
     }
 
     dim_customer {
-        string customer_key PK
-        string sk_id_curr "natural key"
-        string gender
+        int customer_key PK
         string age_bucket
         string income_type
-        string income_bracket
-        string occupation_type
-        string plus_education_family_housing "..."
-    }
-
-    dim_bureau_category {
-        string bureau_category_key PK
-        string credit_active
-        string credit_type
-        string credit_currency
     }
 
     dim_time {
-        string date_key PK "yyyymmdd"
-        string full_date
-        string day_offset "vs snapshot"
-        string year
-        string quarter
+        int date_key PK
+        date full_date
         string year_month
     }
 
+    dim_bureau_category {
+        int bureau_category_key PK
+        string credit_active
+        string credit_type
+    }
+
     fact_loan_application {
-        string application_id PK
-        string customer_key FK
-        string credit_history_key FK
-        string contract_key FK
-        string region_key FK
-        string application_date_key FK
-        int target "0/1/NULL"
-        boolean is_train
-        float amt_credit "Σ"
-        float amt_income "Σ"
-        float debt_to_income
-        float ext_source_mean
-        int max_dpd_days
-        string plus_5_more_measures
+        bigint application_id PK
+        int customer_key FK
+        int credit_history_key FK
+        int contract_key FK
+        int region_key FK
+        int application_date_key FK
+        int outcome_date_key FK "NULL: hồ sơ mới"
+        int target
+        double amt_credit
+        double debt_to_income
     }
 
     fact_bureau_credit {
-        string bureau_credit_id PK
-        string customer_key FK
-        string bureau_category_key FK
-        string open_date_key FK
-        string close_date_key FK
-        float amt_credit_sum "Σ"
-        float amt_credit_sum_debt "Σ"
-        int credit_day_overdue
-        int credit_duration_days
-        string max_bb_dpd_status
-        string plus_2_more_measures
+        bigint bureau_credit_id PK
+        int customer_key FK
+        int bureau_category_key FK
+        int open_date_key FK
+        int close_date_key FK
+        double amt_credit_sum
+        double amt_credit_sum_debt
     }
 
-    %% Relationships
-    dim_contract ||--o{ fact_loan_application : ""
-    dim_region ||--o{ fact_loan_application : ""
-    dim_credit_history ||--o{ fact_loan_application : ""
-    dim_customer ||--o{ fact_loan_application : ""
-    dim_time ||--o{ fact_loan_application : "application_date_key"
+    fact_risk_assessment {
+        bigint application_id PK "FK"
+        string score_grade FK
+        string rule_grade FK
+        string final_grade FK
+        double pd
+        string decision
+        double recommended_credit
+    }
 
-    dim_customer ||--o{ fact_bureau_credit : ""
-    dim_bureau_category ||--o{ fact_bureau_credit : ""
-    dim_time ||--o{ fact_bureau_credit : "open_date_key"
-    dim_time |o--o{ fact_bureau_credit : "close_date_key (0..1)"
+    dim_rule {
+        string rule_code PK
+        string rule_group
+    }
+
+    fact_rule_hit {
+        bigint application_id FK
+        string rule_code FK
+        string grade FK
+        double rate
+    }
+
+    dim_contract ||--o{ fact_loan_application : "contract_key"
+    dim_credit_history ||--o{ fact_loan_application : "credit_history_key"
+    dim_region ||--o{ fact_loan_application : "region_key"
+    dim_customer ||--o{ fact_loan_application : "customer_key"
+    dim_time ||--o{ fact_loan_application : "application_date_key, outcome_date_key"
+
+    dim_customer ||--o{ fact_bureau_credit : "customer_key"
+    dim_time ||--o{ fact_bureau_credit : "open_date_key, close_date_key"
+    dim_bureau_category ||--o{ fact_bureau_credit : "bureau_category_key"
+
+    dim_risk_grade ||--o{ fact_risk_assessment : "score, rule, final grade"
+    fact_loan_application ||--o| fact_risk_assessment : "application_id"
+    dim_risk_grade ||--o{ fact_rule_hit : "grade"
+    fact_risk_assessment ||--o{ fact_rule_hit : "application_id"
+    dim_rule ||--o{ fact_rule_hit : "rule_code"

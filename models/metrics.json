@@ -1,0 +1,244 @@
+{
+  "auc_oof": 0.7585672906756028,
+  "auc_oof_raw": 0.758101593390562,
+  "brier": 0.06781264529051431,
+  "mean_pd_oof": 0.08072881945686496,
+  "base_rate": 0.08072881945686496,
+  "n_train": 307511,
+  "n_folds": 5,
+  "calibration": [
+    {
+      "bin": 1,
+      "n": 30752,
+      "mean_pd": 0.011067565111919263,
+      "default_rate": 0.011023673257023933
+    },
+    {
+      "bin": 2,
+      "n": 30751,
+      "mean_pd": 0.020119619230199823,
+      "default_rate": 0.019901791811648403
+    },
+    {
+      "bin": 3,
+      "n": 30751,
+      "mean_pd": 0.027465306106370827,
+      "default_rate": 0.027608858248512242
+    },
+    {
+      "bin": 4,
+      "n": 30751,
+      "mean_pd": 0.037491466009299174,
+      "default_rate": 0.03794998536632955
+    },
+    {
+      "bin": 5,
+      "n": 30751,
+      "mean_pd": 0.046972018450067314,
+      "default_rate": 0.04679522617150662
+    },
+    {
+      "bin": 6,
+      "n": 30751,
+      "mean_pd": 0.06121400053545556,
+      "default_rate": 0.061331338818249814
+    },
+    {
+      "bin": 7,
+      "n": 30751,
+      "mean_pd": 0.07825308142491401,
+      "default_rate": 0.07827387727228383
+    },
+    {
+      "bin": 8,
+      "n": 30751,
+      "mean_pd": 0.10563934891867452,
+      "default_rate": 0.10506975382914377
+    },
+    {
+      "bin": 9,
+      "n": 30751,
+      "mean_pd": 0.14752667783558107,
+      "default_rate": 0.1476699944717245
+    },
+    {
+      "bin": 10,
+      "n": 30751,
+      "mean_pd": 0.271541376279144,
+      "default_rate": 0.2716659620825339
+    }
+  ],
+  "global_shap": [
+    {
+      "feature": "ext_source_mean",
+      "label": "Average external credit score",
+      "mean_abs_shap": 0.548178475661367
+    },
+    {
+      "feature": "credit_to_goods",
+      "label": "Credit to goods price ratio",
+      "mean_abs_shap": 0.1346427177949799
+    },
+    {
+      "feature": "years_employed",
+      "label": "Years employed",
+      "mean_abs_shap": 0.13421905533071393
+    },
+    {
+      "feature": "late_payment_ratio",
+      "label": "Share of instalments paid late",
+      "mean_abs_shap": 0.13264489934107812
+    },
+    {
+      "feature": "education_type",
+      "label": "Education",
+      "mean_abs_shap": 0.10453320879528678
+    },
+    {
+      "feature": "prev_approval_rate",
+      "label": "Previous approval rate",
+      "mean_abs_shap": 0.10390259169768797
+    },
+    {
+      "feature": "occupation_type",
+      "label": "Occupation",
+      "mean_abs_shap": 0.09507360521048348
+    },
+    {
+      "feature": "amt_goods_price",
+      "label": "Goods price",
+      "mean_abs_shap": 0.08601465350921986
+    },
+    {
+      "feature": "amt_annuity",
+      "label": "Loan annuity",
+      "mean_abs_shap": 0.07792051254601853
+    },
+    {
+      "feature": "bureau_active_bucket",
+      "label": "Active bureau credits band",
+      "mean_abs_shap": 0.07332682275418251
+    },
+    {
+      "feature": "family_status",
+      "label": "Family status",
+      "mean_abs_shap": 0.05740307380589989
+    },
+    {
+      "feature": "age_years",
+      "label": "Age",
+      "mean_abs_shap": 0.055774535246635955
+    },
+    {
+      "feature": "cnt_prev_applications",
+      "label": "Previous Home Credit applications",
+      "mean_abs_shap": 0.05283445159956395
+    },
+    {
+      "feature": "max_dpd_days",
+      "label": "Worst days past due (history)",
+      "mean_abs_shap": 0.04148319316656998
+    },
+    {
+      "feature": "debt_to_income",
+      "label": "Annuity to income ratio",
+      "mean_abs_shap": 0.035431296699137596
+    },
+    {
+      "feature": "income_type",
+      "label": "Employment type",
+      "mean_abs_shap": 0.0352023059391046
+    },
+    {
+      "feature": "cnt_bureau_active",
+      "label": "Active bureau credits",
+      "mean_abs_shap": 0.03463340859868133
+    },
+    {
+      "feature": "amt_credit",
+      "label": "Credit amount",
+      "mean_abs_shap": 0.033217798168336046
+    },
+    {
+      "feature": "region_rating_client",
+      "label": "Region rating",
+      "mean_abs_shap": 0.032714236520090006
+    },
+    {
+      "feature": "contract_type",
+      "label": "Contract type",
+      "mean_abs_shap": 0.03148432658485589
+    },
+    {
+      "feature": "credit_to_income",
+      "label": "Credit to income ratio",
+      "mean_abs_shap": 0.020505868195204353
+    },
+    {
+      "feature": "housing_type",
+      "label": "Housing",
+      "mean_abs_shap": 0.015608224506906708
+    },
+    {
+      "feature": "amt_income",
+      "label": "Annual income",
+      "mean_abs_shap": 0.015185571397144496
+    },
+    {
+      "feature": "max_dpd_bucket",
+      "label": "Max days past due band",
+      "mean_abs_shap": 0.012771677023113853
+    },
+    {
+      "feature": "cnt_fam_members",
+      "label": "Family members",
+      "mean_abs_shap": 0.006856204701959959
+    },
+    {
+      "feature": "cnt_children",
+      "label": "Number of children",
+      "mean_abs_shap": 0.005057078595187284
+    }
+  ],
+  "features": [
+    "amt_income",
+    "amt_credit",
+    "amt_annuity",
+    "amt_goods_price",
+    "debt_to_income",
+    "credit_to_income",
+    "credit_to_goods",
+    "ext_source_mean",
+    "age_years",
+    "years_employed",
+    "cnt_children",
+    "cnt_fam_members",
+    "cnt_bureau_active",
+    "cnt_prev_applications",
+    "prev_approval_rate",
+    "max_dpd_days",
+    "late_payment_ratio",
+    "region_rating_client",
+    "income_type",
+    "education_type",
+    "family_status",
+    "housing_type",
+    "occupation_type",
+    "contract_type",
+    "max_dpd_bucket",
+    "bureau_active_bucket"
+  ],
+  "params": {
+    "n_estimators": 800,
+    "learning_rate": 0.02,
+    "num_leaves": 31,
+    "min_child_samples": 100,
+    "subsample": 0.8,
+    "subsample_freq": 1,
+    "colsample_bytree": 0.7,
+    "reg_lambda": 1.0,
+    "random_state": 42,
+    "verbose": -1
+  },
+  "trained_at": "2026-11-15T00:16:52"
+}

@@ -102,7 +102,7 @@ WITH base AS (
 )
 SELECT
     *,
-    -- Draft KPI definition (to confirm in docs/kpi_definitions.md):
+    -- Analysis attribute (not one of the BR KPIs, see docs/kpi_definitions.md):
     -- overdue = overdue right now in the bureau, or ever more than 30 days past due anywhere
     has_current_overdue OR max_dpd_days > 30         AS overdue_flag,
     CASE
@@ -125,5 +125,12 @@ SELECT
         WHEN prev_approval_rate < 0.5   THEN '<50%'
         WHEN prev_approval_rate < 1     THEN '50-99%'
         ELSE '100%'
-    END                                              AS prev_approval_bucket
+    END                                              AS prev_approval_bucket,
+    -- Segment attribute of the DSS segment rule (BR-SEG-01). has_current_overdue comes from the
+    -- bureau, so it can only be true when has_bureau is.
+    CASE
+        WHEN NOT has_bureau      THEN 'No bureau'
+        WHEN has_current_overdue THEN 'Current overdue'
+        ELSE 'Clean history'
+    END                                              AS credit_history_status
 FROM base;

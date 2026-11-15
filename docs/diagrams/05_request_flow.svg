@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 1240 640" width="1240" height="640" role="img" aria-labelledby="dg5-t dg5-d">
-<title id="dg5-t">Query flow of one OLAP request</title>
-<desc id="dg5-d">The analyst clicks a bar; the React app updates the shared filters and calls the API; the API validates the names, asks the query layer, which answers from its cache or runs a GROUP BY on DuckDB; the JSON result re-renders the charts.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 1240 904" width="1240" height="904" role="img" aria-labelledby="dg5-t dg5-d">
+<title id="dg5-t">Query flow of one Analytics cube request</title>
+<desc id="dg5-d">The analyst changes the Analytics view: a filter chip (slice/dice), the interval, roll-up or drill-down arrows, removing or adding a dimension, or pivot. The React page writes the view to ?state= in the URL and sends five POST /api/analytics/cube requests at once (four panels and the Cube table). FastAPI validates each body with a strict CubeQuery model (422 on a bad body); the cube layer checks the names against the whitelists (400), compiles the conditions to bound parameters and runs one GROUPING SETS query on the read-only DuckDB view mart.v_application_wide. Cells, subtotals and the grand total come back as gzipped JSON and the charts re-render; clicking a cell or bar drills through to the Explorer. Cube queries are not cached; other API reads (Overview, grades, rules, Explorer book) are.</desc>
 <style>
 .dg{--canvas:#fcfcfb;--bg:#ffffff;--panel:#f4f4f1;--line:#d6d5ce;--ink:#171716;--ink2:#52514e;--ink3:#8a8882;--acc:#2a78d6;--acc-soft:#eaf2fd;--acc-ink:#1c5cab;--teal:#1baf7a;--teal-soft:#e3f5ee;font-family:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
 @media (prefers-color-scheme:dark){.dg{--canvas:#1a1a19;--bg:#232321;--panel:#151514;--line:#3b3b37;--ink:#f0efec;--ink2:#c3c2b7;--ink3:#97958e;--acc:#3987e5;--acc-soft:#15263b;--acc-ink:#8dbaf0;--teal:#199e70;--teal-soft:#11302a}}
@@ -9,7 +9,7 @@
 .dg text{fill:var(--ink)}.dg .t3{fill:var(--ink3)}
 .dg .canvas{fill:var(--canvas)}
 .dg .head{fill:var(--bg);stroke:var(--line);stroke-width:1.2}.dg .heada{fill:var(--acc-soft);stroke:var(--acc);stroke-width:1.4}
-.dg .ti{font-size:15px;font-weight:600}.dg .sub{font-size:11.5px;fill:var(--ink3)}
+.dg .ti{font-size:15px;font-weight:600}.dg .sub{font-size:11.5px;fill:var(--ink3)}.dg .sm{font-size:11.5px}
 .dg .life{stroke:var(--line);stroke-width:1.4;stroke-dasharray:4 5}
 .dg .act{fill:var(--acc-soft);stroke:var(--acc);stroke-width:1}
 .dg .m{fill:none;stroke:var(--ink2);stroke-width:1.5}.dg .r{fill:none;stroke:var(--ink3);stroke-width:1.4;stroke-dasharray:6 4}
@@ -17,98 +17,116 @@
 .dg .msg{font-size:12.5px;fill:var(--ink)}.dg .code{font-family:"Cascadia Code",Consolas,ui-monospace,monospace;font-size:12px;fill:var(--acc-ink)}
 .dg .note{font-size:11.5px;fill:var(--ink3)}
 .dg .badge{fill:var(--acc)}.dg .bt{fill:#fff;font-size:11px;font-weight:700}
-.dg .frame{fill:var(--panel);stroke:var(--line);stroke-width:1.2;opacity:0.9}
-.dg .tab{fill:var(--line)}.dg .tabt{font-size:11.5px;font-weight:700;fill:var(--ink2)}
-.dg .div{stroke:var(--ink3);stroke-width:1;stroke-dasharray:5 4}
-.dg .guard{font-size:11.5px;font-weight:600;fill:var(--ink2)}
+.dg .notebox{fill:var(--panel);stroke:var(--line);stroke-width:1.2}
 .dg .lb{paint-order:stroke;stroke:var(--canvas);stroke-width:5px;stroke-linejoin:round}
-.dg .lbp{paint-order:stroke;stroke:var(--panel);stroke-width:5px;stroke-linejoin:round}
 </style>
 <defs>
   <marker id="dg5-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker>
   <marker id="dg5-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="var(--ink3)" stroke-width="1.6"/></marker>
 </defs>
-<rect class="canvas" width="1240" height="640"/>
-
-<!-- alt frame (drawn first) -->
-<rect class="frame" x="530" y="352" width="690" height="170" rx="8"/>
-<path class="tab" d="M530,360 a8,8 0 0 1 8,-8 H584 V368 l-8,8 H530 Z"/>
-<text x="544" y="370" class="tabt">alt</text>
-<text x="640" y="372" class="guard">[result already cached]</text>
-<path class="div" d="M530,418 H1220"/>
-<text x="640" y="436" class="guard">[first request for these filters]</text>
+<rect class="canvas" width="1240" height="904"/>
 
 <!-- lifelines -->
-<path class="life" d="M110,78 V620"/>
-<path class="life" d="M360,78 V620"/>
-<path class="life" d="M620,78 V620"/>
-<path class="life" d="M870,78 V620"/>
-<path class="life" d="M1110,78 V620"/>
+<path class="life" d="M100,78 V860"/>
+<path class="life" d="M330,78 V860"/>
+<path class="life" d="M570,78 V860"/>
+<path class="life" d="M820,78 V860"/>
+<path class="life" d="M1110,78 V860"/>
 
 <!-- activation bars -->
-<rect class="act" x="354" y="120" width="12" height="490" rx="2"/>
-<rect class="act" x="614" y="215" width="12" height="340" rx="2"/>
-<rect class="act" x="864" y="320" width="12" height="190" rx="2"/>
-<rect class="act" x="1104" y="460" width="12" height="40" rx="2"/>
+<rect class="act" x="324" y="140" width="12" height="710" rx="2"/>
+<rect class="act" x="564" y="258" width="12" height="432" rx="2"/>
+<rect class="act" x="814" y="384" width="12" height="246" rx="2"/>
+<rect class="act" x="1104" y="536" width="12" height="56" rx="2"/>
 
 <!-- heads -->
-<rect class="heada" x="20" y="18" width="180" height="60" rx="12"/>
-<text x="110" y="44" class="ti" text-anchor="middle">Analyst</text><text x="110" y="62" class="sub" text-anchor="middle">browser user</text>
-<rect class="head" x="260" y="18" width="200" height="60" rx="12"/>
-<text x="360" y="44" class="ti" text-anchor="middle">React app</text><text x="360" y="62" class="sub" text-anchor="middle">shared filters · charts</text>
-<rect class="head" x="520" y="18" width="200" height="60" rx="12"/>
-<text x="620" y="44" class="ti" text-anchor="middle">FastAPI</text><text x="620" y="62" class="sub" text-anchor="middle">/api/* endpoints</text>
-<rect class="head" x="770" y="18" width="200" height="60" rx="12"/>
-<text x="870" y="44" class="ti" text-anchor="middle">Query layer</text><text x="870" y="62" class="sub" text-anchor="middle">whitelist · lru_cache</text>
+<rect class="heada" x="20" y="18" width="160" height="60" rx="12"/>
+<text x="100" y="44" class="ti" text-anchor="middle">Analyst</text><text x="100" y="62" class="sub" text-anchor="middle">browser user</text>
+<rect class="head" x="230" y="18" width="200" height="60" rx="12"/>
+<text x="330" y="44" class="ti" text-anchor="middle">React · Analytics</text><text x="330" y="62" class="sub" text-anchor="middle">view state in ?state=</text>
+<rect class="head" x="470" y="18" width="200" height="60" rx="12"/>
+<text x="570" y="44" class="ti" text-anchor="middle">FastAPI</text><text x="570" y="62" class="sub" text-anchor="middle">POST /api/analytics/cube</text>
+<rect class="head" x="720" y="18" width="200" height="60" rx="12"/>
+<text x="820" y="44" class="ti" text-anchor="middle">Cube layer</text><text x="820" y="62" class="sub" text-anchor="middle">hcdw/api/cube.py</text>
 <rect class="heada" x="1010" y="18" width="200" height="60" rx="12"/>
-<text x="1110" y="44" class="ti" text-anchor="middle">DuckDB</text><text x="1110" y="62" class="sub" text-anchor="middle">hc.duckdb · read-only</text>
+<text x="1110" y="44" class="ti" text-anchor="middle">DuckDB · read-only</text><text x="1110" y="62" class="sub" text-anchor="middle">mart.v_application_wide</text>
 
-<!-- 1 click -->
-<circle class="badge" cx="128" cy="112" r="9"/><text x="128" y="116" class="bt" text-anchor="middle">1</text>
-<path class="m" d="M110,126 H352" marker-end="url(#dg5-m)"/>
-<text x="146" y="116" class="msg lb">click bar “age 25–34”</text>
+<!-- 1 change the view -->
+<circle class="badge" cx="118" cy="110" r="9"/><text x="118" y="114" class="bt" text-anchor="middle">1</text>
+<text x="134" y="114" class="msg lb">filter chip (slice/dice)</text>
+<text x="134" y="132" class="msg lb">or Interval · ▲ ▼ × + ⇄</text>
+<path class="m" d="M100,144 H322" marker-end="url(#dg5-m)"/>
 
-<!-- 2 self: update filters -->
-<circle class="badge" cx="378" cy="150" r="9"/><text x="378" y="154" class="bt" text-anchor="middle">2</text>
-<path class="m" d="M366,162 H410 V184 H368" marker-end="url(#dg5-m)"/>
-<text x="420" y="178" class="msg">update shared filters (all pages)</text>
+<!-- 2 self: URL state -->
+<circle class="badge" cx="348" cy="166" r="9"/><text x="348" y="170" class="bt" text-anchor="middle">2</text>
+<path class="m" d="M336,176 H380 V198 H338" marker-end="url(#dg5-m)"/>
+<text x="390" y="190" class="msg lb">update ?state= in the URL</text>
+<text x="390" y="206" class="note lb">shareable link</text>
 
-<!-- 3 GET -->
-<circle class="badge" cx="384" cy="204" r="9"/><text x="384" y="208" class="bt" text-anchor="middle">3</text>
-<path class="m" d="M366,228 H612" marker-end="url(#dg5-m)"/>
-<text x="400" y="208" class="code lb">GET /api/by/income_type</text>
-<text x="400" y="222" class="code lb">?age_bucket=25-34</text>
+<!-- 3 POST (one per panel) -->
+<circle class="badge" cx="354" cy="236" r="9"/><text x="354" y="240" class="bt" text-anchor="middle">3</text>
+<text x="370" y="250" class="code lb">POST /api/analytics/cube</text>
+<path class="m" d="M336,262 H562" marker-end="url(#dg5-m)"/>
+<text x="370" y="280" class="note lb">5 requests in parallel</text>
+<text x="370" y="295" class="note lb">4 panels + Cube table</text>
 
-<!-- 4 self: validate -->
-<circle class="badge" cx="638" cy="250" r="9"/><text x="638" y="254" class="bt" text-anchor="middle">4</text>
-<path class="m" d="M626,262 H670 V284 H628" marker-end="url(#dg5-m)"/>
-<text x="680" y="270" class="msg">check names against the whitelist</text>
-<text x="680" y="286" class="note">unknown dimension or filter → 400</text>
+<!-- request body (example) -->
+<path class="notebox" d="M112,250 H304 L318,264 V350 H112 Z"/>
+<path class="notebox" d="M304,250 V264 H318" fill="none"/>
+<text x="124" y="270" class="note">e.g. body of step 3</text>
+<text x="124" y="290" class="code">conditions: [ … ]</text>
+<text x="124" y="306" class="code">rows: [application_month]</text>
+<text x="124" y="322" class="code">cols: [decision]</text>
+<text x="124" y="338" class="code">measure: n_applications</text>
 
-<!-- 5 call query layer -->
-<circle class="badge" cx="644" cy="312" r="9"/><text x="644" y="316" class="bt" text-anchor="middle">5</text>
-<path class="m" d="M626,330 H862" marker-end="url(#dg5-m)"/>
-<text x="660" y="320" class="code lb">by_dimension(dim, filters)</text>
+<!-- 4a self: validate the body -->
+<circle class="badge" cx="590" cy="316" r="10"/><text x="590" y="320" class="bt" text-anchor="middle">4a</text>
+<path class="m" d="M576,326 H620 V348 H578" marker-end="url(#dg5-m)"/>
+<text x="630" y="338" class="msg lb">strict CubeQuery</text>
+<text x="630" y="354" class="note lb">bad type or key → 422</text>
 
-<!-- alt: cached -->
-<path class="r" d="M864,398 H628" marker-end="url(#dg5-r)"/>
-<text x="746" y="390" class="msg lbp" text-anchor="middle">rows from memory · &lt; 5 ms</text>
+<!-- call the cube layer -->
+<text x="600" y="380" class="code lb">cube.run(body)</text>
+<path class="m" d="M576,388 H812" marker-end="url(#dg5-m)"/>
 
-<!-- alt: first request -->
-<path class="m" d="M876,464 H1102" marker-end="url(#dg5-m)"/>
-<text x="890" y="456" class="code lbp">SELECT … GROUP BY 1</text>
-<path class="r" d="M1104,494 H878" marker-end="url(#dg5-r)"/>
-<text x="990" y="486" class="msg lbp" text-anchor="middle">rows · 50–200 ms</text>
-<path class="r" d="M864,512 H628" marker-end="url(#dg5-r)"/>
-<text x="746" y="506" class="msg lbp" text-anchor="middle">rows (cached for next time)</text>
+<!-- 4b self: whitelist -->
+<circle class="badge" cx="840" cy="410" r="10"/><text x="840" y="414" class="bt" text-anchor="middle">4b</text>
+<path class="m" d="M826,420 H870 V442 H828" marker-end="url(#dg5-m)"/>
+<text x="880" y="432" class="msg lb">whitelisted names</text>
+<text x="880" y="448" class="note lb">≤ 2 rows · ≤ 1 col · no repeat</text>
+<text x="880" y="463" class="note lb">else → 400</text>
+<text x="880" y="478" class="note lb">conditions → bound params</text>
 
-<!-- 6 JSON back -->
-<circle class="badge" cx="604" cy="540" r="9"/><text x="604" y="544" class="bt" text-anchor="middle">6</text>
-<path class="r" d="M614,552 H368" marker-end="url(#dg5-r)"/>
-<text x="492" y="544" class="msg lb" text-anchor="middle">JSON · gzip</text>
+<!-- 5 one SQL query -->
+<circle class="badge" cx="844" cy="506" r="9"/><text x="844" y="510" class="bt" text-anchor="middle">5</text>
+<text x="860" y="514" class="code lb">WHERE application_id IN (cohort)</text>
+<text x="860" y="530" class="code lb">GROUP BY GROUPING SETS (…)</text>
+<path class="m" d="M826,540 H1102" marker-end="url(#dg5-m)"/>
+<path class="r" d="M1104,578 H828" marker-end="url(#dg5-r)"/>
+<text x="966" y="570" class="msg lb" text-anchor="middle">rows · 15–60 ms</text>
 
-<!-- 7 render -->
-<circle class="badge" cx="342" cy="582" r="9"/><text x="342" y="586" class="bt" text-anchor="middle">7</text>
-<path class="r" d="M354,596 H112" marker-end="url(#dg5-r)"/>
-<text x="232" y="588" class="msg lb" text-anchor="middle">charts, KPIs, tables re-render</text>
+<!-- 6 result -->
+<circle class="badge" cx="802" cy="606" r="9"/><text x="802" y="610" class="bt" text-anchor="middle">6</text>
+<text x="686" y="612" class="msg lb" text-anchor="middle">cells, subtotals, grand total</text>
+<path class="r" d="M814,622 H578" marker-end="url(#dg5-r)"/>
+<text x="686" y="640" class="note lb" text-anchor="middle">null = a total level</text>
+<text x="686" y="655" class="note lb" text-anchor="middle">“(missing)” = a real NULL</text>
+<path class="r" d="M564,676 H338" marker-end="url(#dg5-r)"/>
+<text x="450" y="668" class="msg lb" text-anchor="middle">JSON · gzip</text>
+
+<!-- 7 self: re-render -->
+<circle class="badge" cx="348" cy="700" r="9"/><text x="348" y="704" class="bt" text-anchor="middle">7</text>
+<path class="m" d="M336,710 H380 V732 H338" marker-end="url(#dg5-m)"/>
+<text x="390" y="724" class="msg lb">re-render panels + table</text>
+<text x="390" y="740" class="note lb">dimmed while loading</text>
+
+<!-- 8 drill-through -->
+<circle class="badge" cx="118" cy="778" r="9"/><text x="118" y="782" class="bt" text-anchor="middle">8</text>
+<text x="134" y="782" class="msg lb">click a cell or bar</text>
+<path class="m" d="M100,794 H322" marker-end="url(#dg5-m)"/>
+<path class="m" d="M336,808 H380 V830 H338" marker-end="url(#dg5-m)"/>
+<text x="390" y="822" class="msg lb">drill-through to /explore</text>
+<text x="390" y="838" class="note lb">members become conditions</text>
+
+<text x="20" y="886" class="note">Cube queries are not cached (≈ 15–60 ms each). Other API reads (Overview, grades, rules, Explorer book) are lru_cached; the warehouse is a static snapshot until the next ETL.</text>
 </svg>

@@ -1,6 +1,6 @@
 """Capture report figures with headless Chrome/Edge.
 
-* Dashboard pages: screenshots of the running app (start it first with `hcdw serve`).
+* Web pages: screenshots of the running app (start it first with `hcdw serve`).
 * Diagrams: the SVGs in docs/diagrams rendered on their own, at 2x for print.
 
     python scripts/capture_figures.py                    # light theme, into reports/figures/
@@ -19,13 +19,14 @@ ROOT = Path(__file__).resolve().parents[1]
 DIAGRAM_DIR = ROOT / "docs" / "diagrams"
 
 PAGES = [  # (file name, path, window height)
-    ("dashboard_overview", "/", 1500),
-    ("dashboard_portfolio", "/portfolio", 2300),
-    ("dashboard_drilldown", "/drilldown", 1150),
-    ("dashboard_credit_history", "/credit-history", 2300),
-    ("dashboard_olap_pivot", "/olap", 950),
-    ("dashboard_risk_simulator", "/simulator", 1050),
-    ("dashboard_architecture", "/architecture", 1250),
+    ("page_overview", "/", 1120),
+    ("page_analytics", "/analytics", 1700),
+    ("page_analytics_sql", "/analytics?tab=sql", 1100),
+    ("page_explorer", "/explore", 1240),
+    ("page_application_details", "/applications-details?id=257416", 1100),
+    ("page_playground", "/playground", 1260),
+    ("page_grades", "/grades", 1150),
+    ("page_architecture", "/architecture", 1250),
 ]
 CANDIDATES = [
     r"C:\Program Files\Google\Chrome\Application\chrome.exe",
@@ -43,7 +44,7 @@ def find_browser() -> str:
 
 def shoot(browser: str, url: str, out: Path, width: int, height: int, profile: str, scale: int = 1) -> None:
     subprocess.run(
-        [browser, "--headless=new", "--disable-gpu", "--hide-scrollbars", f"--user-data-dir={profile}",
+        [browser, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--force-prefers-reduced-motion", f"--user-data-dir={profile}",
          f"--force-device-scale-factor={scale}", f"--window-size={width},{height}",
          "--virtual-time-budget=20000", f"--screenshot={out}", url],
         check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=120,
@@ -62,14 +63,15 @@ def capture_diagrams(browser: str, theme: str, out_dir: Path, profile: str) -> N
                             encoding="utf-8")
             out = out_dir / f"diagram_{svg.stem[3:]}.png"
             shoot(browser, page.as_uri(), out, w, h, profile, scale=2)
-            print(f"{out.relative_to(ROOT)}  <- docs/diagrams/{svg.name}")
+            print(f"{out.resolve().relative_to(ROOT)}  <- docs/diagrams/{svg.name}")
 
 
 def capture_pages(browser: str, base: str, theme: str, out_dir: Path, profile: str) -> None:
     for name, path, height in PAGES:
         out = out_dir / f"{name}.png"
-        shoot(browser, f"{base}{path}?theme={theme}", out, 1440, height, profile)
-        print(f"{out.relative_to(ROOT)}  <- {path}")
+        sep = "&" if "?" in path else "?"
+        shoot(browser, f"{base}{path}{sep}theme={theme}", out, 1440, height, profile)
+        print(f"{out.resolve().relative_to(ROOT)}  <- {path}")
 
 
 def main() -> None:
