@@ -152,6 +152,6 @@ Tạo file ZIP nộp bài (sau khi đã commit báo cáo và slide mới nhất,
 python scripts/package_submission.py
 ```
 
-Kết quả: `submission/CO4031_HK261_HomeCredit.zip` gồm `report.pdf`, `slides.pdf`, `README.md` (cách chạy), `data/sample/`
+Kết quả: `submission/CO4031_2311186_2310853_2310381.zip` gồm báo cáo `CO4031_2311186_2310853_2310381.pdf`, `slides.pdf`, `README.md` (cách chạy), `data/sample/`
 và `src/` chứa toàn bộ project kèm frontend đã build sẵn. Trong ZIP, chạy từ `src/` theo README đi kèm
 (`hcdw etl --source sample --score` rồi `hcdw serve`); chỉ những file đã commit mới được đóng gói.

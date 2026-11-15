@@ -1,11 +1,11 @@
 """Build the submission ZIP required by section 5.1 of the assignment.
 
-    python scripts/package_submission.py            # -> submission/CO4031_HK261_HomeCredit.zip
+    python scripts/package_submission.py            # -> submission/CO4031_2311186_2310853_2310381.zip
     python scripts/package_submission.py --build    # run `npm run build` first
 
 Layout of the archive:
 
-    report.pdf        reports/latex/main.pdf
+    <NAME>.pdf        reports/latex/main.pdf (the report, named like the archive)
     slides.pdf        reports/slides/slides.pdf
     README.md         how to run the project from the archive
     data/             sample data (data/sample + data/README.md)
@@ -27,6 +27,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 REPO_URL = "https://github.com/LoveTechwCat/home-credit-dw"
 REPORT = "reports/latex/main.pdf"
+# Archive and report file name: course code + student IDs of the group.
+NAME = "CO4031_2311186_2310853_2310381"
+REPORT_NAME = f"{NAME}.pdf"
 SLIDES = "reports/slides/slides.pdf"
 # Tracked files that do not belong in the submission (the assignment brief itself).
 EXCLUDE = {"docs/CO4031_Assignment_HK261.pdf"}
@@ -35,11 +38,11 @@ README = f"""# Bài tập lớn CO4031 - Kho dữ liệu và hệ hỗ trợ quy
 
 | Thành phần | Vị trí |
 |---|---|
-| Báo cáo | `report.pdf` |
+| Báo cáo | `{REPORT_NAME}` |
 | Slide thuyết trình | `slides.pdf` |
 | Mã nguồn (SQL, Python ETL/API/DSS, frontend React) | `src/` - cũng có trên GitHub: {REPO_URL} |
 | Dữ liệu mẫu (5.000 hồ sơ, đủ các bảng con) | `data/sample/` |
-| Link video (nếu có) | trang bìa của `report.pdf` |
+| Link video (nếu có) | trang bìa của `{REPORT_NAME}` |
 
 ## Chạy thử từ file ZIP
 
@@ -94,7 +97,7 @@ def tracked_files() -> dict[str, bytes]:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--out", type=Path, default=ROOT / "submission" / "CO4031_HK261_HomeCredit.zip")
+    ap.add_argument("--out", type=Path, default=ROOT / "submission" / f"{NAME}.zip")
     ap.add_argument("--build", action="store_true", help="run `npm run build` in frontend/ first")
     args = ap.parse_args()
 
@@ -117,7 +120,7 @@ def main() -> None:
     n_src = 0
     with zipfile.ZipFile(args.out, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
         z.writestr("README.md", README)
-        z.writestr("report.pdf", files[REPORT])
+        z.writestr(REPORT_NAME, files[REPORT])
         z.writestr("slides.pdf", files[SLIDES])
         for name, data in sorted(files.items()):
             if name in EXCLUDE:
