@@ -172,7 +172,7 @@
 			\rsNode{sim}{32}{236}{400}{100}{Ngày mô phỏng}{application\_dates.csv}
 			\rsNode{plain}{32}{448}{680}{136}{React SPA · Risk Studio}%
 			{Overview · Analytics · Explorer · Application details · Playground}
-			\rsNode{plain}{896}{448}{304}{136}{FastAPI}{/api/* · chỉ đọc kho}
+			\rsNode{plain}{896}{448}{304}{136}{FastAPI}{/api/* · OLAP + DSS · chỉ đọc kho}
 			\draw[rs conn] (336,132) -- (464,132);
 			\draw[rs conn] (768,132) -- (896,132);
 			\draw[rs conn both] (1200,132) -- (1328,132);
@@ -180,6 +180,7 @@
 			\draw[rs conn] (1048,200) -- (1048,448);
 			\draw[rs conn] (1480,200) |- (1200,516);
 			\draw[rs conn] (712,516) -- (896,516);
+			\rsT[text=rsMuted,anchor=south]{1264}{124}{\fSmall}{đọc / ghi}
 			\rsT[text=rsMuted]{1064}{280}{\fSmall}{chỉ đọc}
 			\rsT[text=rsMuted]{1496}{280}{\fSmall}{đọc mô hình}
 			\rsT[text=rsMuted]{728}{468}{\fSmall}{HTTP JSON}
@@ -619,9 +620,10 @@
 		Khánh Huy – khoảng 15 giây. Phần trình bày của nhóm đến đây là kết thúc. Tóm lại, nhóm
 		đã xây dựng một kho dữ liệu từ 8 bảng Kaggle, một hệ hỗ trợ quyết định xếp hạng A đến E
 		kèm giải thích, và một trang mô phỏng chính sách. Cảm ơn thầy và các bạn đã lắng nghe;
-		nhóm rất mong nhận được câu hỏi và góp ý. Gợi ý phân công khi trả lời: kho dữ liệu và
-		ETL do Hùng Cường; KPI, OLAP, thang hạng, mô hình và luật do Thiên Hào; chính sách,
-		Playground, giao diện và demo do Khánh Huy.}
+		nhóm rất mong nhận được câu hỏi và góp ý. Gợi ý phân công khi trả lời, theo bảng phân
+		công trong báo cáo: yêu cầu nghiệp vụ, KPI và hệ hỗ trợ quyết định (thang hạng, mô hình,
+		luật, chính sách, Playground) do Thiên Hào; kho dữ liệu, ETL, OLAP, backend và giao diện
+		web do Khánh Huy; đánh giá kết quả, hạn chế, hướng phát triển và báo cáo do Hùng Cường.}
 \end{frame}
 
 \end{document}
