@@ -16,610 +16,612 @@
 
 % ===================================================================== 1
 \begin{frame}{Risk Studio}
-\rsslide[dark]{}{%
-  \rsT[text=rsEyebrowC]{128}{128}{\fEyebrow}%
-    {\MakeUppercase{CO4031 · Kho dữ liệu và Hệ hỗ trợ quyết định · HK261}}
-  \rsGradeBars{128}{362.7}
-  \rsT{128}{402.7}{\fBig}{Risk Studio}
-  \rsTw[text=rsTealSoft]{128}{542.7}{1200}{\fHthreeReg}%
-    {Kho dữ liệu và hệ hỗ trợ quyết định thẩm định tín dụng}
-  \rsT[text=rsTealSoft]{128}{788.2}{\fSmallS}{Lớp L02 · Nhóm sinh viên}
-  \rsT{128}{826.6}{\fBody}{Doãn Phương Hùng Cường · 2310381}
-  \rsT{128}{870.4}{\fBody}{Nguyễn Thiên Hào · 2310853}
-  \rsT{128}{914.2}{\fBody}{Nguyễn Khắc Khánh Huy · 2311186}
-  \rsT[anchor=north east]{1792}{875.8}{\fBodyS}{GVHD: ThS. Đỗ Thanh Thái}
-  \rsT[anchor=north east,text=rsMutedC]{1792}{919.6}{\fSmall}%
-    {Dữ liệu: Home Credit Default Risk (Kaggle)}
-}
-\note{%
-Hùng Cường – khoảng 20 giây. Chào thầy và các bạn. Nhóm chúng em gồm ba sinh viên lớp
-L02: Doãn Phương Hùng Cường, Nguyễn Thiên Hào và Nguyễn Khắc Khánh Huy, dưới sự hướng
-dẫn của thầy Đỗ Thanh Thái. Đề tài là Risk Studio: kho dữ liệu và hệ hỗ trợ quyết định
-thẩm định tín dụng trên bộ dữ liệu Home Credit của Kaggle. Mỗi bạn trình bày khoảng năm
-phút: em trình bày bài toán và kho dữ liệu, Thiên Hào trình bày phân tích và thang hạng,
-Khánh Huy trình bày kết quả chính sách, demo và hạn chế.}
+	\rsslide[dark]{}{%
+		\rsT[text=rsEyebrowC]{128}{128}{\fEyebrow}%
+		{\MakeUppercase{CO4031 · Kho dữ liệu và Hệ hỗ trợ quyết định · HK261}}
+		\rsGradeBars{128}{362.7}
+		\rsT{128}{402.7}{\fBig}{Risk Studio}
+		\rsTw[text=rsTealSoft]{128}{542.7}{1200}{\fHthreeReg}%
+		{Kho dữ liệu và hệ hỗ trợ quyết định thẩm định tín dụng}
+		\rsT[text=rsTealSoft]{128}{788.2}{\fSmallS}{Lớp L02 · Nhóm sinh viên}
+		\rsT{128}{826.6}{\fBody}{Doãn Phương Hùng Cường · 2310381}
+		\rsT{128}{870.4}{\fBody}{Nguyễn Thiên Hào · 2310853}
+		\rsT{128}{914.2}{\fBody}{Nguyễn Khắc Khánh Huy · 2311186}
+		\rsT[anchor=north east]{1792}{875.8}{\fBodyS}{GVHD: ThS. Đỗ Thanh Thái}
+		\rsT[anchor=north east,text=rsMutedC]{1792}{919.6}{\fSmall}%
+		{Dữ liệu: Home Credit Default Risk (Kaggle)}
+	}
+	\note{%
+		Hùng Cường – khoảng 20 giây. Chào thầy và các bạn. Nhóm chúng em gồm ba sinh viên lớp
+		L02: Doãn Phương Hùng Cường, Nguyễn Thiên Hào và Nguyễn Khắc Khánh Huy, dưới sự hướng
+		dẫn của thầy Đỗ Thanh Thái. Đề tài là Risk Studio: kho dữ liệu và hệ hỗ trợ quyết định
+		thẩm định tín dụng trên bộ dữ liệu Home Credit của Kaggle. Mỗi bạn trình bày khoảng năm
+		phút: em trình bày bài toán và kho dữ liệu, Thiên Hào trình bày phân tích và thang hạng,
+		Khánh Huy trình bày kết quả chính sách, demo và hạn chế.}
 \end{frame}
 
 % ===================================================================== 2
 \begin{frame}{Bài toán thẩm định tín dụng}
-\rsslide{Hùng Cường}{%
-  \rsHead{01 · Bối cảnh}{Bài toán thẩm định tín dụng}
-  % left column (860 px)
-  \rsT[text=rsTeal]{128}{278.4}{\fBig}{356.255}
-  \rsT{128}{402.4}{\fBodyS}{hồ sơ vay cần một đề xuất}
-  \rsTw[text=rsMuted]{128}{452.2}{860}{\fSmall}%
-    {307.511 khoản vay lịch sử (đã có kết quả trả nợ) + 48.744 hồ sơ mới (cần thẩm định)}
-  % right column: three decisions
-  \rsT[text=rsMuted]{1052}{278.4}{\fSmallS}{Mỗi hồ sơ nhận một trong ba đề xuất}
-  \rsPill[256]{1052}{326.8}{approve}{Approve}
-  \rsT{1328}{330.1}{\fBody}{Duyệt}
-  \rsPill[256]{1052}{387.2}{review}{Manual review}
-  \rsT{1328}{390.5}{\fBody}{Thẩm định thêm}
-  \rsPill[256]{1052}{447.6}{reject}{Reject}
-  \rsT{1328}{450.9}{\fBody}{Từ chối}
-  % three questions, pinned to the bottom
-  \rsCard{128}{734}{533.33}{186}
-  \rsCard{693.33}{734}{533.33}{186}
-  \rsCard{1258.67}{734}{533.33}{186}
-  \rsT[text=rsTeal]{161}{767}{\fSmallS}{Q2 · Phân khúc}
-  \rsTw{161}{811.4}{467.33}{\fBody}{Phân khúc nào rủi ro cao và chiếm bao nhiêu danh mục?}
-  \rsT[text=rsTeal]{726.33}{767}{\fSmallS}{Q4 · Từng hồ sơ}
-  \rsTw{726.33}{811.4}{467.33}{\fBody}{Hồ sơ này nên xử lý ra sao, và vì sao?}
-  \rsT[text=rsTeal]{1291.67}{767}{\fSmallS}{Q5 · Chính sách}
-  \rsTw{1291.67}{811.4}{467.33}{\fBody}{Đổi ngưỡng thì tỷ lệ duyệt và tỷ lệ vỡ nợ đổi ra sao?}
-}
-\note{%
-Hùng Cường – khoảng 50 giây. Home Credit cho vay tiêu dùng với nhóm khách hàng có ít
-hoặc không có lịch sử tín dụng. Mỗi hồ sơ là một quyết định cân bằng hai rủi ro: duyệt
-quá lỏng thì mất vốn, duyệt quá chặt thì mất khách tốt. Thẩm định thủ công lại thiếu
-nhất quán và khó giải thích. Hệ thống của nhóm đưa ra một trong ba đề xuất: duyệt, thẩm
-định thêm hoặc từ chối, cho 356.255 hồ sơ, gồm 307.511 khoản vay lịch sử đã biết kết quả
-và 48.744 hồ sơ mới. Ba câu hỏi chính nhóm muốn trả lời là: phân khúc nào rủi ro cao,
-một hồ sơ cụ thể nên xử lý ra sao và vì sao, và nếu đổi chính sách thì tỷ lệ duyệt và tỷ
-lệ vỡ nợ thay đổi thế nào.}
+	\rsslide{Hùng Cường}{%
+		\rsHead{01 · Bối cảnh}{Bài toán thẩm định tín dụng}
+		% left column (860 px)
+		\rsT[text=rsTeal]{128}{278.4}{\fBig}{356.255}
+		\rsT{128}{402.4}{\fBodyS}{hồ sơ vay cần một đề xuất}
+		\rsTw[text=rsMuted]{128}{452.2}{860}{\fSmall}%
+		{307.511 khoản vay lịch sử (đã có kết quả trả nợ) + 48.744 hồ sơ mới (cần thẩm định)}
+		% right column: three decisions
+		\rsT[text=rsMuted]{1052}{278.4}{\fSmallS}{Mỗi hồ sơ nhận một trong ba đề xuất}
+		\rsPill[256]{1052}{326.8}{approve}{Approve}
+		\rsT{1328}{330.1}{\fBody}{Duyệt}
+		\rsPill[256]{1052}{387.2}{review}{Manual review}
+		\rsT{1328}{390.5}{\fBody}{Thẩm định thêm}
+		\rsPill[256]{1052}{447.6}{reject}{Reject}
+		\rsT{1328}{450.9}{\fBody}{Từ chối}
+		% three questions, pinned to the bottom
+		\rsCard{128}{734}{533.33}{186}
+		\rsCard{693.33}{734}{533.33}{186}
+		\rsCard{1258.67}{734}{533.33}{186}
+		\rsT[text=rsTeal]{161}{767}{\fSmallS}{Q2 · Phân khúc}
+		\rsTw{161}{811.4}{467.33}{\fBody}{Phân khúc nào rủi ro cao và chiếm bao nhiêu danh mục?}
+		\rsT[text=rsTeal]{726.33}{767}{\fSmallS}{Q4 · Từng hồ sơ}
+		\rsTw{726.33}{811.4}{467.33}{\fBody}{Hồ sơ này nên xử lý ra sao, và vì sao?}
+		\rsT[text=rsTeal]{1291.67}{767}{\fSmallS}{Q5 · Chính sách}
+		\rsTw{1291.67}{811.4}{467.33}{\fBody}{Đổi ngưỡng thì tỷ lệ duyệt và tỷ lệ vỡ nợ đổi ra sao?}
+	}
+	\note{%
+		Hùng Cường – khoảng 50 giây. Home Credit cho vay tiêu dùng với nhóm khách hàng có ít
+		hoặc không có lịch sử tín dụng. Mỗi hồ sơ là một quyết định cân bằng hai rủi ro: duyệt
+		quá lỏng thì mất vốn, duyệt quá chặt thì mất khách tốt. Thẩm định thủ công lại thiếu
+		nhất quán và khó giải thích. Hệ thống của nhóm đưa ra một trong ba đề xuất: duyệt, thẩm
+		định thêm hoặc từ chối, cho 356.255 hồ sơ, gồm 307.511 khoản vay lịch sử đã biết kết quả
+		và 48.744 hồ sơ mới. Ba câu hỏi chính nhóm muốn trả lời là: phân khúc nào rủi ro cao,
+		một hồ sơ cụ thể nên xử lý ra sao và vì sao, và nếu đổi chính sách thì tỷ lệ duyệt và tỷ
+		lệ vỡ nợ thay đổi thế nào.}
 \end{frame}
 
 % ===================================================================== 3
 \begin{frame}{Người dùng và cấp quyết định}
-\rsslide{Hùng Cường}{%
-  \rsHead{02 · Người dùng}{Người dùng và cấp quyết định}
-  \rsTable{128}{278.4}{\fBody}{20}{465.92,449.28,748.8}{l,l,l}
-  \rsRow[th]{61.8}{Người dùng & Cấp quyết định & Quyết định cần hỗ trợ}
-  \rsRow{61.8}{Trưởng phòng rủi ro & Chiến lược, chiến thuật & Đặt ngưỡng hạng, luật và chính sách}
-  \rsRow{61.8}{Chuyên viên thẩm định & Tác nghiệp & Duyệt, thẩm định thêm hay từ chối hồ sơ}
-  \rsRow{61.8}{Ban điều hành & Giám sát & Theo dõi KPI của danh mục}
-  % Simon model, pinned to the bottom
-  \rsT[text=rsMuted]{128}{646.6}{\fSmallS}%
-    {Mô hình Simon: mỗi giai đoạn ra quyết định có trang web riêng}
-  \rsCard{128}{695}{512}{225}
-  \rsCard{704}{695}{512}{225}
-  \rsCard{1280}{695}{512}{225}
-  \draw[rs conn] (640,807.5) -- (704,807.5);
-  \draw[rs conn] (1216,807.5) -- (1280,807.5);
-  \rsT[text=rsTeal]{161}{728}{\fSmallS}{Nhận thức · Intelligence}
-  \rsT{161}{772.4}{\fBodyS}{Overview · Analytics · Explorer}
-  \rsTw[text=rsMuted]{161}{822.2}{446}{\fSmall}{Phát hiện phân khúc và yếu tố rủi ro}
-  \rsT[text=rsTeal]{737}{728}{\fSmallS}{Thiết kế · Design}
-  \rsT{737}{772.4}{\fBodyS}{Playground}
-  \rsTw[text=rsMuted]{737}{822.2}{446}{\fSmall}{Thử ngưỡng, luật và chính sách theo hạng}
-  \rsT[text=rsTeal]{1313}{728}{\fSmallS}{Lựa chọn · Choice}
-  \rsT{1313}{772.4}{\fBodyS}{Application details}
-  \rsTw[text=rsMuted]{1313}{822.2}{446}{\fSmall}{Chọn đề xuất cho từng hồ sơ, kèm lý do}
-}
-\note{%
-Hùng Cường – khoảng 50 giây. Hệ thống phục vụ ba nhóm người dùng. Trưởng phòng rủi ro ra
-quyết định chiến lược và chiến thuật: đặt ngưỡng hạng, các luật và chính sách cho từng
-hạng. Chuyên viên thẩm định ra quyết định tác nghiệp trên từng hồ sơ. Ban điều hành giám
-sát qua các KPI. Thẩm định tín dụng là quyết định bán cấu trúc: một phần mô hình hoá
-được bằng dữ liệu, phần còn lại cần con người. Vì vậy hệ thống chỉ đề xuất, không tự
-quyết. Theo mô hình Simon, giai đoạn nhận thức dùng Overview, Analytics và Explorer;
-giai đoạn thiết kế dùng Playground; giai đoạn lựa chọn dùng trang Application details.
-Tiếp theo, em xin trình bày phần kho dữ liệu.}
+	\rsslide{Hùng Cường}{%
+		\rsHead{02 · Người dùng}{Người dùng và cấp quyết định}
+		\rsTable{128}{278.4}{\fBody}{20}{465.92,449.28,748.8}{l,l,l}
+		\rsRow[th]{61.8}{Người dùng & Cấp quyết định & Quyết định cần hỗ trợ}
+		\rsRow{61.8}{Trưởng phòng rủi ro & Chiến lược, chiến thuật & Đặt ngưỡng hạng, luật và chính sách}
+		\rsRow{61.8}{Chuyên viên thẩm định & Tác nghiệp & Duyệt, thẩm định thêm hay từ chối hồ sơ}
+		\rsRow{61.8}{Ban điều hành & Giám sát & Theo dõi KPI của danh mục}
+		% Simon model, pinned to the bottom
+		\rsT[text=rsMuted]{128}{646.6}{\fSmallS}%
+		{Mô hình Simon: mỗi giai đoạn ra quyết định có trang web riêng}
+		\rsCard{128}{695}{512}{225}
+		\rsCard{704}{695}{512}{225}
+		\rsCard{1280}{695}{512}{225}
+		\draw[rs conn] (640,807.5) -- (704,807.5);
+		\draw[rs conn] (1216,807.5) -- (1280,807.5);
+		\rsT[text=rsTeal]{161}{728}{\fSmallS}{Nhận thức · Intelligence}
+		\rsT{161}{772.4}{\fBodyS}{Overview · Analytics · Explorer}
+		\rsTw[text=rsMuted]{161}{822.2}{446}{\fSmall}{Phát hiện phân khúc và yếu tố rủi ro}
+		\rsT[text=rsTeal]{737}{728}{\fSmallS}{Thiết kế · Design}
+		\rsT{737}{772.4}{\fBodyS}{Playground}
+		\rsTw[text=rsMuted]{737}{822.2}{446}{\fSmall}{Thử ngưỡng, luật và chính sách theo hạng}
+		\rsT[text=rsTeal]{1313}{728}{\fSmallS}{Lựa chọn · Choice}
+		\rsT{1313}{772.4}{\fBodyS}{Application details}
+		\rsTw[text=rsMuted]{1313}{822.2}{446}{\fSmall}{Chọn đề xuất cho từng hồ sơ, kèm lý do}
+	}
+	\note{%
+		Hùng Cường – khoảng 50 giây. Hệ thống phục vụ ba nhóm người dùng. Trưởng phòng rủi ro ra
+		quyết định chiến lược và chiến thuật: đặt ngưỡng hạng, các luật và chính sách cho từng
+		hạng. Chuyên viên thẩm định ra quyết định tác nghiệp trên từng hồ sơ. Ban điều hành giám
+		sát qua các KPI. Thẩm định tín dụng là quyết định bán cấu trúc: một phần mô hình hoá
+		được bằng dữ liệu, phần còn lại cần con người. Vì vậy hệ thống chỉ đề xuất, không tự
+		quyết. Theo mô hình Simon, giai đoạn nhận thức dùng Overview, Analytics và Explorer;
+		giai đoạn thiết kế dùng Playground; giai đoạn lựa chọn dùng trang Application details.
+		Tiếp theo, em xin trình bày phần kho dữ liệu.}
 \end{frame}
 
 % ===================================================================== 4
 \begin{frame}{Dữ liệu nguồn}
-\rsslide{Hùng Cường}{%
-  \rsHead{03 · Kho dữ liệu}{Dữ liệu nguồn}
-  \rsT[text=rsTeal]{128}{278.4}{\fBig}{8}
-  \rsT[text=rsMuted]{128}{394.4}{\fSmall}{bảng CSV từ Kaggle}
-  \rsT[text=rsTeal]{128}{446.8}{\fBig}{2,7 GB}
-  \rsT[text=rsMuted]{128}{562.8}{\fSmall}{dung lượng CSV}
-  \rsT[text=rsTeal]{128}{615.2}{\fBig}{58,5}
-  \rsT[text=rsMuted]{128}{731.2}{\fSmall}{triệu dòng (khoảng)}
-  \rsTable{632}{278.4}{\fSmall}{20}{464,696}{l,l}
-  \rsRow[th]{56.4}{Bảng & Mỗi dòng là}
-  \rsRow{56.4}{application\_train & Hồ sơ vay có nhãn TARGET (lịch sử)}
-  \rsRow{56.4}{application\_test & Hồ sơ vay chưa có nhãn (hồ sơ mới)}
-  \rsRow{56.4}{bureau & Khoản vay tại tổ chức khác (Credit Bureau)}
-  \rsRow{56.4}{bureau\_balance & Quá hạn theo tháng của khoản bureau}
-  \rsRow{56.4}{previous\_application & Hồ sơ vay cũ tại Home Credit}
-  \rsRow{56.4}{installments\_payments & Một kỳ trả góp: phải trả so với thực trả}
-  \rsRow{56.4}{POS\_CASH\_balance & Số dư, quá hạn theo tháng (POS, tiền mặt)}
-  \rsRow{56.4}{credit\_card\_balance & Số dư, hạn mức, quá hạn của thẻ tín dụng}
-  % simulated-dates call-out with a clock icon
-  \rsCardSoft{128}{826}{1664}{130.2}
-  \draw[rsTealDeep,line width=4\rspx,line cap=round,line join=round]
-    (184,891.1) circle (20) (184,879.1) -- (184,891.1) -- (192,895.1);
-  \rsT{232}{854}{\fBodyS}{Thêm một nguồn MÔ PHỎNG: ngày nộp hồ sơ và ngày có kết quả}
-  \rsT[text=rsMuted]{232}{895.8}{\fSmall}%
-    {Dữ liệu gốc chỉ có số ngày tính lùi, nên ngày được sinh bằng hcdw synth-dates.}
-}
-\note{%
-Hùng Cường – khoảng 40 giây. Dữ liệu nguồn là bộ Home Credit Default Risk trên Kaggle: 8
-bảng CSV, khoảng 2,7 GB và khoảng 58,5 triệu dòng. Bảng application là trung tâm; tập
-train có nhãn TARGET nên đóng vai khoản vay lịch sử, tập test chưa có nhãn nên đóng vai
-hồ sơ mới. Các bảng còn lại là lịch sử tín dụng: bureau, hồ sơ cũ, trả góp, POS và thẻ.
-Một điểm quan trọng: dữ liệu gốc không có ngày thật, chỉ có số ngày tính lùi từ lúc nộp
-hồ sơ. Vì vậy nhóm thêm một nguồn mô phỏng cho ngày nộp và ngày có kết quả. Mọi biểu đồ
-theo thời gian trong phần sau đều dựa trên ngày mô phỏng này, nên không đọc thành xu
-hướng nghiệp vụ.}
+	\rsslide{Hùng Cường}{%
+		\rsHead{03 · Kho dữ liệu}{Dữ liệu nguồn}
+		\rsT[text=rsTeal]{128}{278.4}{\fBig}{8}
+		\rsT[text=rsMuted]{128}{394.4}{\fSmall}{bảng CSV từ Kaggle}
+		\rsT[text=rsTeal]{128}{446.8}{\fBig}{2,7 GB}
+		\rsT[text=rsMuted]{128}{562.8}{\fSmall}{dung lượng CSV}
+		\rsT[text=rsTeal]{128}{615.2}{\fBig}{58,5}
+		\rsT[text=rsMuted]{128}{731.2}{\fSmall}{triệu dòng (khoảng)}
+		\rsTable{632}{278.4}{\fSmall}{20}{464,696}{l,l}
+		\rsRow[th]{56.4}{Bảng & Mỗi dòng là}
+		\rsRow{56.4}{application\_train & Hồ sơ vay có nhãn TARGET (lịch sử)}
+		\rsRow{56.4}{application\_test & Hồ sơ vay chưa có nhãn (hồ sơ mới)}
+		\rsRow{56.4}{bureau & Khoản vay tại tổ chức khác (Credit Bureau)}
+		\rsRow{56.4}{bureau\_balance & Quá hạn theo tháng của khoản bureau}
+		\rsRow{56.4}{previous\_application & Hồ sơ vay cũ tại Home Credit}
+		\rsRow{56.4}{installments\_payments & Một kỳ trả góp: phải trả so với thực trả}
+		\rsRow{56.4}{POS\_CASH\_balance & Số dư, quá hạn theo tháng (POS, tiền mặt)}
+		\rsRow{56.4}{credit\_card\_balance & Số dư, hạn mức, quá hạn của thẻ tín dụng}
+		% simulated-dates call-out with a clock icon
+		\rsCardSoft{128}{826}{1664}{130.2}
+		\draw[rsTealDeep,line width=4\rspx,line cap=round,line join=round]
+		(184,891.1) circle (20) (184,879.1) -- (184,891.1) -- (192,895.1);
+		\rsT{232}{854}{\fBodyS}{Thêm một nguồn MÔ PHỎNG: ngày nộp hồ sơ và ngày có kết quả}
+		\rsT[text=rsMuted]{232}{895.8}{\fSmall}%
+		{Dữ liệu gốc chỉ có số ngày tính lùi, nên ngày được sinh bằng hcdw synth-dates.}
+	}
+	\note{%
+		Hùng Cường – khoảng 40 giây. Dữ liệu nguồn là bộ Home Credit Default Risk trên Kaggle: 8
+		bảng CSV, khoảng 2,7 GB và khoảng 58,5 triệu dòng. Bảng application là trung tâm; tập
+		train có nhãn TARGET nên đóng vai khoản vay lịch sử, tập test chưa có nhãn nên đóng vai
+		hồ sơ mới. Các bảng còn lại là lịch sử tín dụng: bureau, hồ sơ cũ, trả góp, POS và thẻ.
+		Một điểm quan trọng: dữ liệu gốc không có ngày thật, chỉ có số ngày tính lùi từ lúc nộp
+		hồ sơ. Vì vậy nhóm thêm một nguồn mô phỏng cho ngày nộp và ngày có kết quả. Mọi biểu đồ
+		theo thời gian trong phần sau đều dựa trên ngày mô phỏng này, nên không đọc thành xu
+		hướng nghiệp vụ.}
 \end{frame}
 
 % ===================================================================== 5
 \begin{frame}{Kiến trúc tổng thể}
-\rsslide{Hùng Cường}{%
-  \rsHead{04 · Kho dữ liệu}{Kiến trúc tổng thể}
-  \begin{scope}[shift={(128,278.4)}]
-    \fill[rsBand,rounded corners=16\rspx] (0,0) rectangle ++(1664,352);
-    \fill[rsBand,rounded corners=16\rspx] (0,384) rectangle ++(1664,256);
-    \rsT[text=rsEyebrowC]{32}{16}{\fEyebrow}{\MakeUppercase{Offline · CLI hcdw}}
-    \rsT[text=rsEyebrowC]{32}{400}{\fEyebrow}{\MakeUppercase{Serving · hcdw serve}}
-    \rsNode{plain}{32}{64}{304}{136}{Kaggle CSV}{8 bảng · 2,7 GB}
-    \rsNode{plain}{464}{64}{304}{136}{ETL · hcdw etl}{làm sạch, gộp, nạp, 50 kiểm tra}
-    \rsNode{key}{896}{64}{304}{136}{DuckDB}{staging · dw · mart}
-    \rsNode{plain}{1328}{64}{304}{136}{Train + score}{LightGBM \rsRA{} hạng A–E}
-    \rsNode{sim}{32}{236}{400}{100}{Ngày mô phỏng}{application\_dates.csv}
-    \rsNode{plain}{32}{448}{680}{136}{React SPA · Risk Studio}%
-      {Overview · Analytics · Explorer · Application details · Playground}
-    \rsNode{plain}{896}{448}{304}{136}{FastAPI}{/api/* · chỉ đọc kho}
-    \draw[rs conn] (336,132) -- (464,132);
-    \draw[rs conn] (768,132) -- (896,132);
-    \draw[rs conn both] (1200,132) -- (1328,132);
-    \draw[rs conn,rs dashed] (432,286) -| (616,200);
-    \draw[rs conn] (1048,200) -- (1048,448);
-    \draw[rs conn] (1480,200) |- (1200,516);
-    \draw[rs conn] (712,516) -- (896,516);
-    \rsT[text=rsMuted]{1064}{280}{\fSmall}{chỉ đọc}
-    \rsT[text=rsMuted]{1496}{280}{\fSmall}{đọc mô hình}
-    \rsT[text=rsMuted]{728}{468}{\fSmall}{HTTP JSON}
-  \end{scope}
-}
-\note{%
-Hùng Cường – khoảng 50 giây. Hệ thống chia hai phần. Phần offline chạy bằng dòng lệnh
-hcdw: ETL đọc 8 file CSV của Kaggle và nguồn ngày mô phỏng, làm sạch, gộp, nạp vào một
-file DuckDB gồm ba lược đồ staging, dw và mart. Sau đó bước train học mô hình LightGBM
-ngay trên kho, và bước score chấm mọi hồ sơ rồi ghi kết quả hạng A đến E trở lại kho.
-Phần serving gồm API FastAPI chỉ đọc kho và mô hình đã lưu, và giao diện React có năm
-trang chính. Trình duyệt không bao giờ gửi SQL; API kiểm tra tên chiều và chỉ số theo
-danh sách cho phép. Offline và serving dùng chung mã chấm điểm, nên chấm hàng loạt và
-chấm một hồ sơ cho cùng kết quả.}
+	\rsslide{Hùng Cường}{%
+		\rsHead{04 · Kho dữ liệu}{Kiến trúc tổng thể}
+		\begin{scope}[shift={(128,278.4)}]
+			\fill[rsBand,rounded corners=16\rspx] (0,0) rectangle ++(1664,352);
+			\fill[rsBand,rounded corners=16\rspx] (0,384) rectangle ++(1664,256);
+			\rsT[text=rsEyebrowC]{32}{16}{\fEyebrow}{\MakeUppercase{Offline · CLI hcdw}}
+			\rsT[text=rsEyebrowC]{32}{400}{\fEyebrow}{\MakeUppercase{Serving · hcdw serve}}
+			\rsNode{plain}{32}{64}{304}{136}{Kaggle CSV}{8 bảng · 2,7 GB}
+			\rsNode{plain}{464}{64}{304}{136}{ETL · hcdw etl}{làm sạch, gộp, nạp, 50 kiểm tra}
+			\rsNode{key}{896}{64}{304}{136}{DuckDB}{staging · dw · mart}
+			\rsNode{plain}{1328}{64}{304}{136}{Train + score}{LightGBM \rsRA{} hạng A–E}
+			\rsNode{sim}{32}{236}{400}{100}{Ngày mô phỏng}{application\_dates.csv}
+			\rsNode{plain}{32}{448}{680}{136}{React SPA · Risk Studio}%
+			{Overview · Analytics · Explorer · Application details · Playground}
+			\rsNode{plain}{896}{448}{304}{136}{FastAPI}{/api/* · chỉ đọc kho}
+			\draw[rs conn] (336,132) -- (464,132);
+			\draw[rs conn] (768,132) -- (896,132);
+			\draw[rs conn both] (1200,132) -- (1328,132);
+			\draw[rs conn,rs dashed] (432,286) -| (616,200);
+			\draw[rs conn] (1048,200) -- (1048,448);
+			\draw[rs conn] (1480,200) |- (1200,516);
+			\draw[rs conn] (712,516) -- (896,516);
+			\rsT[text=rsMuted]{1064}{280}{\fSmall}{chỉ đọc}
+			\rsT[text=rsMuted]{1496}{280}{\fSmall}{đọc mô hình}
+			\rsT[text=rsMuted]{728}{468}{\fSmall}{HTTP JSON}
+		\end{scope}
+	}
+	\note{%
+		Hùng Cường – khoảng 50 giây. Hệ thống chia hai phần. Phần offline chạy bằng dòng lệnh
+		hcdw: ETL đọc 8 file CSV của Kaggle và nguồn ngày mô phỏng, làm sạch, gộp, nạp vào một
+		file DuckDB gồm ba lược đồ staging, dw và mart. Sau đó bước train học mô hình LightGBM
+		ngay trên kho, và bước score chấm mọi hồ sơ rồi ghi kết quả hạng A đến E trở lại kho.
+		Phần serving gồm API FastAPI chỉ đọc kho và mô hình đã lưu, và giao diện React có năm
+		trang chính. Trình duyệt không bao giờ gửi SQL; API kiểm tra tên chiều và chỉ số theo
+		danh sách cho phép. Offline và serving dùng chung mã chấm điểm, nên chấm hàng loạt và
+		chấm một hồ sơ cho cùng kết quả.}
 \end{frame}
 
 % ===================================================================== 6
 \begin{frame}{Mô hình đa chiều}
-\rsslide{Hùng Cường}{%
-  \rsHead{05 · Kho dữ liệu}{Mô hình đa chiều}
-  \rsT[text=rsTeal]{128}{278.4}{\fBig}{4}
-  \rsT{128}{394.4}{\fBody}{bảng sự kiện (fact)}
-  \rsT[text=rsTeal]{128}{464.2}{\fBig}{8}
-  \rsT{128}{580.2}{\fBody}{bảng chiều (dimension)}
-  \rsTw[text=rsMuted]{128}{650}{340}{\fSmall}%
-    {Star schema, không snowflake: mỗi chiều chỉ cần một phép join}
-  % analytical part: fact constellation
-  \rsCard{516}{278.4}{755.69}{504.6}
-  \rsT{549}{311.4}{\fBodyS}{Kho phân tích · fact constellation}
-  \fill[rsTeal,rounded corners=10\rspx] (549,365.2) rectangle ++(336.85,86.8);
-  \fill[rsTeal,rounded corners=10\rspx] (901.85,365.2) rectangle ++(336.85,86.8);
-  \rsT[text=rsPage]{565}{375.2}{\fSmallS}{fact\_loan\_application}
-  \rsT[text=rsTealSoft]{565}{409.6}{\fSmall}{1 dòng = 1 hồ sơ vay}
-  \rsT[text=rsPage]{917.85}{375.2}{\fSmallS}{fact\_bureau\_credit}
-  \rsT[text=rsTealSoft]{917.85}{409.6}{\fSmall}{1 dòng = 1 khoản bureau}
-  \foreach \x/\y/\t in {549/468/dim\_customer, 901.85/468/dim\_time,
-      549/540.4/dim\_credit\_history, 901.85/540.4/dim\_contract,
-      549/612.8/dim\_region, 901.85/612.8/dim\_bureau\_category}{
-    \rsBox{\x}{\y}{336.85}{56.4}{10}{none}{rsNodeLine}{2}
-    \rsT{\x+18}{\y+12}{\fSmall}{\t}}
-  \rsTw[text=rsMuted]{549}{685.2}{689.69}{\fSmall}%
-    {dim\_time: role-playing · dim\_credit\_history: mini-dimension · dim\_bureau\_category: junk}
-  % DSS part
-  \rsCard{1319.69}{278.4}{472.31}{454.2}
-  \rsT{1352.69}{311.4}{\fBodyS}{Phần DSS}
-  \fill[rsTeal,rounded corners=10\rspx] (1352.69,365.2) rectangle ++(406.31,86.8);
-  \rsT[text=rsPage]{1368.69}{375.2}{\fSmallS}{fact\_risk\_assessment}
-  \rsT[text=rsTealSoft]{1368.69}{409.6}{\fSmall}{1:1 với hồ sơ vay}
-  \fill[rsTeal,rounded corners=10\rspx] (1352.69,468) rectangle ++(406.31,86.8);
-  \rsT[text=rsPage]{1368.69}{478}{\fSmallS}{fact\_rule\_hit}
-  \rsT[text=rsTealSoft]{1368.69}{512.4}{\fSmall}{1 dòng = 1 luật vi phạm}
-  \rsBox{1352.69}{570.8}{406.31}{56.4}{10}{none}{rsNodeLine}{2}
-  \rsT{1370.69}{582.8}{\fSmall}{dim\_risk\_grade · A–E}
-  \rsBox{1352.69}{643.2}{406.31}{56.4}{10}{none}{rsNodeLine}{2}
-  \rsT{1370.69}{655.2}{\fSmall}{dim\_rule · 6 luật}
-  \rsTw[text=rsMuted]{128}{844.4}{1664}{\fBody}%
-    {Hai fact chính dùng chung dim\_customer và dim\_time, nên phân tích chéo (drill-across) được từ hồ sơ vay sang khoản vay bureau.}
-}
-\note{%
-Hùng Cường – khoảng 45 giây. Kho dữ liệu gồm 4 bảng sự kiện và 8 bảng chiều. Phần phân
-tích là một fact constellation: fact\_loan\_application có hạt là một hồ sơ vay,
-fact\_bureau\_credit có hạt là một khoản vay ở bureau. Hai fact dùng chung chiều khách
-hàng và chiều thời gian, nên có thể phân tích chéo. dim\_time đóng nhiều vai, ví dụ ngày
-nộp và ngày có kết quả; dim\_credit\_history là mini-dimension gộp hàng chục triệu dòng
-lịch sử; dim\_bureau\_category là junk dimension. Phần DSS thêm fact\_risk\_assessment,
-một dòng cho mỗi hồ sơ đã chấm, và fact\_rule\_hit, một dòng cho mỗi luật bị vi phạm,
-cùng hai chiều hạng và luật nạp từ file cấu hình.}
+	\rsslide{Hùng Cường}{%
+		\rsHead{05 · Kho dữ liệu}{Mô hình đa chiều}
+		\rsT[text=rsTeal]{128}{278.4}{\fBig}{4}
+		\rsT{128}{394.4}{\fBody}{bảng sự kiện (fact)}
+		\rsT[text=rsTeal]{128}{464.2}{\fBig}{8}
+		\rsT{128}{580.2}{\fBody}{bảng chiều (dimension)}
+		\rsTw[text=rsMuted]{128}{650}{340}{\fSmall}%
+		{Star schema, không snowflake: mỗi chiều chỉ cần một phép join}
+		% analytical part: fact constellation
+		\rsCard{516}{278.4}{755.69}{504.6}
+		\rsT{549}{311.4}{\fBodyS}{Kho phân tích · fact constellation}
+		\fill[rsTeal,rounded corners=10\rspx] (549,365.2) rectangle ++(336.85,86.8);
+		\fill[rsTeal,rounded corners=10\rspx] (901.85,365.2) rectangle ++(336.85,86.8);
+		\rsT[text=rsPage]{565}{375.2}{\fSmallS}{fact\_loan\_application}
+		\rsT[text=rsTealSoft]{565}{409.6}{\fSmall}{1 dòng = 1 hồ sơ vay}
+		\rsT[text=rsPage]{917.85}{375.2}{\fSmallS}{fact\_bureau\_credit}
+		\rsT[text=rsTealSoft]{917.85}{409.6}{\fSmall}{1 dòng = 1 khoản bureau}
+		\foreach \x/\y/\t in {549/468/dim\_customer, 901.85/468/dim\_time,
+				549/540.4/dim\_credit\_history, 901.85/540.4/dim\_contract,
+				549/612.8/dim\_region, 901.85/612.8/dim\_bureau\_category}{
+				\rsBox{\x}{\y}{336.85}{56.4}{10}{none}{rsNodeLine}{2}
+				\rsT{\x+18}{\y+12}{\fSmall}{\t}}
+		\rsTw[text=rsMuted]{549}{685.2}{689.69}{\fSmall}%
+		{dim\_time: role-playing · dim\_credit\_history: mini-dimension · dim\_bureau\_category: junk}
+		% DSS part
+		\rsCard{1319.69}{278.4}{472.31}{454.2}
+		\rsT{1352.69}{311.4}{\fBodyS}{Phần DSS}
+		\fill[rsTeal,rounded corners=10\rspx] (1352.69,365.2) rectangle ++(406.31,86.8);
+		\rsT[text=rsPage]{1368.69}{375.2}{\fSmallS}{fact\_risk\_assessment}
+		\rsT[text=rsTealSoft]{1368.69}{409.6}{\fSmall}{1:1 với hồ sơ vay}
+		\fill[rsTeal,rounded corners=10\rspx] (1352.69,468) rectangle ++(406.31,86.8);
+		\rsT[text=rsPage]{1368.69}{478}{\fSmallS}{fact\_rule\_hit}
+		\rsT[text=rsTealSoft]{1368.69}{512.4}{\fSmall}{1 dòng = 1 luật vi phạm}
+		\rsBox{1352.69}{570.8}{406.31}{56.4}{10}{none}{rsNodeLine}{2}
+		\rsT{1370.69}{582.8}{\fSmall}{dim\_risk\_grade · A–E}
+		\rsBox{1352.69}{643.2}{406.31}{56.4}{10}{none}{rsNodeLine}{2}
+		\rsT{1370.69}{655.2}{\fSmall}{dim\_rule · 6 luật}
+		\rsTw[text=rsMuted]{128}{844.4}{1664}{\fBody}%
+		{Hai fact chính dùng chung dim\_customer và dim\_time, nên phân tích chéo (drill-across) được từ hồ sơ vay sang khoản vay bureau.}
+	}
+	\note{%
+		Hùng Cường – khoảng 45 giây. Kho dữ liệu gồm 4 bảng sự kiện và 8 bảng chiều. Phần phân
+		tích là một fact constellation: fact\_loan\_application có hạt là một hồ sơ vay,
+		fact\_bureau\_credit có hạt là một khoản vay ở bureau. Hai fact dùng chung chiều khách
+		hàng và chiều thời gian, nên có thể phân tích chéo. dim\_time đóng nhiều vai, ví dụ ngày
+		nộp và ngày có kết quả; dim\_credit\_history là mini-dimension gộp hàng chục triệu dòng
+		lịch sử; dim\_bureau\_category là junk dimension. Phần DSS thêm fact\_risk\_assessment,
+		một dòng cho mỗi hồ sơ đã chấm, và fact\_rule\_hit, một dòng cho mỗi luật bị vi phạm,
+		cùng hai chiều hạng và luật nạp từ file cấu hình.}
 \end{frame}
 
 % ===================================================================== 7
 \begin{frame}{ETL và cổng chất lượng}
-\rsslide{Hùng Cường}{%
-  \rsHead{06 · Kho dữ liệu}{ETL và cổng chất lượng}
-  \begin{scope}[shift={(128,278.4)}]
-    \rsNode{plain}{0}{0}{320}{150}{1 · Extract}{8 CSV + ngày mô phỏng vào staging}
-    \rsNode{plain}{448}{0}{320}{150}{2 · Clean}{Quy tắc R1–R10 (pandas)}
-    \rsNode{plain}{896}{0}{320}{150}{3 · Aggregate}{Lịch sử \rsRA{} 1 dòng mỗi khách (SQL)}
-    \rsNode{plain}{1344}{0}{320}{150}{4 · Load}{Dim, fact và view mart}
-    \rsNode{gate}{1344}{240}{320}{150}{5 · Quality gate}{50 kiểm tra: PK, FK, số dòng…}
-    \rsNode{ok}{896}{240}{320}{150}{Publish}{Thay hc.duckdb bằng file tạm}
-    \rsNode{bad}{1344}{480}{320}{150}{Rollback}{Xoá file tạm, giữ kho cũ, exit 1}
-    \rsT[text=rsTeal]{0}{240}{\fBig}{\textasciitilde 15 giây}
-    \rsT[text=rsMuted]{0}{360}{\fSmall}{hcdw etl trên toàn bộ 2,7 GB CSV}
-    \rsT{0}{424.4}{\fNsixty}{\textasciitilde 1,5 phút}
-    \rsT[text=rsMuted]{0}{498.4}{\fSmall}{hcdw etl -\kern0pt-score: thêm train và chấm điểm}
-    \draw[rs conn] (320,75) -- (448,75);
-    \draw[rs conn] (768,75) -- (896,75);
-    \draw[rs conn] (1216,75) -- (1344,75);
-    \draw[rs conn] (1504,150) -- (1504,240);
-    \draw[rs conn,draw=rsGA] (1344,315) -- (1216,315);
-    \draw[rs conn,draw=rsGE] (1504,390) -- (1504,480);
-    \rsT[text=rsGA]{1240}{263}{\fSmallS}{Đạt}
-    \rsT[text=rsGE]{1520}{419}{\fSmallS}{Không đạt}
-  \end{scope}
-}
-\note{%
-Hùng Cường – khoảng 45 giây. Quy trình ETL đi qua các bước extract, clean, aggregate và
-load. Extract đọc 8 file CSV và nguồn ngày mô phỏng vào staging; clean áp dụng mười quy
-tắc làm sạch R1 đến R10; aggregate gộp lịch sử tín dụng về một dòng mỗi khách; load nạp
-các bảng chiều, bảng sự kiện và view phân tích. Mọi bước ghi vào một file tạm. Sau đó
-cổng chất lượng chạy 50 kiểm tra như khoá chính, khoá ngoại, số dòng và đối soát tổng
-tiền. Nếu tất cả đạt, file tạm thay kho đang dùng; nếu có kiểm tra không đạt, file tạm
-bị xoá, kho cũ giữ nguyên. Toàn bộ ETL mất khoảng 15 giây, và khoảng 1,5 phút nếu chạy
-thêm train và chấm điểm. Tiếp theo, Thiên Hào sẽ trình bày phần phân tích.}
+	\rsslide{Hùng Cường}{%
+		\rsHead{06 · Kho dữ liệu}{ETL và cổng chất lượng}
+		\begin{scope}[shift={(128,278.4)}]
+			\rsNode{plain}{0}{0}{320}{150}{1 · Extract}{8 CSV + ngày mô phỏng vào staging}
+			\rsNode{plain}{448}{0}{320}{150}{2 · Clean}{Quy tắc R1–R10 (pandas)}
+			\rsNode{plain}{896}{0}{320}{150}{3 · Aggregate}{Lịch sử \rsRA{} 1 dòng mỗi khách (SQL)}
+			\rsNode{plain}{1344}{0}{320}{150}{4 · Load}{Dim, fact và view mart}
+			\rsNode{gate}{1344}{240}{320}{150}{5 · Quality gate}{50 kiểm tra: PK, FK, số dòng…}
+			\rsNode{ok}{896}{240}{320}{150}{Publish}{Thay hc.duckdb bằng file tạm}
+			\rsNode{bad}{1344}{480}{320}{150}{Rollback}{Xoá file tạm, giữ kho cũ, exit 1}
+			\rsT[text=rsTeal]{0}{240}{\fBig}{\textasciitilde 15 giây}
+			\rsT[text=rsMuted]{0}{360}{\fSmall}{hcdw etl trên toàn bộ 2,7 GB CSV}
+			\rsT{0}{424.4}{\fNsixty}{\textasciitilde 1,5 phút}
+			\rsT[text=rsMuted]{0}{498.4}{\fSmall}{hcdw etl -\kern0pt-score: thêm train và chấm điểm}
+			\draw[rs conn] (320,75) -- (448,75);
+			\draw[rs conn] (768,75) -- (896,75);
+			\draw[rs conn] (1216,75) -- (1344,75);
+			\draw[rs conn] (1504,150) -- (1504,240);
+			\draw[rs conn,draw=rsGA] (1344,315) -- (1216,315);
+			\draw[rs conn,draw=rsGE] (1504,390) -- (1504,480);
+			\rsT[text=rsGA]{1240}{263}{\fSmallS}{Đạt}
+			\rsT[text=rsGE]{1520}{419}{\fSmallS}{Không đạt}
+		\end{scope}
+	}
+	\note{%
+		Hùng Cường – khoảng 45 giây. Quy trình ETL đi qua các bước extract, clean, aggregate và
+		load. Extract đọc 8 file CSV và nguồn ngày mô phỏng vào staging; clean áp dụng mười quy
+		tắc làm sạch R1 đến R10; aggregate gộp lịch sử tín dụng về một dòng mỗi khách; load nạp
+		các bảng chiều, bảng sự kiện và view phân tích. Mọi bước ghi vào một file tạm. Sau đó
+		cổng chất lượng chạy 50 kiểm tra như khoá chính, khoá ngoại, số dòng và đối soát tổng
+		tiền. Nếu tất cả đạt, file tạm thay kho đang dùng; nếu có kiểm tra không đạt, file tạm
+		bị xoá, kho cũ giữ nguyên. Toàn bộ ETL mất khoảng 15 giây, và khoảng 1,5 phút nếu chạy
+		thêm train và chấm điểm. Tiếp theo, Thiên Hào sẽ trình bày phần phân tích.}
 \end{frame}
 
 % ===================================================================== 8
 \begin{frame}{KPI chính}
-\rsslide{Thiên Hào}{%
-  \rsHead{07 · Phân tích}{KPI chính}
-  % 3 x 2 grid, columns 533.33 px, gap 32
-  \rsCard{128}{278.4}{533.33}{284.2}
-  \rsPill{161}{311.4}{scopeall}{All applications}
-  \rsT{161}{367.8}{\fBig}{51,86\%}
-  \rsT{161}{491.8}{\fBody}{Tỷ lệ duyệt · KPI-04}
-  \rsCard{693.33}{278.4}{533.33}{284.2}
-  \rsPill{726.33}{311.4}{scopeall}{All applications}
-  \rsT{726.33}{367.8}{\fBig}{39,54\%}
-  \rsT{726.33}{491.8}{\fBody}{Tỷ lệ chuyển thẩm định · KPI-05}
-  \rsCard{1258.67}{278.4}{533.33}{284.2}
-  \rsPill{1291.67}{311.4}{scopehist}{Historical loans}
-  \rsT{1291.67}{367.8}{\fBig}{8,07\%}
-  \rsT{1291.67}{491.8}{\fBody}{Tỷ lệ vỡ nợ · KPI-01}
-  \rsCard{128}{594.6}{533.33}{284.2}
-  \rsPill{161}{627.6}{scopeall}{All applications}
-  \rsT[name=kpiA]{161}{684}{\fBig}{209,4}
-  \node[anchor=base west] at ([xshift=10\rspx]kpiA.base east) {\fHthree tỷ};
-  \rsT{161}{808}{\fBody}{Dư nợ cấp mới · KPI-02}
-  \rsCard{693.33}{594.6}{533.33}{284.2}
-  \rsPill{726.33}{627.6}{scopeall}{All applications}
-  \rsT[name=kpiB]{726.33}{684}{\fBig}{15,76}
-  \node[anchor=base west] at ([xshift=10\rspx]kpiB.base east) {\fHthree tỷ};
-  \rsT{726.33}{808}{\fBody}{Dư nợ chịu rủi ro · KPI-03}
-  \rsCardSoft{1258.67}{594.6}{533.33}{284.2}
-  \rsT[text=rsTeal]{1290.67}{625.5}{\fNsixty}{356.255}
-  \rsTw{1290.67}{699.5}{469.33}{\fBody}%
-    {hồ sơ đã chấm = 307.511 khoản vay lịch sử + 48.744 hồ sơ mới}
-  \rsTw[text=rsMuted]{1290.67}{783.1}{469.33}{\fSmall}%
-    {Tỷ lệ vỡ nợ chỉ tính được trên khoản vay lịch sử. Tiền giữ đơn vị gốc.}
-}
-\note{%
-Thiên Hào – khoảng 1 phút. Đây là năm KPI chính trên trang Overview. Mỗi ô ghi rõ phạm
-vi. Trên mọi hồ sơ đã chấm, chính sách hiện hành duyệt 51,86\% và chuyển thẩm định thêm
-39,54\%. Dư nợ cấp mới là 209,4 tỷ, và dư nợ chịu rủi ro, tức tổng tiền vay nhân xác
-suất vỡ nợ, là 15,76 tỷ, giữ nguyên đơn vị tiền trong dữ liệu gốc. Riêng tỷ lệ vỡ nợ
-8,07\% chỉ tính trên khoản vay lịch sử, vì chỉ chúng có kết quả trả nợ. Hai phạm vi này
-có nhãn All applications và Historical loans trên giao diện, để người xem không so nhầm
-hai con số khác mẫu số.}
+	\rsslide{Thiên Hào}{%
+		\rsHead{07 · Phân tích}{KPI chính}
+		% 3 x 2 grid, columns 533.33 px, gap 32
+		\rsCard{128}{278.4}{533.33}{284.2}
+		\rsPill{161}{311.4}{scopeall}{All applications}
+		\rsT{161}{367.8}{\fBig}{51,86\%}
+		\rsT{161}{491.8}{\fBody}{Tỷ lệ duyệt · KPI-04}
+		\rsCard{693.33}{278.4}{533.33}{284.2}
+		\rsPill{726.33}{311.4}{scopeall}{All applications}
+		\rsT{726.33}{367.8}{\fBig}{39,54\%}
+		\rsT{726.33}{491.8}{\fBody}{Tỷ lệ chuyển thẩm định · KPI-05}
+		\rsCard{1258.67}{278.4}{533.33}{284.2}
+		\rsPill{1291.67}{311.4}{scopehist}{Historical loans}
+		\rsT{1291.67}{367.8}{\fBig}{8,07\%}
+		\rsT{1291.67}{491.8}{\fBody}{Tỷ lệ vỡ nợ · KPI-01}
+		\rsCard{128}{594.6}{533.33}{284.2}
+		\rsPill{161}{627.6}{scopeall}{All applications}
+		\rsT[name=kpiA]{161}{684}{\fBig}{209,4}
+		\node[anchor=base west] at ([xshift=10\rspx]kpiA.base east) {\fHthree tỷ};
+		\rsT{161}{808}{\fBody}{Dư nợ cấp mới · KPI-02}
+		\rsCard{693.33}{594.6}{533.33}{284.2}
+		\rsPill{726.33}{627.6}{scopeall}{All applications}
+		\rsT[name=kpiB]{726.33}{684}{\fBig}{15,76}
+		\node[anchor=base west] at ([xshift=10\rspx]kpiB.base east) {\fHthree tỷ};
+		\rsT{726.33}{808}{\fBody}{Dư nợ chịu rủi ro · KPI-03}
+		\rsCardSoft{1258.67}{594.6}{533.33}{284.2}
+		\rsT[text=rsTeal]{1290.67}{625.5}{\fNsixty}{356.255}
+		\rsTw{1290.67}{699.5}{469.33}{\fBody}%
+		{hồ sơ đã chấm = 307.511 khoản vay lịch sử + 48.744 hồ sơ mới}
+		\rsTw[text=rsMuted]{1290.67}{783.1}{469.33}{\fSmall}%
+		{Tỷ lệ vỡ nợ chỉ tính được trên khoản vay lịch sử. Tiền giữ đơn vị gốc.}
+	}
+	\note{%
+		Thiên Hào – khoảng 1 phút. Đây là năm KPI chính trên trang Overview. Mỗi ô ghi rõ phạm
+		vi. Trên mọi hồ sơ đã chấm, chính sách hiện hành duyệt 51,86\% và chuyển thẩm định thêm
+		39,54\%. Dư nợ cấp mới là 209,4 tỷ, và dư nợ chịu rủi ro, tức tổng tiền vay nhân xác
+		suất vỡ nợ, là 15,76 tỷ, giữ nguyên đơn vị tiền trong dữ liệu gốc. Riêng tỷ lệ vỡ nợ
+		8,07\% chỉ tính trên khoản vay lịch sử, vì chỉ chúng có kết quả trả nợ. Hai phạm vi này
+		có nhãn All applications và Historical loans trên giao diện, để người xem không so nhầm
+		hai con số khác mẫu số.}
 \end{frame}
 
 % ===================================================================== 9
 \begin{frame}{OLAP trên trang Analytics}
-\rsslide{Thiên Hào}{%
-  \rsHead{08 · Phân tích}{OLAP trên trang Analytics}
-  \rsTable{128}{278.4}{\fBody}{20}{276,644}{l,l}
-  \rsRow[th]{61.8}{Phép OLAP & Thao tác trên Analytics}
-  \rsRow{61.8}{Slice & Một chip lọc: cố định một chiều}
-  \rsRow{61.8}{Dice & Nhiều chip lọc trên từ hai chiều}
-  \rsRow{61.8}{Roll-up & Interval lên Year; \rsUp{} hoặc × bỏ chiều}
-  \rsRow{61.8}{Drill-down & Interval xuống Month; \rsDown{} hoặc + chiều}
-  \rsRow{61.8}{Pivot & \rsSwap{} đổi chiều hàng và chiều cột}
-  \rsRow{61.8}{Drill-through & Bấm một ô \rsRA{} mở Explorer}
-  \rsCardSoft{128}{788.4}{920}{131.6}
-  \rsTw{160}{816.4}{856}{\fBody}%
-    {Mỗi thao tác gửi một yêu cầu tới API và chạy một câu SQL GROUPING SETS: khoảng 15–60 ms trên 356 nghìn hồ sơ.}
-  \rsShot{1100}{128}{692}{792}{images/page_analytics.png}
-}
-\note{%
-Thiên Hào – khoảng 1 phút. Trang Analytics minh hoạ các phép OLAP trên cùng một khối dữ
-liệu. Slice là thêm một chip lọc cố định một chiều; dice là nhiều chip trên từ hai
-chiều. Roll-up và drill-down là đổi Interval giữa năm, quý, tháng, hoặc dùng nút mũi
-tên, thêm và bỏ chiều trên bảng Cube. Pivot là nút đổi hàng và cột. Bấm một ô sẽ mở
-Explorer với đúng nhóm đó, gọi là drill-through. Mỗi thao tác chỉ gửi một yêu cầu tới
-API, API kiểm tra tên chiều rồi chạy một câu SQL GROUPING SETS, mất khoảng 15 đến 60
-mili giây. Lưu ý: trục thời gian ở đây dùng ngày mô phỏng.}
+	\rsslide{Thiên Hào}{%
+		\rsHead{08 · Phân tích}{OLAP trên trang Analytics}
+		\rsTable{128}{278.4}{\fBody}{20}{276,644}{l,l}
+		\rsRow[th]{61.8}{Phép OLAP & Thao tác trên Analytics}
+		\rsRow{61.8}{Slice & Một chip lọc: cố định một chiều}
+		\rsRow{61.8}{Dice & Nhiều chip lọc trên từ hai chiều}
+		\rsRow{61.8}{Roll-up & Interval lên Year; \rsUp{} hoặc × bỏ chiều}
+		\rsRow{61.8}{Drill-down & Interval xuống Month; \rsDown{} hoặc + chiều}
+		\rsRow{61.8}{Pivot & \rsSwap{} đổi chiều hàng và chiều cột}
+		\rsRow{61.8}{Drill-through & Bấm một ô \rsRA{} mở Explorer}
+		\rsCardSoft{128}{788.4}{920}{131.6}
+		\rsTw{160}{816.4}{856}{\fBody}%
+		{Tùy thao tác, trang gửi 1, 3 hoặc 5 yêu cầu tới API; mỗi yêu cầu chạy một câu SQL GROUPING SETS (15–60 ms).}
+		\rsShot{1100}{128}{692}{792}{images/page_analytics.png}
+	}
+	\note{%
+		Thiên Hào – khoảng 1 phút. Trang Analytics minh hoạ các phép OLAP trên cùng một khối dữ
+		liệu. Slice là thêm một chip lọc cố định một chiều; dice là nhiều chip trên từ hai
+		chiều. Roll-up và drill-down là đổi Interval giữa năm, quý, tháng, hoặc dùng nút mũi
+		tên, thêm và bỏ chiều trên bảng Cube. Pivot là nút đổi hàng và cột. Bấm một ô sẽ mở
+		Explorer với đúng nhóm đó, gọi là drill-through. Tùy thao tác trên bảng Cube, Interval
+		hay bộ lọc, trang gửi 1, 3 hoặc 5 yêu cầu tới API; mỗi yêu cầu chạy một câu SQL
+		GROUPING SETS trong khoảng 15 đến 60 mili giây. Lưu ý: trục thời gian ở đây dùng ngày
+		mô phỏng.}
 \end{frame}
 
 % ===================================================================== 10
 \begin{frame}{Insight từ dữ liệu}
-\rsslide{Thiên Hào}{%
-  \rsHead{09 · Phân tích}{Insight từ dữ liệu}
-  % left: default rate by credit history
-  \rsCard{128}{278.4}{808}{619.6}
-  \rsT{161}{311.4}{\fHthree}{Theo lịch sử tín dụng}
-  \rsT[text=rsMuted]{161}{370.6}{\fSmall}%
-    {Tỷ lệ vỡ nợ · khoản vay lịch sử · đường đứt: chung 8,07\%}
-  \foreach \x/\h/\c/\v in {207/116/rsTeal/{10,12\%}, 443/88/rsTeal/{7,62\%},
-      679/185/rsTealDeep/{16,11\%}}{
-    \fill[\c] (\x,791) [rounded corners=8\rspx] -- (\x,791-\h) -- (\x+180,791-\h)
-      [sharp corners] -- (\x+180,791) -- cycle;
-    \node[anchor=north] at (\x+90,791-\h-45.8) {\fBodyS\rsstrut\v\rsstrut};}
-  \fill[rsNodeLine] (161,791) rectangle ++(744,2);
-  \draw[rsMuted,line width=2\rspx,dash pattern=on 6\rspx off 6\rspx]
-    (161,699) -- ++(744,0);
-  \node[anchor=north] at (297,809) {\fSmall\rsstrut No bureau\rsstrut};
-  \node[anchor=north] at (533,809) {\fSmall\rsstrut Clean history\rsstrut};
-  \node[anchor=north] at (769,809) {\fSmall\rsstrut Current overdue\rsstrut};
-  % right: default rate by final grade, same scale
-  \rsCard{984}{278.4}{808}{619.6}
-  \rsT{1017}{311.4}{\fHthree}{Theo hạng cuối: tăng đều A \rsRA{} E}
-  \rsT[text=rsMuted]{1017}{370.6}{\fSmall}%
-    {Tỷ lệ vỡ nợ · khoản vay lịch sử · cùng thang với biểu đồ trái}
-  \foreach \x/\h/\r/\c/\v/\g in {1057/7/4/rsGA/{0,62\%}/A, 1195/41/8/rsGB/{3,54\%}/B,
-      1333/95/8/rsGC/{8,29\%}/C, 1471/140/8/rsGD/{12,15\%}/D, 1609/322/8/rsGE/{28,02\%}/E}{
-    \fill[\c] (\x,791) [rounded corners=\r\rspx] -- (\x,791-\h) -- (\x+112,791-\h)
-      [sharp corners] -- (\x+112,791) -- cycle;
-    \node[anchor=north] at (\x+56,791-\h-45.8) {\fBodyS\rsstrut\v\rsstrut};
-    \rsChip{\x+28}{809}{\c}{\g}}
-  \fill[rsNodeLine] (1017,791) rectangle ++(744,2);
-}
-\note{%
-Thiên Hào – khoảng 1 phút. Hai insight chính. Thứ nhất, lịch sử tín dụng ảnh hưởng rõ
-đến khả năng trả nợ: khách đang quá hạn ở bureau vỡ nợ 16,11\%, gấp đôi mức chung
-8,07\%; khách không có dữ liệu bureau vỡ nợ 10,12\%, còn khách có lịch sử sạch chỉ
-7,62\%. Đây là lý do lịch sử tín dụng là thuộc tính đầu tiên của luật phân khúc. Thứ
-hai, thang hạng cuối phân tách rủi ro tốt: tỷ lệ vỡ nợ thực tế tăng đều từ 0,62\% ở hạng
-A lên 28,02\% ở hạng E, đúng yêu cầu BR-07. Hai biểu đồ dùng chung một thang đo. Tiếp
-theo, em xin trình bày cách hệ thống xếp hạng.}
+	\rsslide{Thiên Hào}{%
+		\rsHead{09 · Phân tích}{Insight từ dữ liệu}
+		% left: default rate by credit history
+		\rsCard{128}{278.4}{808}{619.6}
+		\rsT{161}{311.4}{\fHthree}{Theo lịch sử tín dụng}
+		\rsT[text=rsMuted]{161}{370.6}{\fSmall}%
+		{Tỷ lệ vỡ nợ · khoản vay lịch sử · đường đứt: chung 8,07\%}
+		\foreach \x/\h/\c/\v in {207/116/rsTeal/{10,12\%}, 443/88/rsTeal/{7,62\%},
+				679/185/rsTealDeep/{16,11\%}}{
+				\fill[\c] (\x,791) [rounded corners=8\rspx] -- (\x,791-\h) -- (\x+180,791-\h)
+				[sharp corners] -- (\x+180,791) -- cycle;
+				\node[anchor=north] at (\x+90,791-\h-45.8) {\fBodyS\rsstrut\v\rsstrut};}
+		\fill[rsNodeLine] (161,791) rectangle ++(744,2);
+		\draw[rsMuted,line width=2\rspx,dash pattern=on 6\rspx off 6\rspx]
+		(161,699) -- ++(744,0);
+		\node[anchor=north] at (297,809) {\fSmall\rsstrut No bureau\rsstrut};
+		\node[anchor=north] at (533,809) {\fSmall\rsstrut Clean history\rsstrut};
+		\node[anchor=north] at (769,809) {\fSmall\rsstrut Current overdue\rsstrut};
+		% right: default rate by final grade, same scale
+		\rsCard{984}{278.4}{808}{619.6}
+		\rsT{1017}{311.4}{\fHthree}{Theo hạng cuối: tăng đều A \rsRA{} E}
+		\rsT[text=rsMuted]{1017}{370.6}{\fSmall}%
+		{Tỷ lệ vỡ nợ · khoản vay lịch sử · cùng thang với biểu đồ trái}
+		\foreach \x/\h/\r/\c/\v/\g in {1057/7/4/rsGA/{0,62\%}/A, 1195/41/8/rsGB/{3,54\%}/B,
+				1333/95/8/rsGC/{8,29\%}/C, 1471/140/8/rsGD/{12,15\%}/D, 1609/322/8/rsGE/{28,02\%}/E}{
+				\fill[\c] (\x,791) [rounded corners=\r\rspx] -- (\x,791-\h) -- (\x+112,791-\h)
+				[sharp corners] -- (\x+112,791) -- cycle;
+				\node[anchor=north] at (\x+56,791-\h-45.8) {\fBodyS\rsstrut\v\rsstrut};
+				\rsChip{\x+28}{809}{\c}{\g}}
+		\fill[rsNodeLine] (1017,791) rectangle ++(744,2);
+	}
+	\note{%
+		Thiên Hào – khoảng 1 phút. Hai insight chính. Thứ nhất, lịch sử tín dụng ảnh hưởng rõ
+		đến khả năng trả nợ: khách đang quá hạn ở bureau vỡ nợ 16,11\%, gấp đôi mức chung
+		8,07\%; khách không có dữ liệu bureau vỡ nợ 10,12\%, còn khách có lịch sử sạch chỉ
+		7,62\%. Đây là lý do lịch sử tín dụng là thuộc tính đầu tiên của luật phân khúc. Thứ
+		hai, thang hạng cuối phân tách rủi ro tốt: tỷ lệ vỡ nợ thực tế tăng đều từ 0,62\% ở hạng
+		A lên 28,02\% ở hạng E, đúng yêu cầu BR-07. Hai biểu đồ dùng chung một thang đo. Tiếp
+		theo, em xin trình bày cách hệ thống xếp hạng.}
 \end{frame}
 
 % ===================================================================== 11
 \begin{frame}{Thang hạng A–E}
-\rsslide{Thiên Hào}{%
-  \rsHead{10 · Hỗ trợ quyết định}{Thang hạng A–E}
-  \begin{scope}[shift={(128,278.4)}]
-    \rsNode{plain}{0}{82}{240}{136}{Hồ sơ}{dữ liệu trong kho}
-    \rsNode{plain}{400}{0}{380}{136}{1 · Hạng điểm}{PD của mô hình \rsRA{} ngưỡng A–E}
-    \rsNode{plain}{400}{164}{380}{136}{2 · Hạng luật}{Hạng xấu nhất trong các luật vi phạm}
-    \rsNode{key}{940}{82}{380}{136}{3 · Hạng cuối}{Hạng XẤU HƠN của hai hạng}
-    \rsNode{plain}{1420}{82}{244}{136}{4 · Chính sách}{Quyết định + hạn mức}
-    \draw[rs conn] (240,150) -- (320,150) -- (320,68) -- (400,68);
-    \draw[rs conn] (240,150) -- (320,150) -- (320,232) -- (400,232);
-    \draw[rs conn] (780,68) -- (860,68) -- (860,150) -- (940,150);
-    \draw[rs conn] (780,232) -- (860,232) -- (860,150) -- (940,150);
-    \draw[rs conn] (1320,150) -- (1420,150);
-  \end{scope}
-  \rsT[text=rsMuted]{128}{664.8}{\fSmallS}%
-    {Một thang chung cho hạng điểm và hạng luật; mỗi hạng gắn đúng một chính sách}
-  \foreach \i/\c/\g/\t/\p/\d/\m in {
-      0/rsGA/A/{< 1\%}/approve/Approve/{Tối đa 8× thu nhập},
-      1/rsGB/B/{1\% – 7\%}/approve/Approve/{Tối đa 6× thu nhập},
-      2/rsGC/C/{7\% – 13\%}/review/Manual review/{Tối đa 4× thu nhập},
-      3/rsGD/D/{13\% – 20\%}/review/Manual review/{Tối đa 3× thu nhập},
-      4/rsGE/E/{≥ 20\%}/reject/Reject/{Không cấp hạn mức}}{
-    \pgfmathsetmacro\cx{128+337.6*\i}
-    \rsCard{\cx}{713.2}{313.6}{206.8}
-    \rsChip{\cx+29}{738.2}{\c}{\g}
-    \rsT{\cx+97}{747.3}{\fBodyS}{\t}
-    \rsPill{\cx+29}{806.2}{\p}{\d}
-    \rsT[text=rsMuted]{\cx+29}{862.6}{\fSmall}{\m}}
-}
-\note{%
-Thiên Hào – khoảng 1 phút 10 giây. Hệ hỗ trợ quyết định dùng một thang hạng A đến E duy
-nhất, xác định theo xác suất vỡ nợ với các ngưỡng 1, 7, 13 và 20\%. Mỗi hồ sơ được đánh
-giá từ hai nguồn. Hạng điểm đến từ PD do mô hình ước lượng. Hạng luật là hạng xấu nhất
-trong các luật mà hồ sơ vi phạm; không vi phạm luật nào thì không có hạng luật. Hạng
-cuối là hạng xấu hơn trong hai hạng, nên luật chỉ hạ hạng, không bao giờ nâng. Mỗi hạng
-gắn một chính sách: A và B duyệt, hạn mức tối đa 8 và 6 lần thu nhập; C và D chuyển thẩm
-định thêm với 4 và 3 lần; E từ chối.}
+	\rsslide{Thiên Hào}{%
+		\rsHead{10 · Hỗ trợ quyết định}{Thang hạng A–E}
+		\begin{scope}[shift={(128,278.4)}]
+			\rsNode{plain}{0}{82}{240}{136}{Hồ sơ}{dữ liệu trong kho}
+			\rsNode{plain}{400}{0}{380}{136}{1 · Hạng điểm}{PD của mô hình \rsRA{} ngưỡng A–E}
+			\rsNode{plain}{400}{164}{380}{136}{2 · Hạng luật}{Hạng xấu nhất trong các luật vi phạm}
+			\rsNode{key}{940}{82}{380}{136}{3 · Hạng cuối}{Hạng XẤU HƠN của hai hạng}
+			\rsNode{plain}{1420}{82}{244}{136}{4 · Chính sách}{Quyết định + hạn mức}
+			\draw[rs conn] (240,150) -- (320,150) -- (320,68) -- (400,68);
+			\draw[rs conn] (240,150) -- (320,150) -- (320,232) -- (400,232);
+			\draw[rs conn] (780,68) -- (860,68) -- (860,150) -- (940,150);
+			\draw[rs conn] (780,232) -- (860,232) -- (860,150) -- (940,150);
+			\draw[rs conn] (1320,150) -- (1420,150);
+		\end{scope}
+		\rsT[text=rsMuted]{128}{664.8}{\fSmallS}%
+		{Một thang chung cho hạng điểm và hạng luật; mỗi hạng gắn đúng một chính sách}
+		\foreach \i/\c/\g/\t/\p/\d/\m in {
+				0/rsGA/A/{< 1\%}/approve/Approve/{Tối đa 8× thu nhập},
+				1/rsGB/B/{1\% – 7\%}/approve/Approve/{Tối đa 6× thu nhập},
+				2/rsGC/C/{7\% – 13\%}/review/Manual review/{Tối đa 4× thu nhập},
+				3/rsGD/D/{13\% – 20\%}/review/Manual review/{Tối đa 3× thu nhập},
+				4/rsGE/E/{≥ 20\%}/reject/Reject/{Không cấp hạn mức}}{
+				\pgfmathsetmacro\cx{128+337.6*\i}
+				\rsCard{\cx}{713.2}{313.6}{206.8}
+				\rsChip{\cx+29}{738.2}{\c}{\g}
+				\rsT{\cx+97}{747.3}{\fBodyS}{\t}
+				\rsPill{\cx+29}{806.2}{\p}{\d}
+				\rsT[text=rsMuted]{\cx+29}{862.6}{\fSmall}{\m}}
+	}
+	\note{%
+		Thiên Hào – khoảng 1 phút 10 giây. Hệ hỗ trợ quyết định dùng một thang hạng A đến E duy
+		nhất, xác định theo xác suất vỡ nợ với các ngưỡng 1, 7, 13 và 20\%. Mỗi hồ sơ được đánh
+		giá từ hai nguồn. Hạng điểm đến từ PD do mô hình ước lượng. Hạng luật là hạng xấu nhất
+		trong các luật mà hồ sơ vi phạm; không vi phạm luật nào thì không có hạng luật. Hạng
+		cuối là hạng xấu hơn trong hai hạng, nên luật chỉ hạ hạng, không bao giờ nâng. Mỗi hạng
+		gắn một chính sách: A và B duyệt, hạn mức tối đa 8 và 6 lần thu nhập; C và D chuyển thẩm
+		định thêm với 4 và 3 lần; E từ chối.}
 \end{frame}
 
 % ===================================================================== 12
 \begin{frame}{Mô hình PD và luật}
-\rsslide{Thiên Hào}{%
-  \rsHead{11 · Hỗ trợ quyết định}{Mô hình PD và luật}
-  \rsT[text=rsTeal]{128}{278.4}{\fBig}{0,7586}
-  \rsT{128}{398.4}{\fBody}{AUC out-of-fold}
-  \rsT[text=rsTeal]{128}{468.2}{\fBig}{0,0678}
-  \rsT{128}{588.2}{\fBody}{Brier, PD đã hiệu chỉnh}
-  \rsCardSoft{128}{658}{520}{161.2}
-  \rsTw{160}{686}{456}{\fSmallS}{LightGBM 5-fold OOF + hiệu chỉnh isotonic}
-  \rsTw[text=rsMuted]{160}{758.8}{456}{\fSmall}{26 đặc trưng, không dùng giới tính}
-  \rsTable{712}{278.4}{\fBody}{20}{237.6,518.4,129.6,194.4}{l,l,l,r}
-  \rsRow[th]{61.8}{Mã & Luật & Hạng & Vỡ nợ}
-  \rsRow{61.8}{BR-SEG-01 & Phân khúc rủi ro cao & \textcolor{rsGD}{D, E} & 15,12\%}
-  \rsRow{61.8}{BR-RF-01 & Hồ sơ cũ bị từ chối nhiều & \textcolor{rsGD}{D} & 15,10\%}
-  \rsRow{61.8}{BR-RF-02 & Trả trễ hơn 20\% kỳ & \textcolor{rsGC}{C} & 11,99\%}
-  \rsRow{61.8}{BR-RF-03 & Từng quá hạn hơn 90 ngày & \textcolor{rsGC}{C} & 9,83\%}
-  \rsRow{61.8}{BR-RF-04 & Đang quá hạn ở bureau & \textcolor{rsGD}{D} & 16,11\%}
-  \rsRow{61.8}{BR-RF-05 & Trả trễ hơn 50\% kỳ & \textcolor{rsGD}{D} & 16,44\%}
-  \rsTw[text=rsMuted]{712}{727}{1080}{\fSmall}%
-    {Vỡ nợ: tỷ lệ vỡ nợ lịch sử của nhóm vi phạm, quy về thang A–E thành hạng của luật.}
-}
-\note{%
-Thiên Hào – khoảng 50 giây. Mô hình PD là LightGBM với kiểm định chéo 5 phần. Mỗi khoản
-vay lịch sử nhận PD từ một mô hình chưa từng thấy nó, sau đó PD được hiệu chỉnh bằng
-isotonic để khớp tỷ lệ vỡ nợ thật, vì ngưỡng hạng là xác suất. AUC đạt 0,7586 và Brier
-0,0678. Mô hình không dùng giới tính. Bên phải là sáu luật: một luật phân khúc BR-SEG-01
-và năm luật nghiệp vụ BR-RF-01 đến 05. Hạng của mỗi luật lấy từ tỷ lệ vỡ nợ lịch sử của
-chính nhóm vi phạm, ví dụ khách đang quá hạn ở bureau vỡ nợ 16,11\% nên luật có hạng D.
-Mỗi luật có mã và điều kiện rõ ràng, nên chuyên viên kiểm tra lại được. Tiếp theo, Khánh
-Huy sẽ trình bày kết quả của chính sách.}
+	\rsslide{Thiên Hào}{%
+		\rsHead{11 · Hỗ trợ quyết định}{Mô hình PD và luật}
+		\rsT[text=rsTeal]{128}{278.4}{\fBig}{0,7586}
+		\rsT{128}{398.4}{\fBody}{AUC out-of-fold}
+		\rsT[text=rsTeal]{128}{468.2}{\fBig}{0,0678}
+		\rsT{128}{588.2}{\fBody}{Brier, PD đã hiệu chỉnh}
+		\rsCardSoft{128}{658}{520}{161.2}
+		\rsTw{160}{686}{456}{\fSmallS}{LightGBM 5-fold OOF + hiệu chỉnh isotonic}
+		\rsTw[text=rsMuted]{160}{758.8}{456}{\fSmall}{26 đặc trưng, không dùng giới tính}
+		\rsTable{712}{278.4}{\fBody}{20}{237.6,518.4,129.6,194.4}{l,l,l,r}
+		\rsRow[th]{61.8}{Mã & Luật & Hạng & Vỡ nợ}
+		\rsRow{61.8}{BR-SEG-01 & Phân khúc rủi ro cao & \textcolor{rsGD}{D, E} & 15,12\%}
+		\rsRow{61.8}{BR-RF-01 & Hồ sơ cũ bị từ chối nhiều & \textcolor{rsGD}{D} & 15,10\%}
+		\rsRow{61.8}{BR-RF-02 & Trả trễ hơn 20\% kỳ & \textcolor{rsGC}{C} & 11,99\%}
+		\rsRow{61.8}{BR-RF-03 & Từng quá hạn hơn 90 ngày & \textcolor{rsGC}{C} & 9,83\%}
+		\rsRow{61.8}{BR-RF-04 & Đang quá hạn ở bureau & \textcolor{rsGD}{D} & 16,11\%}
+		\rsRow{61.8}{BR-RF-05 & Trả trễ hơn 50\% kỳ & \textcolor{rsGD}{D} & 16,44\%}
+		\rsTw[text=rsMuted]{712}{727}{1080}{\fSmall}%
+		{Vỡ nợ: tỷ lệ vỡ nợ lịch sử của nhóm vi phạm, quy về thang A–E thành hạng của luật.}
+	}
+	\note{%
+		Thiên Hào – khoảng 50 giây. Mô hình PD là LightGBM với kiểm định chéo 5 phần. Mỗi khoản
+		vay lịch sử nhận PD từ một mô hình chưa từng thấy nó, sau đó PD được hiệu chỉnh bằng
+		isotonic để khớp tỷ lệ vỡ nợ thật, vì ngưỡng hạng là xác suất. AUC đạt 0,7586 và Brier
+		0,0678. Mô hình không dùng giới tính. Bên phải là sáu luật: một luật phân khúc BR-SEG-01
+		và năm luật nghiệp vụ BR-RF-01 đến 05. Hạng của mỗi luật lấy từ tỷ lệ vỡ nợ lịch sử của
+		chính nhóm vi phạm, ví dụ khách đang quá hạn ở bureau vỡ nợ 16,11\% nên luật có hạng D.
+		Mỗi luật có mã và điều kiện rõ ràng, nên chuyên viên kiểm tra lại được. Tiếp theo, Khánh
+		Huy sẽ trình bày kết quả của chính sách.}
 \end{frame}
 
 % ===================================================================== 13
 \begin{frame}{Kết quả chính sách}
-\rsslide[accent]{Khánh Huy}{%
-  \rsHead{12 · Hỗ trợ quyết định}{Kết quả chính sách}
-  \fill[rsPage,rounded corners=16\rspx] (128,278.4) rectangle ++(1664,256.8);
-  \rsT[text=rsInk]{160}{310.4}{\fSmallS}{Đề xuất trên mọi hồ sơ đã chấm (356.255)}
-  \begin{scope}
-    \clip[rounded corners=12\rspx] (160,358.8) rectangle ++(1600,96);
-    \fill[rsApprove] (160,358.8) rectangle ++(829.84,96);
-    \fill[rsReview] (989.84,358.8) rectangle ++(632.70,96);
-    \fill[rsReject] (1622.54,358.8) rectangle ++(137.46,96);
-  \end{scope}
-  \rsT[anchor=north,text=rsPaper]{574.92}{387.9}{\fBodyS}{Approve 51,86\%}
-  \rsT[anchor=north,text=rsInk]{1306.19}{387.9}{\fBodyS}{Manual review 39,54\%}
-  \rsT[anchor=north,text=rsPaper]{1691.27}{387.9}{\fBodyS}{8,59\%}
-  \rsT[text=rsMuted]{160}{470.8}{\fSmall}%
-    {Approve = hạng A, B · Manual review = hạng C, D · Reject 8,59\% = hạng E}
-  \rsT{128}{720.4}{\fBig}{3,37\%}
-  \rsTw[text=rsTealSoft]{128}{844.4}{760}{\fBody}%
-    {vỡ nợ của nhóm được duyệt, so với 8,07\% chung (khoản vay lịch sử)}
-  \rsT{984}{720.4}{\fBig}{13,55\%}
-  \rsTw[text=rsTealSoft]{984}{844.4}{640}{\fBody}%
-    {hồ sơ bị luật hạ hạng so với hạng điểm (mọi hồ sơ)}
-}
-\note{%
-Khánh Huy – khoảng 50 giây. Với chính sách mặc định, trên mọi hồ sơ đã chấm, hệ thống đề
-xuất duyệt 51,86\%, chuyển thẩm định thêm 39,54\% và từ chối 8,59\%. Kết quả quan trọng
-nhất: nhóm được duyệt chỉ vỡ nợ 3,37\%, so với 8,07\% của toàn bộ khoản vay lịch sử, tức
-chưa bằng một nửa. Luật đã hạ hạng 13,55\% hồ sơ so với hạng điểm. Khối lượng thẩm định
-thêm gần 40\% là lựa chọn thận trọng; đây cũng là điểm nhóm sẽ quay lại ở phần hạn chế.
-Câu hỏi tiếp theo là: nếu đổi chính sách thì sao? Đó là việc của trang Playground.}
+	\rsslide[accent]{Khánh Huy}{%
+		\rsHead{12 · Hỗ trợ quyết định}{Kết quả chính sách}
+		\fill[rsPage,rounded corners=16\rspx] (128,278.4) rectangle ++(1664,256.8);
+		\rsT[text=rsInk]{160}{310.4}{\fSmallS}{Đề xuất trên mọi hồ sơ đã chấm (356.255)}
+		\begin{scope}
+			\clip[rounded corners=12\rspx] (160,358.8) rectangle ++(1600,96);
+			\fill[rsApprove] (160,358.8) rectangle ++(829.84,96);
+			\fill[rsReview] (989.84,358.8) rectangle ++(632.70,96);
+			\fill[rsReject] (1622.54,358.8) rectangle ++(137.46,96);
+		\end{scope}
+		\rsT[anchor=north,text=rsPaper]{574.92}{387.9}{\fBodyS}{Approve 51,86\%}
+		\rsT[anchor=north,text=rsInk]{1306.19}{387.9}{\fBodyS}{Manual review 39,54\%}
+		\rsT[anchor=north,text=rsPaper]{1691.27}{387.9}{\fBodyS}{8,59\%}
+		\rsT[text=rsMuted]{160}{470.8}{\fSmall}%
+		{Approve = hạng A, B · Manual review = hạng C, D · Reject 8,59\% = hạng E}
+		\rsT{128}{720.4}{\fBig}{3,37\%}
+		\rsTw[text=rsTealSoft]{128}{844.4}{760}{\fBody}%
+		{vỡ nợ của nhóm được duyệt, so với 8,07\% chung (khoản vay lịch sử)}
+		\rsT{984}{720.4}{\fBig}{13,55\%}
+		\rsTw[text=rsTealSoft]{984}{844.4}{640}{\fBody}%
+		{hồ sơ bị luật hạ hạng so với hạng điểm (mọi hồ sơ)}
+	}
+	\note{%
+		Khánh Huy – khoảng 50 giây. Với chính sách mặc định, trên mọi hồ sơ đã chấm, hệ thống đề
+		xuất duyệt 51,86\%, chuyển thẩm định thêm 39,54\% và từ chối 8,59\%. Kết quả quan trọng
+		nhất: nhóm được duyệt chỉ vỡ nợ 3,37\%, so với 8,07\% của toàn bộ khoản vay lịch sử, tức
+		chưa bằng một nửa. Luật đã hạ hạng 13,55\% hồ sơ so với hạng điểm. Khối lượng thẩm định
+		thêm gần 40\% là lựa chọn thận trọng; đây cũng là điểm nhóm sẽ quay lại ở phần hạn chế.
+		Câu hỏi tiếp theo là: nếu đổi chính sách thì sao? Đó là việc của trang Playground.}
 \end{frame}
 
 % ===================================================================== 14
 \begin{frame}{Mô phỏng chính sách trên Playground}
-\rsslide{Khánh Huy}{%
-  \rsHead{13 · Hỗ trợ quyết định}{Mô phỏng chính sách trên Playground}
-  \rsTable{128}{278.4}{\fSmall}{20}{179.2,286.72,197.12,232.96}{l,l,r,r}
-  \rsRow[th]{88.8}{Preset & Thay đổi & Approval rate & Default rate (approved)}
-  \rsRow[hl]{56.4}{Hiện hành & PD 1/7/13/20\% & 51,86\% & 3,37\%}
-  \rsRow{56.4}{Approve C & Hạng C \rsRA{} Approve & 74,90\% & 4,87\%}
-  \rsRow{56.4}{Loosen & PD 2/9/15/25\% & 59,10\% & 3,85\%}
-  \rsRow{56.4}{Tighten & PD 0,5/4/10/15\% & 29,31\% & 2,22\%}
-  \rsRow{56.4}{Rules off & Chỉ dùng hạng điểm & 61,74\% & 3,52\%}
-  \rsCardSoft{128}{673.2}{896}{134.2}
-  \rsTw{160}{701.2}{832}{\fBodyS}{Duyệt nhiều hơn hiện hành thì vỡ nợ nhóm duyệt tăng}
-  \rsTw[text=rsMuted]{160}{747}{832}{\fSmall}%
-    {Mô phỏng dùng lại PD và lần vi phạm đã lưu, khoảng 37 ms mỗi lần.}
-  \rsShot{1072}{278.4}{720}{640}{images/page_playground.png}
-}
-\note{%
-Khánh Huy – khoảng 50 giây. Trang Playground cho trưởng phòng rủi ro thử chính sách
-trước khi áp dụng. Có thể đổi ngưỡng hạng, quyết định và hạn mức của từng hạng, bật tắt
-từng luật. Bảng bên trái là bốn preset so với hiện hành. Chuyển hạng C sang duyệt nâng
-tỷ lệ duyệt lên 74,90\% nhưng vỡ nợ nhóm duyệt tăng lên 4,87\%. Siết ngưỡng làm vỡ nợ
-giảm còn 2,22\% nhưng chỉ duyệt 29,31\%. Tắt luật thì duyệt 61,74\% và vỡ nợ 3,52\%.
-Không có phương án nào vừa duyệt nhiều vừa ít vỡ nợ, nên Playground giúp người quyết
-định thấy rõ đánh đổi. Tiếp theo, em xin demo trực tiếp trên web.}
+	\rsslide{Khánh Huy}{%
+		\rsHead{13 · Hỗ trợ quyết định}{Mô phỏng chính sách trên Playground}
+		\rsTable{128}{278.4}{\fSmall}{20}{179.2,286.72,197.12,232.96}{l,l,r,r}
+		\rsRow[th]{88.8}{Preset & Thay đổi & Approval rate & Default rate (approved)}
+		\rsRow[hl]{56.4}{Hiện hành & PD 1/7/13/20\% & 51,86\% & 3,37\%}
+		\rsRow{56.4}{Approve C & Hạng C \rsRA{} Approve & 74,90\% & 4,87\%}
+		\rsRow{56.4}{Loosen & PD 2/9/15/25\% & 59,10\% & 3,85\%}
+		\rsRow{56.4}{Tighten & PD 0,5/4/10/15\% & 29,31\% & 2,22\%}
+		\rsRow{56.4}{Rules off & Chỉ dùng hạng điểm & 61,74\% & 3,52\%}
+		\rsCardSoft{128}{673.2}{896}{134.2}
+		\rsTw{160}{701.2}{832}{\fBodyS}{Duyệt nhiều hơn hiện hành thì vỡ nợ nhóm duyệt tăng}
+		\rsTw[text=rsMuted]{160}{747}{832}{\fSmall}%
+		{Mô phỏng dùng lại PD và lần vi phạm đã lưu, khoảng 37 ms mỗi lần.}
+		\rsShot{1072}{278.4}{720}{640}{images/page_playground.png}
+	}
+	\note{%
+		Khánh Huy – khoảng 50 giây. Trang Playground cho trưởng phòng rủi ro thử chính sách
+		trước khi áp dụng. Có thể đổi ngưỡng hạng, quyết định và hạn mức của từng hạng, bật tắt
+		từng luật. Bảng bên trái là bốn preset so với hiện hành. Chuyển hạng C sang duyệt nâng
+		tỷ lệ duyệt lên 74,90\% nhưng vỡ nợ nhóm duyệt tăng lên 4,87\%. Siết ngưỡng làm vỡ nợ
+		giảm còn 2,22\% nhưng chỉ duyệt 29,31\%. Tắt luật thì duyệt 61,74\% và vỡ nợ 3,52\%.
+		Không có phương án nào vừa duyệt nhiều vừa ít vỡ nợ, nên Playground giúp người quyết
+		định thấy rõ đánh đổi. Tiếp theo, em xin demo trực tiếp trên web.}
 \end{frame}
 
 % ===================================================================== 15
 \begin{frame}{Demo trực tiếp}
-\rsslide{Khánh Huy}{%
-  \rsHead{14 · Demo}{Demo trực tiếp}
-  % five demo steps; card 4 (the worked case) has a 2 px teal border
-  \foreach \y/\h/\n/\t/\s in {
-      278.4/106.2/1/Overview/{5 KPI, ô waffle và Segment analysis},
-      396.6/106.2/2/Analytics/{Slice, roll-up và pivot trên bảng Cube},
-      514.8/106.2/3/Explorer/{Lọc một nhóm hồ sơ, so với mọi hồ sơ},
-      753.2/106.2/5/Playground/{Thử preset Approve C và Tighten}}{
-    \rsCard{128}{\y}{760}{\h}
-    \fill[rsTeal] (181,\y+53.1) circle (24);
-    \node[anchor=base,text=rsPaper] at (181,\y+63.39) {\fBodyS\n};
-    \rsT{229}{\y+17}{\fBodyS}{\t}
-    \rsT[text=rsMuted]{229}{\y+56.8}{\fSmall}{\s}}
-  \rsBox{128}{633}{760}{108.2}{16}{rsPaper}{rsTeal}{2}
-  \fill[rsTeal] (182,687.1) circle (24);
-  \node[anchor=base,text=rsPaper] at (182,697.39) {\fBodyS 4};
-  \rsT{230}{651}{\fBodyS}{Application details · 257416}
-  \rsT[text=rsMuted]{230}{690.8}{\fSmall}{Hạng điểm C, bị luật hạ xuống D: Manual review}
-  \rsShot{936}{278.4}{856}{600}{images/page_application_details.png}
-  \rsT[text=rsMuted]{936}{890.4}{\fSmall}{Ngày trên giao diện là ngày mô phỏng.}
-}
-\note{%
-Khánh Huy – khoảng 2 phút 20 giây, chuyển sang trình duyệt. Một: Overview, chỉ năm KPI
-và biểu đồ tỷ lệ vỡ nợ theo lịch sử tín dụng. Hai: Analytics, thêm một chip lọc, đổi
-Interval sang Year để roll-up, rồi bấm nút đổi hàng cột. Ba: Explorer, lọc một nhóm và
-so với mọi hồ sơ. Bốn: mở Application details, hồ sơ 257416. Hạng điểm là C, nhưng hồ sơ
-vi phạm ba luật, trong đó có luật hạng D, nên hạng cuối là D và đề xuất là thẩm định
-thêm; bên trái là các yếu tố SHAP. Năm: Playground, bấm Approve C rồi Tighten để thấy
-các ô KPI đổi. Lưu ý ngày trên giao diện là ngày mô phỏng. Nếu mạng hoặc máy có sự cố,
-dùng ảnh chụp trên slide này.}
+	\rsslide{Khánh Huy}{%
+		\rsHead{14 · Demo}{Demo trực tiếp}
+		% five demo steps; card 4 (the worked case) has a 2 px teal border
+		\foreach \y/\h/\n/\t/\s in {
+				278.4/106.2/1/Overview/{5 KPI, ô waffle và Segment analysis},
+				396.6/106.2/2/Analytics/{Slice, roll-up và pivot trên bảng Cube},
+				514.8/106.2/3/Explorer/{Lọc một nhóm hồ sơ, so với mọi hồ sơ},
+				753.2/106.2/5/Playground/{Thử preset Approve C, Reset rồi Tighten}}{
+				\rsCard{128}{\y}{760}{\h}
+				\fill[rsTeal] (181,\y+53.1) circle (24);
+				\node[anchor=base,text=rsPaper] at (181,\y+63.39) {\fBodyS\n};
+				\rsT{229}{\y+17}{\fBodyS}{\t}
+				\rsT[text=rsMuted]{229}{\y+56.8}{\fSmall}{\s}}
+		\rsBox{128}{633}{760}{108.2}{16}{rsPaper}{rsTeal}{2}
+		\fill[rsTeal] (182,687.1) circle (24);
+		\node[anchor=base,text=rsPaper] at (182,697.39) {\fBodyS 4};
+		\rsT{230}{651}{\fBodyS}{Application details · 257416}
+		\rsT[text=rsMuted]{230}{690.8}{\fSmall}{Hạng điểm C, bị luật hạ xuống D: Manual review}
+		\rsShot{936}{278.4}{856}{600}{images/page_application_details.png}
+		\rsT[text=rsMuted]{936}{890.4}{\fSmall}{Ngày trên giao diện là ngày mô phỏng.}
+	}
+	\note{%
+		Khánh Huy – khoảng 2 phút 20 giây, chuyển sang trình duyệt. Một: Overview, chỉ năm KPI
+		và biểu đồ tỷ lệ vỡ nợ theo lịch sử tín dụng. Hai: Analytics, thêm một chip lọc, đổi
+		Interval sang Year để roll-up, rồi bấm nút đổi hàng cột. Ba: Explorer, lọc một nhóm và
+		so với mọi hồ sơ. Bốn: mở Application details, hồ sơ 257416. Hạng điểm là C, nhưng hồ sơ
+		vi phạm ba luật, trong đó có luật hạng D, nên hạng cuối là D và đề xuất là thẩm định
+		thêm; bên trái là các yếu tố SHAP. Năm: Playground, bấm Approve C, bấm Reset rồi bấm
+		Tighten để thấy các ô KPI đổi (vì các nút preset áp dụng chồng lên cấu hình đang mở).
+		Lưu ý ngày trên giao diện là ngày mô phỏng. Nếu mạng hoặc máy có sự cố, dùng ảnh chụp
+		trên slide này.}
 \end{frame}
 
 % ===================================================================== 16
 \begin{frame}{Hạn chế và hướng phát triển}
-\rsslide{Khánh Huy}{%
-  \rsHead{15 · Đánh giá}{Hạn chế và hướng phát triển}
-  \rsT[text=rsMuted]{128}{278.4}{\fSmallS}{Hạn chế}
-  \rsT[text=rsTeal]{992}{278.4}{\fSmallS}{Hướng phát triển}
-  \foreach \y/\a/\b/\c/\d in {
-      324.8/{Ngày nộp và ngày kết quả là mô phỏng}/{Xu hướng theo thời gian không có ý nghĩa nghiệp vụ}%
-        /{Dùng ngày thật, nạp tăng dần}/{Incremental load theo ngày, thay vì dựng lại toàn bộ},
-      447/{Hiệu chỉnh PD chưa kiểm định độc lập}/{Isotonic được khớp và đo trên cùng PD OOF}%
-        /{Tách tập holdout}/{Khớp trên phần còn lại, đo Brier trên holdout},
-      569.2/{Luật đổi nhiều, cải thiện ít}/{Duyệt 61,74\% \rsRA{} 51,86\%; vỡ nợ duyệt 3,52\% \rsRA{} 3,37\%}%
-        /{Đánh giá lại từng luật}/{Tắt hoặc đổi ngưỡng, đo tác động trên Playground},
-      691.4/{Thẩm định thêm 39,54\% hồ sơ}/{Nhiều việc cho chuyên viên thẩm định}%
-        /{Tìm nhóm hạng C rủi ro thấp}/{Dùng Explorer và Playground, thử chính sách riêng},
-      813.6/{What-if chưa đơn điệu}/{Mô hình cây: vài hồ sơ đi ngược hướng nghiệp vụ}%
-        /{Thêm monotone constraints}/{Cho thu nhập và số tiền vay trong LightGBM}}{
-    \rsCard{128}{\y}{800}{108.2}
-    \rsT{157}{\y+17}{\fBodyS}{\a}
-    \rsT[text=rsMuted]{157}{\y+58.8}{\fSmall}{\b}
-    \draw[rs conn] (928,\y+54.1) -- (992,\y+54.1);
-    \rsCardSoft{992}{\y}{800}{108.2}
-    \rsT{1020}{\y+16}{\fBodyS}{\c}
-    \rsT[text=rsMuted]{1020}{\y+57.8}{\fSmall}{\d}}
-}
-\note{%
-Khánh Huy – khoảng 45 giây. Nhóm nhận thấy năm hạn chế chính, mỗi hạn chế có một hướng
-khắc phục. Một, ngày là dữ liệu mô phỏng, nên cần ngày thật và nạp tăng dần. Hai, bộ
-hiệu chỉnh PD được khớp và đo trên cùng dữ liệu, nên cần một tập holdout để kiểm định
-thật. Ba, luật làm tỷ lệ duyệt giảm gần 10 điểm phần trăm nhưng vỡ nợ nhóm duyệt chỉ
-giảm khoảng 0,15 điểm, nên cần đánh giá lại từng luật trên Playground. Bốn, gần 40\% hồ
-sơ phải thẩm định thêm; có thể tìm nhóm hạng C rủi ro thấp để tự động hoá. Năm, phân
-tích what-if chưa đơn điệu; có thể thêm ràng buộc đơn điệu cho mô hình.}
+	\rsslide{Khánh Huy}{%
+		\rsHead{15 · Đánh giá}{Hạn chế và hướng phát triển}
+		\rsT[text=rsMuted]{128}{278.4}{\fSmallS}{Hạn chế}
+		\rsT[text=rsTeal]{992}{278.4}{\fSmallS}{Hướng phát triển}
+		\foreach \y/\a/\b/\c/\d in {
+				324.8/{Ngày nộp và ngày kết quả là mô phỏng}/{Xu hướng theo thời gian không có ý nghĩa nghiệp vụ}%
+				/{Dùng ngày thật, nạp tăng dần}/{Incremental load theo ngày, thay vì dựng lại toàn bộ},
+				447/{Hiệu chỉnh PD chưa kiểm định độc lập}/{Isotonic được khớp và đo trên cùng PD OOF}%
+				/{Tách tập holdout}/{Khớp trên phần còn lại, đo Brier trên holdout},
+				569.2/{Luật đổi nhiều, cải thiện ít}/{Duyệt 61,74\% \rsRA{} 51,86\%; vỡ nợ duyệt 3,52\% \rsRA{} 3,37\%}%
+				/{Đánh giá lại từng luật}/{Tắt hoặc đổi ngưỡng, đo tác động trên Playground},
+				691.4/{Thẩm định thêm 39,54\% hồ sơ}/{Nhiều việc cho chuyên viên thẩm định}%
+				/{Tìm nhóm hạng C rủi ro thấp}/{Dùng Explorer và Playground, thử chính sách riêng},
+				813.6/{What-if chưa đơn điệu}/{Mô hình cây: vài hồ sơ đi ngược hướng nghiệp vụ}%
+				/{Thêm monotone constraints}/{Cho thu nhập và số tiền vay trong LightGBM}}{
+				\rsCard{128}{\y}{800}{108.2}
+				\rsT{157}{\y+17}{\fBodyS}{\a}
+				\rsT[text=rsMuted]{157}{\y+58.8}{\fSmall}{\b}
+				\draw[rs conn] (928,\y+54.1) -- (992,\y+54.1);
+				\rsCardSoft{992}{\y}{800}{108.2}
+				\rsT{1020}{\y+16}{\fBodyS}{\c}
+				\rsT[text=rsMuted]{1020}{\y+57.8}{\fSmall}{\d}}
+	}
+	\note{%
+		Khánh Huy – khoảng 45 giây. Nhóm nhận thấy năm hạn chế chính, mỗi hạn chế có một hướng
+		khắc phục. Một, ngày là dữ liệu mô phỏng, nên cần ngày thật và nạp tăng dần. Hai, bộ
+		hiệu chỉnh PD được khớp và đo trên cùng dữ liệu, nên cần một tập holdout để kiểm định
+		thật. Ba, luật làm tỷ lệ duyệt giảm gần 10 điểm phần trăm nhưng vỡ nợ nhóm duyệt chỉ
+		giảm khoảng 0,15 điểm, nên cần đánh giá lại từng luật trên Playground. Bốn, gần 40\% hồ
+		sơ phải thẩm định thêm; có thể tìm nhóm hạng C rủi ro thấp để tự động hoá. Năm, phân
+		tích what-if chưa đơn điệu; có thể thêm ràng buộc đơn điệu cho mô hình.}
 \end{frame}
 
 % ===================================================================== 17
 \begin{frame}{Cảm ơn · Hỏi đáp}
-\rsslide[dark]{}{%
-  \rsGradeBars{128}{392.2}
-  \rsT{128}{436.2}{\fBig}{Cảm ơn · Hỏi đáp}
-  \rsT[text=rsTealSoft]{128}{580.2}{\fHthreeReg}%
-    {Doãn Phương Hùng Cường · Nguyễn Thiên Hào · Nguyễn Khắc Khánh Huy}
-  \rsT[text=rsMutedC]{128}{655.4}{\fSmall}%
-    {Risk Studio · CO4031 HK261 · Lớp L02 · GVHD: ThS. Đỗ Thanh Thái}
-}
-\note{%
-Khánh Huy – khoảng 15 giây. Phần trình bày của nhóm đến đây là kết thúc. Tóm lại, nhóm
-đã xây dựng một kho dữ liệu từ 8 bảng Kaggle, một hệ hỗ trợ quyết định xếp hạng A đến E
-kèm giải thích, và một trang mô phỏng chính sách. Cảm ơn thầy và các bạn đã lắng nghe;
-nhóm rất mong nhận được câu hỏi và góp ý. Gợi ý phân công khi trả lời: kho dữ liệu và
-ETL do Hùng Cường; KPI, OLAP, thang hạng, mô hình và luật do Thiên Hào; chính sách,
-Playground, giao diện và demo do Khánh Huy.}
+	\rsslide[dark]{}{%
+		\rsGradeBars{128}{392.2}
+		\rsT{128}{436.2}{\fBig}{Cảm ơn · Hỏi đáp}
+		\rsT[text=rsTealSoft]{128}{580.2}{\fHthreeReg}%
+		{Doãn Phương Hùng Cường · Nguyễn Thiên Hào · Nguyễn Khắc Khánh Huy}
+		\rsT[text=rsMutedC]{128}{655.4}{\fSmall}%
+		{Risk Studio · CO4031 HK261 · Lớp L02 · GVHD: ThS. Đỗ Thanh Thái}
+	}
+	\note{%
+		Khánh Huy – khoảng 15 giây. Phần trình bày của nhóm đến đây là kết thúc. Tóm lại, nhóm
+		đã xây dựng một kho dữ liệu từ 8 bảng Kaggle, một hệ hỗ trợ quyết định xếp hạng A đến E
+		kèm giải thích, và một trang mô phỏng chính sách. Cảm ơn thầy và các bạn đã lắng nghe;
+		nhóm rất mong nhận được câu hỏi và góp ý. Gợi ý phân công khi trả lời: kho dữ liệu và
+		ETL do Hùng Cường; KPI, OLAP, thang hạng, mô hình và luật do Thiên Hào; chính sách,
+		Playground, giao diện và demo do Khánh Huy.}
 \end{frame}
 
 \end{document}

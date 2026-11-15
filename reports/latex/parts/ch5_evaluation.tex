@@ -1,12 +1,7 @@
 \part{Đánh giá và hướng phát triển}
 \label{part:ch5}
-
-Chương này đối chiếu kết quả với mục tiêu của đề bài và các yêu cầu nghiệp vụ, nêu các hạn chế đã biết và đề xuất hướng khắc phục.
-
-%======================================================================
 \section{Kết quả đạt được}
 \label{sec:eval-results}
-
 Năm mục tiêu đầu của đề bài đều có sản phẩm tương ứng trong báo cáo và mã nguồn:
 \begin{itemize}[topsep=0pt, itemsep=1pt]
 	\item \textbf{Phân tích yêu cầu:} Chương~\ref{part:ch1} phát biểu bài toán, người dùng, các câu hỏi Q1--Q5, yêu cầu BR-01..11 và các KPI.
@@ -16,54 +11,50 @@ Năm mục tiêu đầu của đề bài đều có sản phẩm tương ứng t
 	\item \textbf{Đánh giá:} Chương này đối chiếu kết quả, nêu hạn chế và hướng phát triển.
 \end{itemize}
 
-Bảng~\ref{tab:lo-coverage} đối chiếu các chuẩn đầu ra của học phần với nội dung báo cáo.
-
 \begin{table}[H]
 	\centering
 	\caption{Đối chiếu chuẩn đầu ra học phần}
 	\label{tab:lo-coverage}
 	\footnotesize
-	\begin{tabular}{l p{0.29\textwidth} p{0.48\textwidth}}
+	\begin{tabular}{c p{0.29\textwidth} p{0.48\textwidth}}
 		\toprule
-		\textbf{Chuẩn đầu ra} & \textbf{Nội dung} & \textbf{Thể hiện trong báo cáo} \\
+		\textbf{Chuẩn đầu ra} & \textbf{Nội dung}                               & \textbf{Thể hiện trong báo cáo}                                                                                  \\
 		\midrule
-		L.O.1.1 & Khái niệm kho dữ liệu và DSS & Định nghĩa kho dữ liệu (mục~\ref{sec:problem}); vai trò đề xuất của DSS (mục~\ref{sec:dss-problem}) \\
-		L.O.1.2 & Vai trò của kho dữ liệu trong DSS & Mô hình học từ kho, kết quả chấm điểm ghi ngược vào kho (mục~\ref{sec:dss-problem}) \\
-		L.O.1.3 & Ví dụ thực tế & Thẩm định tín dụng tiêu dùng trên dữ liệu Home Credit (mục~\ref{sec:ch1-context}) \\
-		L.O.2.1 & Quy trình và nguyên lý thiết kế kho & Mô hình đa chiều và quy trình ETL (mục~\ref{sec:star-schema}, mục~\ref{sec:etl}) \\
-		L.O.2.2 & Vấn đề trong thiết kế kho & Các quyết định thiết kế (Bảng~\ref{tab:design-decisions}); trục thời gian mô phỏng (mục~\ref{sec:time}) \\
-		L.O.2.3 & Thiết kế và hiện thực kho & Chương~\ref{part:ch2} và Chương~\ref{part:ch3} \\
-		L.O.3.1 & Khái niệm và đặc tính của MSS, DSS & Quyết định bán cấu trúc (mục~\ref{sec:semi-structured}) \\
-		L.O.3.2 & Các giai đoạn ra quyết định & Mô hình Simon (Bảng~\ref{tab:simon-phases}, mục~\ref{sec:dss-problem}) \\
-		L.O.3.3 & Mô hình hóa trong DSS & Mô hình PD, luật và mô phỏng chính sách (mục~\ref{sec:dss-model}, \ref{sec:dss-rules}, \ref{sec:dss-simulation}) \\
-		L.O.4.1 & Nguyên tắc phân tích, thiết kế DSS & Yêu cầu BR-04 đến BR-09 (mục~\ref{sec:requirements}) và thiết kế ở Chương~\ref{part:ch4} \\
-		L.O.4.2 & Phân tích, thiết kế, hiện thực một DSS đơn giản & Toàn bộ Chương~\ref{part:ch4} \\
+		L.O.1.1               & Khái niệm kho dữ liệu và DSS                    & Định nghĩa kho dữ liệu (mục~\ref{sec:problem}); vai trò đề xuất của DSS (mục~\ref{sec:dss-problem})              \\
+		L.O.1.2               & Vai trò của kho dữ liệu trong DSS               & Mô hình học từ kho, kết quả chấm điểm ghi ngược vào kho (mục~\ref{sec:dss-problem})                              \\
+		L.O.1.3               & Ví dụ thực tế                                   & Thẩm định tín dụng tiêu dùng trên dữ liệu Home Credit (mục~\ref{sec:ch1-context})                                \\
+		L.O.2.1               & Quy trình và nguyên lý thiết kế kho             & Mô hình đa chiều và quy trình ETL (mục~\ref{sec:star-schema}, mục~\ref{sec:etl})                                 \\
+		L.O.2.2               & Vấn đề trong thiết kế kho                       & Các quyết định thiết kế (Bảng~\ref{tab:design-decisions}); trục thời gian mô phỏng (mục~\ref{sec:time})          \\
+		L.O.2.3               & Thiết kế và hiện thực kho                       & Chương~\ref{part:ch2} và Chương~\ref{part:ch3}                                                                   \\
+		L.O.3.1               & Khái niệm và đặc tính của MSS, DSS              & Quyết định bán cấu trúc (mục~\ref{sec:semi-structured})                                                          \\
+		L.O.3.2               & Các giai đoạn ra quyết định                     & Mô hình Simon (Bảng~\ref{tab:simon-phases}, mục~\ref{sec:dss-problem})                                           \\
+		L.O.3.3               & Mô hình hóa trong DSS                           & Mô hình PD, luật và mô phỏng chính sách (mục~\ref{sec:dss-model}, \ref{sec:dss-rules}, \ref{sec:dss-simulation}) \\
+		L.O.4.1               & Nguyên tắc phân tích, thiết kế DSS              & Yêu cầu BR-04 đến BR-09 (mục~\ref{sec:requirements}) và thiết kế ở Chương~\ref{part:ch4}                         \\
+		L.O.4.2               & Phân tích, thiết kế, hiện thực một DSS đơn giản & Toàn bộ Chương~\ref{part:ch4}                                                                                    \\
 		\bottomrule
 	\end{tabular}
 \end{table}
-
-Bảng~\ref{tab:br-coverage} đối chiếu từng yêu cầu chức năng với phần hiện thực.
 
 \begin{table}[H]
 	\centering
 	\caption{Mức đáp ứng các yêu cầu chức năng}
 	\label{tab:br-coverage}
 	\footnotesize
-	\begin{tabular}{l p{0.3\textwidth} p{0.52\textwidth}}
+	\begin{tabular}{c p{0.3\textwidth} p{0.52\textwidth}}
 		\toprule
-		\textbf{Mã} & \textbf{Yêu cầu} & \textbf{Hiện thực và bằng chứng} \\
+		\textbf{Mã} & \textbf{Yêu cầu}                & \textbf{Hiện thực và bằng chứng}                                                                                                                                        \\
 		\midrule
-		BR-01 & Tích hợp $8$ bảng nguồn & ETL nạp $8$ tập tin Kaggle và nguồn ngày mô phỏng; lịch sử tín dụng gộp về cấp khách hàng (Chương~\ref{part:ch2}) \\
-		BR-02 & Làm sạch và kiểm tra chất lượng & Quy tắc làm sạch R1--R10; $50/50$ kiểm tra chất lượng đạt, ghi vào \texttt{dq\_report.json} sau mỗi lần ETL \\
-		BR-03 & Phân tích đa chiều, OLAP & Trang \textbf{Analytics}: cắt lát, cắt khối, cuộn lên, khoan xuống, xoay và $6$ truy vấn SQL mẫu (Chương~\ref{part:ch3}) \\
-		BR-04 & Hạng điểm từ PD đã hiệu chỉnh & LightGBM OOF và hiệu chỉnh đơn điệu; AUC $0{,}7586$ (mục~\ref{sec:dss-model}) \\
-		BR-05 & Hạng luật & BR-SEG-01 và BR-RF-01..05, hạng theo tỷ lệ vỡ nợ của nhóm vi phạm (mục~\ref{sec:dss-rules}) \\
-		BR-06 & Hạng cuối và chính sách & Hạng xấu hơn trong hai hạng; quyết định và hạn mức theo hạng (mục~\ref{sec:dss-policy}) \\
-		BR-07 & Tỷ lệ vỡ nợ tăng dần từ A tới E & Đạt cho hạng điểm, hạng luật và hạng cuối (Bảng~\ref{tab:grade-distribution}) \\
-		BR-08 & Giải thích từng đề xuất & SHAP, luật vi phạm và câu tóm tắt hạ hạng trên \textbf{Application details} (mục~\ref{sec:dss-explain}) \\
-		BR-09 & Mô phỏng chính sách & Trang \textbf{Playground}: ngưỡng, quyết định, hạn mức, bật/tắt và ngưỡng luật; năm KPI hiện hành so với mô phỏng (mục~\ref{sec:dss-simulation}) \\
-		BR-10 & Giao diện web & Bảy trang: \textbf{Overview}, \textbf{Analytics}, \textbf{Explorer}, \textbf{Application details}, \textbf{Playground}, \textbf{Grades \& model}, \textbf{Architecture} \\
-		BR-11 & Giải thích cấp danh mục & Trung bình $|\text{SHAP}|$ trên khoản vay lịch sử, khối \textbf{What drives the score} trên \textbf{Grades \& model} \\
+		BR-01       & Tích hợp $8$ bảng nguồn         & ETL nạp $8$ tập tin Kaggle và nguồn ngày mô phỏng; lịch sử tín dụng gộp về cấp khách hàng (Chương~\ref{part:ch2})                                                       \\
+		BR-02       & Làm sạch và kiểm tra chất lượng & Quy tắc làm sạch R1--R10; $50/50$ kiểm tra chất lượng đạt, ghi vào \texttt{dq\_report.json} sau mỗi lần ETL                                                             \\
+		BR-03       & Phân tích đa chiều, OLAP        & Trang \textbf{Analytics}: cắt lát, cắt khối, cuộn lên, khoan xuống, xoay và $6$ truy vấn SQL mẫu (Chương~\ref{part:ch3})                                                \\
+		BR-04       & Hạng điểm từ PD đã hiệu chỉnh   & LightGBM OOF và hiệu chỉnh đơn điệu; AUC $0{,}7586$ (mục~\ref{sec:dss-model})                                                                                           \\
+		BR-05       & Hạng luật                       & BR-SEG-01 và BR-RF-01..05, hạng theo tỷ lệ vỡ nợ của nhóm vi phạm (mục~\ref{sec:dss-rules})                                                                             \\
+		BR-06       & Hạng cuối và chính sách         & Hạng xấu hơn trong hai hạng; quyết định và hạn mức theo hạng (mục~\ref{sec:dss-policy})                                                                                 \\
+		BR-07       & Tỷ lệ vỡ nợ tăng dần từ A tới E & Đạt cho hạng điểm, hạng luật và hạng cuối (Bảng~\ref{tab:grade-distribution})                                                                                           \\
+		BR-08       & Giải thích từng đề xuất         & SHAP, luật vi phạm và câu tóm tắt hạ hạng trên \textbf{Application details} (mục~\ref{sec:dss-explain})                                                                 \\
+		BR-09       & Mô phỏng chính sách             & Trang \textbf{Playground}: ngưỡng, quyết định, hạn mức, bật/tắt và ngưỡng luật; năm KPI hiện hành so với mô phỏng (mục~\ref{sec:dss-simulation})                        \\
+		BR-10       & Giao diện web                   & Bảy trang: \textbf{Overview}, \textbf{Analytics}, \textbf{Explorer}, \textbf{Application details}, \textbf{Playground}, \textbf{Grades \& model}, \textbf{Architecture} \\
+		BR-11       & Giải thích cấp danh mục         & Trung bình $|\text{SHAP}|$ trên khoản vay lịch sử, khối \textbf{What drives the score} trên \textbf{Grades \& model}                                                    \\
 		\bottomrule
 	\end{tabular}
 \end{table}

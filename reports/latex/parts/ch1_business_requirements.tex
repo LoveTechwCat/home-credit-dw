@@ -14,6 +14,8 @@ Chương này phân tích bài toán nghiệp vụ và các yêu cầu đặt ra
 \label{sec:context}
 Home Credit là một tổ chức tài chính tiêu dùng hoạt động tại nhiều nước Đông Âu và châu Á, trong đó có Việt Nam. Khách hàng chính của Home Credit có ít hoặc không có lịch sử tín dụng. Nhóm khách hàng này khó vay ở ngân hàng truyền thống vì thiếu dữ liệu chứng minh khả năng trả nợ.~\cite{homecredit2018}
 
+\medskip
+
 Khi thông tin về người vay không đầy đủ, tổ chức cho vay khó phân biệt khách hàng trả nợ tốt với khách hàng có khả năng vỡ nợ cao. Hiện tượng này dẫn tới lựa chọn bất lợi (\textit{adverse selection}) trên thị trường tín dụng.~\cite{stiglitz1981credit} Vì vậy, mỗi quyết định cấp tín dụng phải cân bằng giữa hai loại rủi ro:
 \begin{itemize}[topsep=0pt, itemsep=1pt]
 	\item \textbf{Duyệt quá lỏng:} Khách hàng không trả được nợ, tổ chức mất vốn và chi phí thu hồi nợ tăng.
@@ -26,8 +28,10 @@ Khi thẩm định thủ công, mỗi hồ sơ được đánh giá theo kinh ng
 \label{sec:problem}
 Bài toán của nhóm là \textbf{xây dựng kho dữ liệu và hệ hỗ trợ quyết định (DSS) cho thẩm định tín dụng dựa trên phân khúc khách hàng}. Kho dữ liệu là tập dữ liệu hướng chủ đề, tích hợp từ nhiều nguồn, phục vụ phân tích và ra quyết định.~\cite{inmon2005} Kho dữ liệu của hệ thống tích hợp hồ sơ vay với toàn bộ lịch sử tín dụng của khách hàng, nhờ đó tỷ lệ vỡ nợ được phân tích theo nhiều chiều.
 
+\medskip
+
 Với mỗi hồ sơ, DSS đánh giá rủi ro từ hai nguồn trên cùng một thang A--E:
-\begin{itemize}[topsep=0pt, itemsep=1pt]
+\begin{itemize}[itemsep=1pt]
 	\item \textbf{Hạng điểm:} Hạng suy ra từ xác suất vỡ nợ (\textit{probability of default}, PD) do mô hình học máy ước lượng cho riêng hồ sơ.
 	\item \textbf{Hạng luật:} Hạng xấu nhất trong các luật phân khúc và luật nghiệp vụ mà hồ sơ vi phạm.
 	\item \textbf{Hạng cuối:} Hạng xấu hơn trong hai hạng trên; nếu hồ sơ không vi phạm luật nào thì hạng cuối là hạng điểm.
@@ -35,12 +39,16 @@ Với mỗi hồ sơ, DSS đánh giá rủi ro từ hai nguồn trên cùng mộ
 
 Mỗi hạng là một phân khúc khách hàng và gắn với đúng một chính sách. Hạng A, B được đề xuất Duyệt (\textbf{Approve}). Hạng C, D được đề xuất Thẩm định thêm (\textbf{Manual review}). Hạng E được đề xuất Từ chối (\textbf{Reject}). Kết quả cho mỗi hồ sơ gồm hạng cuối, đề xuất, hạn mức khuyến nghị và lý do của đề xuất. Lý do gồm các yếu tố làm tăng rủi ro theo giá trị SHAP (\textit{SHapley Additive exPlanations}) và các luật mà hồ sơ vi phạm. Thang hạng, các luật và chính sách được trình bày chi tiết ở Chương~\ref{part:ch4}.
 
+\medskip
+
 Hệ thống hướng tới ba mục tiêu:
 \begin{itemize}[topsep=0pt, itemsep=1pt]
 	\item \textbf{Hiểu rủi ro của danh mục:} Biết phân khúc nào có tỷ lệ vỡ nợ cao, chiếm bao nhiêu hồ sơ và bao nhiêu tiền vay.
 	\item \textbf{Quyết định nhất quán và giải thích được:} Mỗi hồ sơ được đề xuất dựa trên dữ liệu thay vì cảm tính, kèm lý do.
 	\item \textbf{Đánh giá trước tác động của chính sách:} Biết tỷ lệ duyệt và tỷ lệ vỡ nợ thay đổi ra sao khi đổi ngưỡng duyệt.
 \end{itemize}
+
+\medskip
 
 Bảng~\ref{tab:business-questions} liệt kê năm câu hỏi nghiệp vụ mà hệ thống phải trả lời được. Các yêu cầu ở mục~\ref{sec:requirements} đều gắn với một hoặc nhiều câu hỏi này.
 
@@ -51,13 +59,13 @@ Bảng~\ref{tab:business-questions} liệt kê năm câu hỏi nghiệp vụ mà
 	\footnotesize
 	\begin{tabular}{l p{14.5cm}}
 		\toprule
-		\textbf{Mã} & \textbf{Câu hỏi} \\
+		\textbf{Mã} & \textbf{Câu hỏi}                                                                                                                                              \\
 		\midrule
-		Q1 & Tỷ lệ vỡ nợ của danh mục thay đổi thế nào theo tuổi, loại thu nhập, nghề, học vấn, nhà ở, vùng và lịch sử tín dụng? \\
-		Q2 & Những phân khúc nào rủi ro cao nhất, và chiếm bao nhiêu phần danh mục (số hồ sơ, tổng tiền vay)? \\
-		Q3 & Lịch sử tín dụng (tại Credit Bureau và tại Home Credit) ảnh hưởng thế nào đến khả năng trả nợ? Khách không có lịch sử tại Credit Bureau rủi ro hơn bao nhiêu? \\
-		Q4 & Một hồ sơ cụ thể có hạng điểm, hạng luật và hạng cuối là gì, nên xử lý ra sao và vì sao? \\
-		Q5 & Nếu đổi chính sách (ngưỡng hạng, quyết định và hạn mức của từng hạng) thì tỷ lệ duyệt và tỷ lệ vỡ nợ của nhóm được duyệt thay đổi ra sao? \\
+		Q1          & Tỷ lệ vỡ nợ của danh mục thay đổi thế nào theo tuổi, loại thu nhập, nghề, học vấn, nhà ở, vùng và lịch sử tín dụng?                                           \\
+		Q2          & Những phân khúc nào rủi ro cao nhất, và chiếm bao nhiêu phần danh mục (số hồ sơ, tổng tiền vay)?                                                              \\
+		Q3          & Lịch sử tín dụng (tại Credit Bureau và tại Home Credit) ảnh hưởng thế nào đến khả năng trả nợ? Khách không có lịch sử tại Credit Bureau rủi ro hơn bao nhiêu? \\
+		Q4          & Một hồ sơ cụ thể có hạng điểm, hạng luật và hạng cuối là gì, nên xử lý ra sao và vì sao?                                                                      \\
+		Q5          & Nếu đổi chính sách (ngưỡng hạng, quyết định và hạn mức của từng hạng) thì tỷ lệ duyệt và tỷ lệ vỡ nợ của nhóm được duyệt thay đổi ra sao?                     \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -70,6 +78,16 @@ Q2 còn hỏi rủi ro đang dồn vào đâu và chính sách nào xử lý đ�
 
 \section{Người dùng và quyết định cần hỗ trợ}
 \label{sec:users}
+
+Hình~\ref{fig:decision_levels} tóm tắt ba nhóm người dùng, các cấp quyết định tương ứng và các trang giao diện phục vụ từng cấp. Trưởng phòng rủi ro đặt chính sách. DSS áp dụng chính sách đó để đề xuất cho từng hồ sơ. Chuyên viên thẩm định ra quyết định cuối cùng.
+
+\begin{figure}[H]
+	\centering
+	\mermaidfile[width=0.95\linewidth, keepaspectratio]{diagrams/decision_levels.mmd}
+	\caption{Các cấp quyết định trong thẩm định tín dụng}
+	\label{fig:decision_levels}
+\end{figure}
+
 Hệ thống phục vụ ba nhóm người dùng ở ba cấp quyết định khác nhau: trưởng phòng quản lý rủi ro tín dụng (sau đây gọi là trưởng phòng rủi ro), chuyên viên thẩm định và ban điều hành. Bảng~\ref{tab:user-decision-levels} nêu quyết định của từng nhóm và thành phần hệ thống hỗ trợ quyết định đó. Tên trang web được ghi đúng như trên giao diện.
 
 \begin{table}[H]
@@ -79,27 +97,18 @@ Hệ thống phục vụ ba nhóm người dùng ở ba cấp quyết định kh
 	\footnotesize
 	\begin{tabular}{p{2.8cm} p{2cm} p{4.8cm} p{5.4cm}}
 		\toprule
-		\textbf{Người dùng} & \textbf{Cấp quyết định} & \textbf{Quyết định} & \textbf{Hệ thống hỗ trợ bằng} \\
+		\textbf{Người dùng}   & \textbf{Cấp quyết định} & \textbf{Quyết định}                                                                     & \textbf{Hệ thống hỗ trợ bằng}                                                                                                                                                                                                                \\
 		\midrule
-		Trưởng phòng rủi ro & Chiến lược, chiến thuật & Đặt ngưỡng hạng A--E, các luật và chính sách cho từng hạng (quyết định, hạn mức tối đa) & Bảng điều khiển (\textit{dashboard}) danh mục trên \textbf{Overview}; khám phá phân khúc trên \textbf{Explorer}; phân tích OLAP theo hạng và theo các chiều khách hàng trên \textbf{Analytics}; mô phỏng chính sách trên \textbf{Playground} \\
+		Trưởng phòng rủi ro   & Chiến lược, chiến thuật & Đặt ngưỡng hạng A--E, các luật và chính sách cho từng hạng (quyết định, hạn mức tối đa) & Bảng điều khiển (\textit{dashboard}) danh mục trên \textbf{Overview}; khám phá phân khúc trên \textbf{Explorer}; phân tích OLAP theo hạng và theo các chiều khách hàng trên \textbf{Analytics}; mô phỏng chính sách trên \textbf{Playground} \\
 		\midrule
-		Chuyên viên thẩm định & Tác nghiệp & Duyệt, chuyển thẩm định thêm hay từ chối một hồ sơ; cho vay bao nhiêu & Trang \textbf{Application details}: PD, hạng điểm, hạng luật, hạng cuối, đề xuất, hạn mức; giải thích bằng SHAP và danh sách luật bị vi phạm \\
+		Chuyên viên thẩm định & Tác nghiệp              & Duyệt, chuyển thẩm định thêm hay từ chối một hồ sơ; cho vay bao nhiêu                   & Trang \textbf{Application details}: PD, hạng điểm, hạng luật, hạng cuối, đề xuất, hạn mức; giải thích bằng SHAP và danh sách luật bị vi phạm                                                                                                 \\
 		\midrule
-		Ban điều hành & Giám sát & Theo dõi sức khỏe danh mục và hiệu quả của chính sách & Các KPI tổng hợp trên \textbf{Overview} \\
+		Ban điều hành         & Giám sát                & Theo dõi sức khỏe danh mục và hiệu quả của chính sách                                   & Các KPI tổng hợp trên \textbf{Overview}                                                                                                                                                                                                      \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-Hình~\ref{fig:decision_levels} tóm tắt các cấp quyết định và luồng thông tin từ kho dữ liệu tới từng cấp. Trưởng phòng rủi ro đặt chính sách. DSS áp dụng chính sách đó để đề xuất cho từng hồ sơ. Chuyên viên thẩm định ra quyết định cuối cùng.
-
-\begin{figure}[H]
-	\centering
-	\mermaidfile[width=0.95\linewidth, keepaspectratio]{diagrams/decision_levels.mmd}
-	\caption{Các cấp quyết định trong thẩm định tín dụng}
-	\label{fig:decision_levels}
-\end{figure}
-
-\subsection{Loại quyết định: bán cấu trúc}
+\subsection{Loại quyết định: Bán cấu trúc}
 \label{sec:semi-structured}
 Thẩm định tín dụng là một quyết định bán cấu trúc (\textit{semi-structured}).~\cite{turban2005} Một phần của quyết định mô hình hóa được bằng dữ liệu, như tỷ lệ vỡ nợ lịch sử và mô hình dự báo. Phần còn lại cần phán đoán của con người, ví dụ hồ sơ ở vùng xám hoặc thông tin nằm ngoài hệ thống. Vì vậy DSS chỉ đề xuất, không tự động quyết định. Hồ sơ ở vùng xám được chuyển cho chuyên viên thẩm định thêm.
 
@@ -112,14 +121,14 @@ Mô hình Simon chia quá trình ra quyết định thành bốn giai đoạn.~\
 	\caption{Các giai đoạn ra quyết định và thành phần hệ thống}
 	\label{tab:simon-phases}
 	\footnotesize
-	\begin{tabular}{p{3cm} p{6.2cm} p{6cm}}
+	\begin{tabular}{m{3cm} p{6.2cm} p{6cm}}
 		\toprule
-		\textbf{Giai đoạn} & \textbf{Hoạt động nghiệp vụ} & \textbf{Thành phần hệ thống} \\
+		\textbf{Giai đoạn}                  & \textbf{Hoạt động nghiệp vụ}                                                         & \textbf{Thành phần hệ thống}                                         \\
 		\midrule
-		Nhận thức (\textit{Intelligence}) & Phát hiện phân khúc và các yếu tố làm tăng rủi ro & Kho dữ liệu, bảng điều khiển, truy vấn OLAP \\
-		Thiết kế (\textit{Design}) & Xây dựng phương án: thang hạng A--E, ngưỡng hạng, các luật, chính sách cho từng hạng & Mô hình dự báo PD, bảng hạng của luật phân khúc, mô phỏng chính sách \\
-		Lựa chọn (\textit{Choice}) & Chọn quyết định cho từng hồ sơ & Hạng cuối của hồ sơ và chính sách của hạng đó, kèm lý do \\
-		Thực hiện (\textit{Implementation}) & Áp dụng chính sách, theo dõi kết quả & KPI trên bảng điều khiển; chạy lại ETL khi có dữ liệu mới \\
+		Nhận thức (\textit{Intelligence})   & Phát hiện phân khúc và các yếu tố làm tăng rủi ro                                    & Kho dữ liệu, bảng điều khiển, truy vấn OLAP                          \\
+		Thiết kế (\textit{Design})          & Xây dựng phương án: thang hạng A--E, ngưỡng hạng, các luật, chính sách cho từng hạng & Mô hình dự báo PD, bảng hạng của luật phân khúc, mô phỏng chính sách \\
+		Lựa chọn (\textit{Choice})          & Chọn quyết định cho từng hồ sơ                                                       & Hạng cuối của hồ sơ và chính sách của hạng đó, kèm lý do             \\
+		Thực hiện (\textit{Implementation}) & Áp dụng chính sách, theo dõi kết quả                                                 & KPI trên bảng điều khiển; chạy lại ETL khi có dữ liệu mới            \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -136,21 +145,21 @@ Bảng~\ref{tab:functional-requirements} liệt kê mười một yêu cầu ch�
 	\caption{Yêu cầu chức năng}
 	\label{tab:functional-requirements}
 	\footnotesize
-	\begin{tabular}{l p{13cm} l}
+	\begin{tabular}{c p{13cm} l}
 		\toprule
-		\textbf{Mã} & \textbf{Yêu cầu} & \textbf{Câu hỏi} \\
+		\textbf{Mã} & \textbf{Yêu cầu}                                                                                                                                                                                                                                                                                                                 & \textbf{Câu hỏi} \\
 		\midrule
-		BR-01 & Tích hợp $8$ bảng nguồn vào kho dữ liệu. Tổng hợp lịch sử tín dụng (Credit Bureau, hồ sơ vay trước đây, trả góp, POS, thẻ) về cấp khách hàng. & Q1--Q4 \\
-		BR-02 & Làm sạch và kiểm tra chất lượng dữ liệu (giá trị giả, giá trị thiếu, ngoại lai, ràng buộc khóa). Lưu báo cáo chất lượng sau mỗi lần ETL. & -- \\
-		BR-03 & Phân tích danh mục đa chiều: số hồ sơ, tổng tiền vay, tỷ lệ vỡ nợ và phân bố hạng A--E theo các chiều khách hàng, hợp đồng, vùng, lịch sử tín dụng, thời gian. Hỗ trợ cuộn lên (\textit{roll-up}), khoan xuống (\textit{drill-down}), cắt lát (\textit{slice}), cắt khối (\textit{dice}) và xoay (\textit{pivot}). & Q1--Q3 \\
-		BR-04 & \textbf{Hạng điểm:} ước lượng PD đã hiệu chỉnh cho từng hồ sơ bằng mô hình học từ dữ liệu trong kho, rồi quy về hạng A--E theo ngưỡng tỷ lệ rủi ro. & Q4 \\
-		BR-05 & \textbf{Hạng luật:} lấy hạng xấu nhất trong các luật mà hồ sơ vi phạm; không vi phạm luật nào thì không có hạng luật. Gồm luật phân khúc và luật nghiệp vụ. Hạng của mỗi luật tính từ tỷ lệ vỡ nợ lịch sử của nhóm vi phạm, theo cùng ngưỡng tỷ lệ rủi ro. & Q2, Q4 \\
-		BR-06 & \textbf{Hạng cuối} là hạng xấu hơn trong hạng điểm và hạng luật. Mỗi hạng gắn một chính sách: quyết định (Duyệt / Thẩm định thêm / Từ chối) và hạn mức tối đa (tiền vay / thu nhập). & Q4 \\
-		BR-07 & Kiểm tra thang hạng: tỷ lệ vỡ nợ thực tế phải tăng đều từ A đến E, cho cả hạng điểm, hạng luật và hạng cuối. & Q2 \\
-		BR-08 & Giải thích mỗi đề xuất cho chuyên viên thẩm định gồm ba phần: SHAP cho hạng điểm ($3$--$5$ yếu tố làm tăng và $3$--$5$ yếu tố làm giảm rủi ro, kèm tên nghiệp vụ, tên cột và giá trị); danh sách luật bị vi phạm kèm tỷ lệ vỡ nợ lịch sử của nhóm vi phạm và hạng của luật; nguồn quyết định hạng cuối và mức bị hạ hạng. & Q4 \\
-		BR-09 & Mô phỏng chính sách (\textit{what-if}) cho cả danh mục: đổi ngưỡng hạng, bật hoặc tắt từng luật, đổi ngưỡng của luật có tham số, đổi quyết định và hạn mức tối đa của từng hạng. So sánh trước và sau $5$ KPI: tỷ lệ vỡ nợ, tiền vay được duyệt và dư nợ chịu rủi ro của nhóm được duyệt, tỷ lệ duyệt và tỷ lệ chuyển thẩm định. & Q5 \\
-		BR-10 & Giao diện web gồm các trang chính \textbf{Overview}, \textbf{Analytics}, \textbf{Explorer}, \textbf{Application details} và \textbf{Playground}; cuối menu có hai trang tham khảo \textbf{Grades \& model} và \textbf{Architecture}. & Q1--Q5 \\
-		BR-11 & Giải thích cấp danh mục: tổng hợp SHAP trên các khoản vay lịch sử để xếp hạng mức ảnh hưởng của các yếu tố, phục vụ kiểm tra logic mô hình và kiểm tra công bằng. & Q1, Q3 \\
+		BR-01       & Tích hợp $8$ bảng nguồn vào kho dữ liệu. Tổng hợp lịch sử tín dụng (Credit Bureau, hồ sơ vay trước đây, trả góp, POS, thẻ) về cấp khách hàng.                                                                                                                                                                                    & Q1--Q4           \\
+		BR-02       & Làm sạch và kiểm tra chất lượng dữ liệu (giá trị giả, giá trị thiếu, ngoại lai, ràng buộc khóa). Lưu báo cáo chất lượng sau mỗi lần ETL.                                                                                                                                                                                         & --               \\
+		BR-03       & Phân tích danh mục đa chiều: số hồ sơ, tổng tiền vay, tỷ lệ vỡ nợ và phân bố hạng A--E theo các chiều khách hàng, hợp đồng, vùng, lịch sử tín dụng, thời gian. Hỗ trợ cuộn lên (\textit{roll-up}), khoan xuống (\textit{drill-down}), cắt lát (\textit{slice}), cắt khối (\textit{dice}) và xoay (\textit{pivot}).               & Q1--Q3           \\
+		BR-04       & \textbf{Hạng điểm:} ước lượng PD đã hiệu chỉnh cho từng hồ sơ bằng mô hình học từ dữ liệu trong kho, rồi quy về hạng A--E theo ngưỡng tỷ lệ rủi ro.                                                                                                                                                                              & Q4               \\
+		BR-05       & \textbf{Hạng luật:} lấy hạng xấu nhất trong các luật mà hồ sơ vi phạm; không vi phạm luật nào thì không có hạng luật. Gồm luật phân khúc và luật nghiệp vụ. Hạng của mỗi luật tính từ tỷ lệ vỡ nợ lịch sử của nhóm vi phạm, theo cùng ngưỡng tỷ lệ rủi ro.                                                                       & Q2, Q4           \\
+		BR-06       & \textbf{Hạng cuối} là hạng xấu hơn trong hạng điểm và hạng luật. Mỗi hạng gắn một chính sách: quyết định (Duyệt / Thẩm định thêm / Từ chối) và hạn mức tối đa (tiền vay / thu nhập).                                                                                                                                             & Q4               \\
+		BR-07       & Kiểm tra thang hạng: tỷ lệ vỡ nợ thực tế phải tăng đều từ A đến E, cho cả hạng điểm, hạng luật và hạng cuối.                                                                                                                                                                                                                     & Q2               \\
+		BR-08       & Giải thích mỗi đề xuất cho chuyên viên thẩm định gồm ba phần: SHAP cho hạng điểm ($3$--$5$ yếu tố làm tăng và $3$--$5$ yếu tố làm giảm rủi ro, kèm tên nghiệp vụ, tên cột và giá trị); danh sách luật bị vi phạm kèm tỷ lệ vỡ nợ lịch sử của nhóm vi phạm và hạng của luật; nguồn quyết định hạng cuối và mức bị hạ hạng.        & Q4               \\
+		BR-09       & Mô phỏng chính sách (\textit{what-if}) cho cả danh mục: đổi ngưỡng hạng, bật hoặc tắt từng luật, đổi ngưỡng của luật có tham số, đổi quyết định và hạn mức tối đa của từng hạng. So sánh trước và sau $5$ KPI: tỷ lệ vỡ nợ, tiền vay được duyệt và dư nợ chịu rủi ro của nhóm được duyệt, tỷ lệ duyệt và tỷ lệ chuyển thẩm định. & Q5               \\
+		BR-10       & Giao diện web gồm các trang chính \textbf{Overview}, \textbf{Analytics}, \textbf{Explorer}, \textbf{Application details} và \textbf{Playground}; cuối menu có hai trang tham khảo \textbf{Grades \& model} và \textbf{Architecture}.                                                                                             & Q1--Q5           \\
+		BR-11       & Giải thích cấp danh mục: tổng hợp SHAP trên các khoản vay lịch sử để xếp hạng mức ảnh hưởng của các yếu tố, phục vụ kiểm tra logic mô hình và kiểm tra công bằng.                                                                                                                                                                & Q1, Q3           \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -187,10 +196,10 @@ Chỉ số về số lượng, tiền vay và quyết định tính trên mọi 
 	\footnotesize
 	\begin{tabular}{p{8cm} p{8cm}}
 		\toprule
-		\textbf{Tính trên mọi hồ sơ (đã chấm)} & \textbf{Chỉ tính trên khoản vay lịch sử} \\
+		\textbf{Tính trên mọi hồ sơ (đã chấm)} & \textbf{Chỉ tính trên khoản vay lịch sử}                                                                                                                                       \\
 		\midrule
 		Số hồ sơ; KPI-02 dư nợ cấp mới; KPI-03 dư nợ chịu rủi ro (hồ sơ mới cũng có PD); KPI-04, KPI-05 và tỷ lệ từ chối; tiền vay được duyệt và hạn mức khuyến nghị; SM-1 phân bố hạng; PD trung bình; SM-5 gánh nặng nợ; số hồ sơ vi phạm luật (\textbf{Loans hit}) trên \textbf{Playground}
-		& KPI-01 tỷ lệ vỡ nợ; số vỡ nợ; SM-2 tỷ lệ vỡ nợ của nhóm được duyệt; phân tách theo kết quả trả nợ; tỷ lệ vỡ nợ của nhóm vi phạm một luật (SM-3); SM-4 độ phân biệt của mô hình \\
+		                                       & KPI-01 tỷ lệ vỡ nợ; số vỡ nợ; SM-2 tỷ lệ vỡ nợ của nhóm được duyệt; phân tách theo kết quả trả nợ; tỷ lệ vỡ nợ của nhóm vi phạm một luật (SM-3); SM-4 độ phân biệt của mô hình \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -202,33 +211,31 @@ Chỉ số về số lượng, tiền vay và quyết định tính trên mọi 
 	\label{fig:kpi_scope}
 \end{figure}
 
-\subsection{KPI chính}
+\subsection{Chỉ số chính}
 \label{sec:kpi-main}
-Bảng~\ref{tab:kpi-main} định nghĩa năm KPI chính. Năm ô KPI trên trang \textbf{Overview} hiển thị đúng năm chỉ số này với nhãn ở cột cuối.
+Năm ô KPI trên trang \textbf{Overview} hiển thị đúng năm chỉ số này với nhãn ở cột cuối.
 
 \begin{table}[H]
 	\centering
 	\caption{Định nghĩa KPI chính}
 	\label{tab:kpi-main}
 	\footnotesize
-	\begin{tabular}{l p{2.4cm} p{5.6cm} p{2.6cm} p{2.6cm}}
+	\begin{tabular}{c p{2.4cm} p{5.6cm} p{2.6cm} p{2.6cm}}
 		\toprule
-		\textbf{Mã} & \textbf{KPI} & \textbf{Công thức và ý nghĩa} & \textbf{Phạm vi} & \textbf{Nhãn trên web} \\
+		\textbf{Mã} & \textbf{KPI}           & \textbf{Công thức và ý nghĩa}                                                                                                             & \textbf{Phạm vi}  & \textbf{Nhãn trên web}      \\
 		\midrule
-		KPI-01 & Tỷ lệ vỡ nợ & \mintinline[fontsize=\footnotesize]{sql}|AVG(target)|; tính chung, theo hạng và theo nhóm thuộc tính & Khoản vay lịch sử & \textbf{Default rate} \\
-		KPI-02 & Dư nợ cấp mới & \mintinline[fontsize=\footnotesize]{sql}|SUM(amt_credit)|; quy mô tiền vay, đại diện cho thu nhập lãi & Mọi hồ sơ & \textbf{Total credit} \\
-		KPI-03 & Dư nợ chịu rủi ro & \mintinline[fontsize=\footnotesize]{sql}|SUM(amt_credit * pd)|; phần tiền vay có nguy cơ mất, giả định mất toàn bộ khi vỡ nợ & Mọi hồ sơ & \textbf{Credit at risk} \\
-		KPI-04 & Tỷ lệ duyệt & Số hồ sơ \mintinline[fontsize=\footnotesize]{sql}|decision = 'approve'| chia cho số hồ sơ đã chấm & Mọi hồ sơ & \textbf{Approval rate} \\
-		KPI-05 & Tỷ lệ chuyển thẩm định & Số hồ sơ \mintinline[fontsize=\footnotesize]{sql}|decision = 'review'| chia cho số hồ sơ đã chấm; đo khối lượng công việc của chuyên viên & Mọi hồ sơ & \textbf{Manual review rate} \\
+		KPI-01      & Tỷ lệ vỡ nợ            & \mintinline[fontsize=\footnotesize]{sql}|AVG(target)|; tính chung, theo hạng và theo nhóm thuộc tính                                      & Khoản vay lịch sử & \textbf{Default rate}       \\
+		KPI-02      & Dư nợ cấp mới          & \mintinline[fontsize=\footnotesize]{sql}|SUM(amt_credit)|; quy mô tiền vay, đại diện cho thu nhập lãi                                     & Mọi hồ sơ         & \textbf{Total credit}       \\
+		KPI-03      & Dư nợ chịu rủi ro      & \mintinline[fontsize=\footnotesize]{sql}|SUM(amt_credit * pd)|; phần tiền vay có nguy cơ mất, giả định mất toàn bộ khi vỡ nợ              & Mọi hồ sơ         & \textbf{Credit at risk}     \\
+		KPI-04      & Tỷ lệ duyệt            & Số hồ sơ \mintinline[fontsize=\footnotesize]{sql}|decision = 'approve'| chia cho số hồ sơ đã chấm                                         & Mọi hồ sơ         & \textbf{Approval rate}      \\
+		KPI-05      & Tỷ lệ chuyển thẩm định & Số hồ sơ \mintinline[fontsize=\footnotesize]{sql}|decision = 'review'| chia cho số hồ sơ đã chấm; đo khối lượng công việc của chuyên viên & Mọi hồ sơ         & \textbf{Manual review rate} \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
 KPI-02 không tính lãi cụ thể, vì dữ liệu không có lãi suất và kỳ hạn của từng hợp đồng. Đặt KPI-02 cạnh KPI-03 cho thấy đánh đổi giữa doanh thu và rủi ro. Trên trang \textbf{Playground}, KPI-01 đến KPI-03 chỉ tính trên nhóm được duyệt của mọi hồ sơ. Khi đó KPI-02 là tiền vay được duyệt sau khi cắt theo hạn mức, còn KPI-03 bằng tổng hạn mức khuyến nghị nhân PD. Vì vậy ba chỉ số này trên \textbf{Playground} nhỏ hơn chỉ số cùng mã trên \textbf{Overview}.
 
-\subsection{Chỉ số phụ}
-\label{sec:kpi-secondary}
-Chỉ số phụ dùng để kiểm tra và giải thích, không phải chỉ số theo dõi chính. Bảng~\ref{tab:kpi-secondary} nêu định nghĩa của năm chỉ số phụ.
+\paragraph{Chỉ số phụ:} Dùng để kiểm tra và giải thích, không phải chỉ số theo dõi chính.
 
 \begin{table}[H]
 	\centering
@@ -237,41 +244,39 @@ Chỉ số phụ dùng để kiểm tra và giải thích, không phải chỉ s
 	\footnotesize
 	\begin{tabular}{l p{3.2cm} p{8.4cm} p{2.6cm}}
 		\toprule
-		\textbf{Mã} & \textbf{Chỉ số} & \textbf{Công thức và ý nghĩa} & \textbf{Phạm vi} \\
+		\textbf{Mã} & \textbf{Chỉ số}                 & \textbf{Công thức và ý nghĩa}                                                                                                         & \textbf{Phạm vi}                                 \\
 		\midrule
-		SM-1 & Phân bố hạng & Số hồ sơ và tỷ trọng của mỗi hạng A--E theo hạng cuối, kèm tỷ lệ hồ sơ bị hạng luật hạ hạng & Mọi hồ sơ \\
-		SM-2 & Tỷ lệ vỡ nợ của nhóm được duyệt & \mintinline[fontsize=\footnotesize]{sql}|AVG(target)| trên các hồ sơ được đề xuất Duyệt; đo chất lượng của nhóm được duyệt & Khoản vay lịch sử \\
-		SM-3 & Tỷ lệ rủi ro & PD đã hiệu chỉnh của hồ sơ, hoặc tỷ lệ vỡ nợ lịch sử của nhóm vi phạm một luật; là căn cứ xếp hạng A--E cho cả hạng điểm và hạng luật & PD: mọi hồ sơ; tỷ lệ của luật: khoản vay lịch sử \\
-		SM-4 & Độ phân biệt của mô hình & AUC của PD dự đoán ngoài mẫu (\textit{out-of-fold}) trong kiểm định chéo $5$ phần (\textit{5-fold cross-validation}) & Khoản vay lịch sử \\
-		SM-5 & Gánh nặng nợ & Trung vị trả góp / thu nhập (DTI) và tiền vay / thu nhập, với thu nhập đã cắt ngoại lai; chỉ để tham khảo, không dùng để xếp hạng & Mọi hồ sơ \\
+		SM-1        & Phân bố hạng                    & Số hồ sơ và tỷ trọng của mỗi hạng A--E theo hạng cuối, kèm tỷ lệ hồ sơ bị hạng luật hạ hạng                                           & Mọi hồ sơ                                        \\
+		SM-2        & Tỷ lệ vỡ nợ của nhóm được duyệt & \mintinline[fontsize=\footnotesize]{sql}|AVG(target)| trên các hồ sơ được đề xuất Duyệt; đo chất lượng của nhóm được duyệt            & Khoản vay lịch sử                                \\
+		SM-3        & Tỷ lệ rủi ro                    & PD đã hiệu chỉnh của hồ sơ, hoặc tỷ lệ vỡ nợ lịch sử của nhóm vi phạm một luật; là căn cứ xếp hạng A--E cho cả hạng điểm và hạng luật & PD: mọi hồ sơ; tỷ lệ của luật: khoản vay lịch sử \\
+		SM-4        & Độ phân biệt của mô hình        & AUC của PD dự đoán ngoài mẫu (\textit{out-of-fold}) trong kiểm định chéo $5$ phần (\textit{5-fold cross-validation})                  & Khoản vay lịch sử                                \\
+		SM-5        & Gánh nặng nợ                    & Trung vị trả góp / thu nhập (DTI) và tiền vay / thu nhập, với thu nhập đã cắt ngoại lai; chỉ để tham khảo, không dùng để xếp hạng     & Mọi hồ sơ                                        \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-\subsection{Số liệu trên dữ liệu thật}
-\label{sec:kpi-values}
-Bảng~\ref{tab:kpi-values} ghi giá trị của các chỉ số sau khi chạy ETL và chấm điểm trên toàn bộ dữ liệu. Cột ``Mọi hồ sơ'' là giá trị hiển thị trên web. Số tiền giữ đơn vị gốc của dữ liệu (mục~\ref{sec:assumptions}).
+\paragraph{Số liệu trên dữ liệu thật:} Bảng~\ref{tab:kpi-values} ghi giá trị của các chỉ số sau khi chạy ETL và chấm điểm trên toàn bộ dữ liệu. Cột ``Mọi hồ sơ'' là giá trị hiển thị trên web. Số tiền giữ đơn vị gốc của dữ liệu (mục~\ref{sec:assumptions}).
 
 \begin{table}[H]
 	\centering
 	\caption{Giá trị KPI và chỉ số phụ trên dữ liệu thật}
 	\label{tab:kpi-values}
 	\footnotesize
-	\begin{tabular}{l p{3.2cm} p{5.4cm} p{5cm}}
+	\begin{tabular}{c p{3.2cm} p{5.4cm} p{5cm}}
 		\toprule
-		\textbf{Mã} & \textbf{Chỉ số} & \textbf{Mọi hồ sơ (web)} & \textbf{Khoản vay lịch sử / hồ sơ mới} \\
+		\textbf{Mã} & \textbf{Chỉ số}                 & \textbf{Mọi hồ sơ (web)}                                                                        & \textbf{Khoản vay lịch sử / hồ sơ mới}                                                                             \\
 		\midrule
-		-- & Số hồ sơ & $356.255$ & $307.511$ / $48.744$ \\
-		KPI-01 & Tỷ lệ vỡ nợ & $8{,}07\%$ (chỉ trên khoản vay lịch sử) & -- \\
-		KPI-02 & Dư nợ cấp mới & $209{,}4$ tỷ (đơn vị tiền gốc) & $184{,}2$ tỷ / $25{,}2$ tỷ \\
-		KPI-03 & Dư nợ chịu rủi ro & $15{,}76$ tỷ & $13{,}84$ tỷ / $1{,}92$ tỷ \\
-		KPI-04 & Tỷ lệ duyệt & $51{,}86\%$ & $52{,}07\%$ / $50{,}59\%$ \\
-		KPI-05 & Tỷ lệ chuyển thẩm định & $39{,}54\%$ (từ chối $8{,}59\%$) & $39{,}26\%$ / $41{,}37\%$ (từ chối $8{,}68\%$ / $8{,}04\%$) \\
-		SM-1 & Phân bố hạng cuối & A $2{,}91\%$, B $48{,}95\%$, C $23{,}03\%$, D $16{,}51\%$, E $8{,}59\%$; bị hạ hạng $13{,}55\%$ & Khoản vay lịch sử: A $3{,}04\%$, B $49{,}02\%$, C $22{,}86\%$, D $16{,}40\%$, E $8{,}68\%$; bị hạ hạng $13{,}58\%$ \\
-		SM-2 & Tỷ lệ vỡ nợ của nhóm được duyệt & $3{,}37\%$ (chỉ trên khoản vay lịch sử) & -- \\
-		SM-3 & Tỷ lệ rủi ro & PD trung bình $8{,}08\%$ & $8{,}07\%$ / $8{,}10\%$ \\
-		SM-4 & AUC (ngoài mẫu) & $0{,}7586$ (chỉ trên khoản vay lịch sử) & -- \\
-		SM-5 & Gánh nặng nợ & Trung vị DTI $0{,}163$; trung vị tiền vay / thu nhập $3{,}16$ & Tiền vay / thu nhập $3{,}27$ / $2{,}67$ \\
+		--          & Số hồ sơ                        & $356.255$                                                                                       & $307.511$ / $48.744$                                                                                               \\
+		KPI-01      & Tỷ lệ vỡ nợ                     & $8{,}07\%$ (chỉ trên khoản vay lịch sử)                                                         & --                                                                                                                 \\
+		KPI-02      & Dư nợ cấp mới                   & $209{,}4$ tỷ (đơn vị tiền gốc)                                                                  & $184{,}2$ tỷ / $25{,}2$ tỷ                                                                                         \\
+		KPI-03      & Dư nợ chịu rủi ro               & $15{,}76$ tỷ                                                                                    & $13{,}84$ tỷ / $1{,}92$ tỷ                                                                                         \\
+		KPI-04      & Tỷ lệ duyệt                     & $51{,}86\%$                                                                                     & $52{,}07\%$ / $50{,}59\%$                                                                                          \\
+		KPI-05      & Tỷ lệ chuyển thẩm định          & $39{,}54\%$ (từ chối $8{,}59\%$)                                                                & $39{,}26\%$ / $41{,}37\%$ (từ chối $8{,}68\%$ / $8{,}04\%$)                                                        \\
+		SM-1        & Phân bố hạng cuối               & A $2{,}91\%$, B $48{,}95\%$, C $23{,}03\%$, D $16{,}51\%$, E $8{,}59\%$; bị hạ hạng $13{,}55\%$ & Khoản vay lịch sử: A $3{,}04\%$, B $49{,}02\%$, C $22{,}86\%$, D $16{,}40\%$, E $8{,}68\%$; bị hạ hạng $13{,}58\%$ \\
+		SM-2        & Tỷ lệ vỡ nợ của nhóm được duyệt & $3{,}37\%$ (chỉ trên khoản vay lịch sử)                                                         & --                                                                                                                 \\
+		SM-3        & Tỷ lệ rủi ro                    & PD trung bình $8{,}08\%$                                                                        & $8{,}07\%$ / $8{,}10\%$                                                                                            \\
+		SM-4        & AUC (ngoài mẫu)                 & $0{,}7586$ (chỉ trên khoản vay lịch sử)                                                         & --                                                                                                                 \\
+		SM-5        & Gánh nặng nợ                    & Trung vị DTI $0{,}163$; trung vị tiền vay / thu nhập $3{,}16$                                   & Tiền vay / thu nhập $3{,}27$ / $2{,}67$                                                                            \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -282,6 +287,8 @@ Theo lịch sử tín dụng, tỷ lệ vỡ nợ của khoản vay lịch sử 
 \label{sec:data-overview}
 Dữ liệu nguồn là bộ \textit{Home Credit Default Risk} do Home Credit công bố trên Kaggle năm 2018.~\cite{homecredit2018} Bộ dữ liệu gồm $8$ bảng, khoảng $58{,}5$ triệu dòng và $2{,}7$ GB tập tin CSV. Ngoài ra, hệ thống dùng thêm một nguồn ngày mô phỏng. Bảng~\ref{tab:source-files} (Chương~\ref{part:ch2}) mô tả từng tập tin nguồn.
 
+\medskip
+
 Bảng \texttt{application} là bảng trung tâm với khóa \texttt{SK\_ID\_CURR}. Các bảng lịch sử nối vào qua \texttt{SK\_ID\_CURR}, \texttt{SK\_ID\_PREV} và \texttt{SK\_ID\_BUREAU}. Năm đặc điểm của dữ liệu ảnh hưởng trực tiếp tới thiết kế hệ thống:
 \begin{itemize}[topsep=0pt, itemsep=1pt]
 	\item \textbf{Nhãn mất cân bằng:} Khách gặp khó khăn trả nợ (\mintinline[fontsize=\small]{sql}|TARGET = 1|) chỉ chiếm $8{,}07\%$ khoản vay lịch sử, nên không thể đánh giá mô hình bằng độ chính xác (\textit{accuracy}) thông thường.
@@ -291,14 +298,15 @@ Bảng \texttt{application} là bảng trung tâm với khóa \texttt{SK\_ID\_CU
 	\item \textbf{Hồ sơ chưa có nhãn:} Các hồ sơ của \texttt{application\_test} được dùng như hồ sơ mới cần thẩm định.
 \end{itemize}
 
+\medskip
+
 Nguồn \texttt{application\_dates.csv} là dữ liệu mô phỏng do lệnh \texttt{hcdw synth-dates} sinh, không có trong bộ Kaggle. Vì vậy xu hướng theo thời gian trong kho không có ý nghĩa nghiệp vụ (mục~\ref{sec:time}).
 
 \section{Phạm vi và giả định}
 \label{sec:scope}
 
-\subsection{Trong phạm vi}
+\subsection*{Trong phạm vi}
 \label{sec:in-scope}
-Hệ thống gồm các thành phần sau:
 \begin{itemize}[topsep=0pt, itemsep=1pt]
 	\item \textbf{Kho dữ liệu:} Kho tích hợp $8$ bảng nguồn và nguồn ngày mô phỏng theo mô hình đa chiều (\textit{star schema}), gồm $4$ bảng sự kiện và $8$ bảng chiều.~\cite{kimball2013} Thiết kế chi tiết nằm ở Chương~\ref{part:ch2}.
 	\item \textbf{ETL:} Quy trình trích xuất, làm sạch, biến đổi và nạp lại toàn bộ kho bằng một lệnh, kèm kiểm tra chất lượng dữ liệu.
@@ -306,9 +314,8 @@ Hệ thống gồm các thành phần sau:
 	\item \textbf{DSS thẩm định:} Hệ thống xếp hạng hồ sơ theo hạng điểm, hạng luật và hạng cuối A--E, đề xuất quyết định, hạn mức và lý do, kèm mô phỏng chính sách (Chương~\ref{part:ch4}).
 \end{itemize}
 
-\subsection{Ngoài phạm vi}
+\subsection*{Ngoài phạm vi}
 \label{sec:out-of-scope}
-Các nghiệp vụ sau nằm ngoài phạm vi của hệ thống:
 \begin{itemize}[topsep=0pt, itemsep=1pt]
 	\item \textbf{Định giá khoản vay:} Hệ thống không đề xuất lãi suất.
 	\item \textbf{Tối ưu lợi nhuận:} Hệ thống không tính lợi nhuận hay phân bổ vốn.
@@ -317,10 +324,9 @@ Các nghiệp vụ sau nằm ngoài phạm vi của hệ thống:
 	\item \textbf{Thông báo cho khách hàng:} Phần giải thích chỉ dành cho chuyên viên thẩm định, không dùng để thông báo lý do từ chối cho khách hàng.
 \end{itemize}
 
-\subsection{Giả định}
+\subsection*{Giả định}
 \label{sec:assumptions}
-Hệ thống dựa trên các giả định sau:
-\begin{itemize}[topsep=0pt, itemsep=1pt]
+\begin{enumerate}[label=\textit{\arabic*},topsep=0pt, itemsep=1pt]
 	\item \textbf{Ý nghĩa nhãn:} \mintinline[fontsize=\small]{sql}|TARGET = 1| nghĩa là khách hàng gặp khó khăn trả nợ theo định nghĩa của Home Credit, và được coi là vỡ nợ.~\cite{homecredit2018}
 	\item \textbf{Ngày tháng:} Dữ liệu gốc không có ngày thật. Ngày nộp hồ sơ và ngày có kết quả là dữ liệu mô phỏng từ nguồn \texttt{application\_dates.csv}. Các ngày còn lại, như ngày mở khoản vay tại Credit Bureau, được quy đổi theo ngày nộp của từng hồ sơ. Vì ngày là mô phỏng, xu hướng theo thời gian không mang ý nghĩa nghiệp vụ.
 	\item \textbf{Khoản vay lịch sử và hồ sơ mới:} Khoản vay lịch sử (\texttt{application\_train}) đã có kết quả, dùng để tính tỷ lệ vỡ nợ và huấn luyện mô hình. Hồ sơ mới (\texttt{application\_test}) đóng vai trò các hồ sơ cần thẩm định.
@@ -328,4 +334,4 @@ Hệ thống dựa trên các giả định sau:
 	\item \textbf{Tổn thất:} Dữ liệu không có tỷ lệ thu hồi sau vỡ nợ. Vì vậy KPI-03 giả định mất toàn bộ khoản vay khi vỡ nợ, là một ước lượng thận trọng.
 	\item \textbf{Tiền tệ:} Số tiền giữ nguyên đơn vị trong dữ liệu gốc, không quy đổi sang đơn vị tiền tệ nào.
 	\item \textbf{Mục đích sử dụng:} Dữ liệu chỉ dùng cho mục đích học tập, theo điều khoản của nguồn công bố.
-\end{itemize}
+\end{enumerate}

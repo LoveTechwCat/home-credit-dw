@@ -61,7 +61,7 @@
 % (regenerate after editing the .mmd), so the report builds without mermaid-cli.
 % The height cap keeps short diagrams from being blown up to the full text width.
 \newcommand{\mermaidfile}[2][width=\linewidth]{%
-  \includegraphics[height=0.42\textheight,keepaspectratio,#1]{#2.pdf}}
+	\includegraphics[height=0.42\textheight,keepaspectratio,#1]{#2.pdf}}
 \RequirePackage[center]{caption}
 \RequirePackage{subcaption,float}
 \RequirePackage{pgfplots}
@@ -319,13 +319,14 @@
 		\vfill
 		\bfseries
 		\begin{tabular}{c}
-			\LARGE\@coursename                                  \\
-			{}                                                  \\
-			\midrule                                            \\
-			\Large\@reporttype                                  \\
-			{}                                                  \\
-			\Large\parbox[c]{0.9\linewidth}{\centering \@title} \\
-			{}                                                  \\
+			\LARGE\@coursename                                              \\
+			{}                                                              \\
+			\midrule                                                        \\
+			\href{https://github.com/LoveTechwCat/home-credit-dw}{Mã Nguồn} \\
+			\Large\@reporttype                                              \\
+			{}                                                              \\
+			\Large\parbox[c]{0.9\linewidth}{\centering \@title}             \\
+			{}                                                              \\
 			\midrule
 		\end{tabular}
 		\vfill

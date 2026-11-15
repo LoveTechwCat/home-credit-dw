@@ -32,8 +32,6 @@ Ba cơ chế giữ cho hệ thống ổn định và an toàn:
 	\item \textbf{Bộ nhớ đệm:} Kho là ảnh chụp tĩnh cho tới lần ETL sau, nên các truy vấn của \textbf{Overview}, \textbf{Grades \& model}, \textbf{Rules}, \textbf{SQL queries} và phần số liệu tổng thể của \textbf{Explorer} được nhớ bằng \texttt{lru\_cache}. Truy vấn khối dữ liệu của \textbf{Analytics} không dùng bộ nhớ đệm.
 \end{itemize}
 
-Bảng~\ref{tab:tech-stack} liệt kê công nghệ của từng tầng.
-
 \begin{table}[H]
 	\centering
 	\caption{Công nghệ sử dụng trong hệ thống}
@@ -41,14 +39,14 @@ Bảng~\ref{tab:tech-stack} liệt kê công nghệ của từng tầng.
 	\footnotesize
 	\begin{tabular}{p{3.4cm} p{5.4cm} p{6.6cm}}
 		\toprule
-		\textbf{Tầng}              & \textbf{Công nghệ}                                   & \textbf{Vai trò}                                                                                   \\
+		\textbf{Tầng}     & \textbf{Công nghệ}                             & \textbf{Vai trò}                                                                                                 \\
 		\midrule
-		Lưu trữ và OLAP            & DuckDB (tập tin cục bộ), MotherDuck (tùy chọn)       & Lưu bảng chiều, bảng sự kiện và khung nhìn; thực thi truy vấn tổng hợp.                            \\
-		ETL                        & Python 3.11+, pandas, DuckDB SQL, Typer              & Đọc CSV, làm sạch, gộp, nạp kho và cung cấp giao diện dòng lệnh \texttt{hcdw}.                      \\
-		Dịch vụ                    & FastAPI, Uvicorn, pydantic                           & Cung cấp API JSON, kiểm tra yêu cầu và tham số hóa truy vấn.                                       \\
-		Giao diện                  & React 18, TypeScript, Tailwind CSS, Recharts         & Vẽ biểu đồ, bảng và các sơ đồ thiết kế.                                                            \\
-		Hỗ trợ quyết định          & LightGBM, scikit-learn, SHAP                         & Ước lượng xác suất vỡ nợ, hiệu chỉnh bằng hồi quy đơn điệu (\textit{isotonic regression}) và giải thích kết quả.                          \\
-		Kiểm thử                   & pytest                                               & Kiểm thử ETL, API và DSS; báo cáo chất lượng sau mỗi lần chạy.                                     \\
+		Lưu trữ và OLAP   & DuckDB (tập tin cục bộ), MotherDuck (tùy chọn) & Lưu bảng chiều, bảng sự kiện và khung nhìn; thực thi truy vấn tổng hợp.                                          \\
+		ETL               & Python 3.11+, pandas, DuckDB SQL, Typer        & Đọc CSV, làm sạch, gộp, nạp kho và cung cấp giao diện dòng lệnh \texttt{hcdw}.                                   \\
+		Dịch vụ           & FastAPI, Uvicorn, pydantic                     & Cung cấp API JSON, kiểm tra yêu cầu và tham số hóa truy vấn.                                                     \\
+		Giao diện         & React 18, TypeScript, Tailwind CSS, Recharts   & Vẽ biểu đồ, bảng và các sơ đồ thiết kế.                                                                          \\
+		Hỗ trợ quyết định & LightGBM, scikit-learn, SHAP                   & Ước lượng xác suất vỡ nợ, hiệu chỉnh bằng hồi quy đơn điệu (\textit{isotonic regression}) và giải thích kết quả. \\
+		Kiểm thử          & pytest                                         & Kiểm thử ETL, API và DSS; báo cáo chất lượng sau mỗi lần chạy.                                                   \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -66,7 +64,7 @@ Hình~\ref{fig:flow_request} mô tả điều xảy ra khi người dùng đổi
 
 \begin{enumerate}[topsep=0pt, itemsep=1pt]
 	\item Người dùng thêm một điều kiện lọc, hoặc bấm \textbf{Interval}, $\blacktriangle$/$\blacktriangledown$, $\times$, $+$ hay $\rightleftarrows$. Trạng thái của trang được ghi vào tham số \texttt{?state=} trên URL, nên có thể chia sẻ bằng đường dẫn.
-	\item Trang gửi song song $5$ yêu cầu \texttt{POST /api/analytics/cube}, gồm $4$ biểu đồ và bảng \textbf{Cube}.
+	\item Tùy phần bị ảnh hưởng, trang gửi $5$ yêu cầu \texttt{POST /api/analytics/cube} (khi đổi bộ lọc \textbf{Cohort}), $3$ yêu cầu (khi đổi \textbf{Interval} cho ba biểu đồ thời gian) hoặc $1$ yêu cầu (khi đổi \textbf{Split by} hay cấu hình bảng \textbf{Cube}); các kết quả đã có trong bộ nhớ đệm phía trình duyệt không phải gửi lại.
 	\item API kiểm tra thân yêu cầu bằng pydantic; sai kiểu dữ liệu thì trả mã $422$.
 	\item Mã \texttt{cube.py} kiểm tra tên chiều và thước đo theo danh sách cho phép, tối đa $2$ chiều hàng và $1$ chiều cột, không lặp chiều; sai thì trả mã $400$.
 	\item API chạy một câu \mintinline[fontsize=\small]{sql}|GROUP BY GROUPING SETS (...)| trên \texttt{mart.v\_application\_wide}. Kết quả gồm các ô, tổng phụ và tổng chung.
@@ -93,13 +91,13 @@ Khối dữ liệu của trang \textbf{Analytics} dựa trên khung nhìn \textt
 	\footnotesize
 	\begin{tabular}{p{2.6cm} p{4.8cm} p{3cm} p{4.6cm}}
 		\toprule
-		\textbf{Phép OLAP}                   & \textbf{Trên giao diện}                                                                                         & \textbf{Trường trong yêu cầu} & \textbf{SQL}                                                         \\
+		\textbf{Phép OLAP}                                            & \textbf{Trên giao diện}                                                                                                                 & \textbf{Trường trong yêu cầu}      & \textbf{SQL}                                                                      \\
 		\midrule
-		Cắt lát và cắt khối (\textit{slice}, \textit{dice}) & Điều kiện lọc trên thanh \textbf{Cohort}                                                              & \texttt{conditions[]}         & \mintinline[fontsize=\footnotesize]{sql}|WHERE ... IN (...)|, giá trị qua tham số \\
-		Cuộn lên, khoan xuống (\textit{roll-up}, \textit{drill-down}) & \textbf{Interval} Year / Quarter / Month; $\blacktriangle$/$\blacktriangledown$ trên chiều thời gian; $\times$ bỏ chiều; $+$ thêm chiều & các mức trong \texttt{rows[]} & Tiền tố của \mintinline[fontsize=\footnotesize]{sql}|GROUPING SETS| tạo tổng phụ \\
-		Xoay (\textit{pivot})                       & Nút $\rightleftarrows$                                                                                          & đổi \texttt{rows} và \texttt{cols} & --                                                             \\
-		Chọn thước đo                        & Ô chọn \textbf{Measure}                                                                                         & \texttt{measure}              & Biểu thức trong \texttt{MEASURES}                                    \\
-		Khoan xuyên (\textit{drill-through})        & Bấm một ô hoặc một cột                                                                                          & --                            & Mở \textbf{Explorer} với các điều kiện tương ứng                     \\
+		Cắt lát và cắt khối (\textit{slice}, \textit{dice})           & Điều kiện lọc trên thanh \textbf{Cohort}                                                                                                & \texttt{conditions[]}              & \mintinline[fontsize=\footnotesize]{sql}|WHERE ... IN (...)|, giá trị qua tham số \\
+		Cuộn lên, khoan xuống (\textit{roll-up}, \textit{drill-down}) & \textbf{Interval} Year / Quarter / Month; $\blacktriangle$/$\blacktriangledown$ trên chiều thời gian; $\times$ bỏ chiều; $+$ thêm chiều & các mức trong \texttt{rows[]}      & Tiền tố của \mintinline[fontsize=\footnotesize]{sql}|GROUPING SETS| tạo tổng phụ  \\
+		Xoay (\textit{pivot})                                         & Nút $\rightleftarrows$                                                                                                                  & đổi \texttt{rows} và \texttt{cols} & --                                                                                \\
+		Chọn thước đo                                                 & Ô chọn \textbf{Measure}                                                                                                                 & \texttt{measure}                   & Biểu thức trong \texttt{MEASURES}                                                 \\
+		Khoan xuyên (\textit{drill-through})                          & Bấm một ô hoặc một cột                                                                                                                  & --                                 & Mở \textbf{Explorer} với các điều kiện tương ứng                                  \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -285,7 +283,15 @@ Mỗi truy vấn khối dữ liệu của trang \textbf{Analytics} mất khoản
 Ứng dụng web có năm trang ở menu chính: \textbf{Overview}, \textbf{Analytics}, \textbf{Explorer}, \textbf{Application details} và \textbf{Playground}. Hai trang tham khảo \textbf{Grades \& model} và \textbf{Architecture} nằm ở chân thanh bên. Mọi số tổng hợp trên web tính trên mọi hồ sơ (đã chấm), tức $356.255$ hồ sơ. Riêng các chỉ số cần kết quả trả nợ, như tỷ lệ vỡ nợ, chỉ tính trên $307.511$ khoản vay lịch sử. Mục này trình bày ba trang phân tích; các trang \textbf{Application details}, \textbf{Playground} và \textbf{Grades \& model} được trình bày ở Chương~\ref{part:ch4}.
 
 \subsection{Trang Overview}
-Trang \textbf{Overview} là điểm vào đầu tiên, cho cái nhìn tổng thể về danh mục. Hình~\ref{fig:page_overview} là ảnh chụp trang với cấu hình mặc định.
+Trang \textbf{Overview} là điểm vào đầu tiên, cho cái nhìn tổng thể về danh mục. Hình~\ref{fig:page_overview} là ảnh chụp trang với cấu hình mặc định gồm ba phần:
+
+\begin{itemize}[topsep=0pt, itemsep=1pt]
+	\item \textbf{Biểu đồ ô vuông (\textit{waffle}):} Khung \textbf{Out of every 100 applications} chia $100$ ô theo quyết định và kết quả trên khoản vay lịch sử. Nhóm Duyệt (\textbf{Approve}) chiếm $52\%$ và có $3{,}4\%$ vỡ nợ. Nhóm Thẩm định thêm (\textbf{Manual review}) chiếm $39\%$ và có $9{,}9\%$ vỡ nợ. Nhóm Từ chối (\textbf{Reject}) chiếm $9\%$ và có $28{,}0\%$ vỡ nợ. Bấm một ô mở \textbf{Explorer} với nhóm đó.
+	\item \textbf{Năm ô KPI:} Dải \textbf{All applications} tính trên mọi hồ sơ và không theo bộ lọc nào. \textbf{Default rate} là $8{,}07\%$ (chỉ trên khoản vay lịch sử), \textbf{Total credit} là $209{,}4$ tỷ (đơn vị tiền gốc) và \textbf{Credit at risk} là $15{,}76$ tỷ. \textbf{Approval rate} là $51{,}86\%$ và \textbf{Manual review rate} là $39{,}54\%$.
+	\item \textbf{Phân tích theo phân khúc:} Ô chọn \textbf{Group by} có $13$ thuộc tính, mặc định là \texttt{credit\_history\_status}, và được lưu trong tham số \texttt{?dim=}. Ô này điều khiển biểu đồ \textbf{Default rate by segment} và bảng \textbf{Segment size}. Bấm một cột mở \textbf{Explorer} với nhóm đó làm điều kiện lọc.
+\end{itemize}
+
+Tỷ lệ duyệt trên biểu đồ ô vuông ($52{,}07\%$) khác ô KPI ($51{,}86\%$) vì biểu đồ ô vuông tính trên khoản vay lịch sử, còn ô KPI tính trên mọi hồ sơ (đã chấm). Với cấu hình mặc định, biểu đồ phân khúc cho thấy khách đang quá hạn ở tổ chức khác có tỷ lệ vỡ nợ $16{,}11\%$. Khách không có lịch sử tín dụng ngoài có tỷ lệ $10{,}12\%$, còn khách có lịch sử sạch có tỷ lệ $7{,}62\%$.
 
 \begin{figure}[H]
 	\centering
@@ -294,23 +300,10 @@ Trang \textbf{Overview} là điểm vào đầu tiên, cho cái nhìn tổng th�
 	\label{fig:page_overview}
 \end{figure}
 
-Trang có ba phần:
-\begin{itemize}[topsep=0pt, itemsep=1pt]
-	\item \textbf{Biểu đồ ô vuông (\textit{waffle}):} Khung \textbf{Out of every 100 applications} chia $100$ ô theo quyết định và kết quả trên khoản vay lịch sử. Nhóm Duyệt (\textbf{Approve}) chiếm $52\%$ và có $3{,}4\%$ vỡ nợ. Nhóm Thẩm định thêm (\textbf{Manual review}) chiếm $39\%$ và có $9{,}9\%$ vỡ nợ. Nhóm Từ chối (\textbf{Reject}) chiếm $9\%$ và có $28{,}0\%$ vỡ nợ. Bấm một ô mở \textbf{Explorer} với nhóm đó.
-	\item \textbf{Năm ô KPI:} Dải \textbf{All applications} tính trên mọi hồ sơ và không theo bộ lọc nào. \textbf{Default rate} là $8{,}07\%$ (chỉ trên khoản vay lịch sử), \textbf{Total credit} là $209{,}4$ tỷ (đơn vị tiền gốc) và \textbf{Credit at risk} là $15{,}76$ tỷ. \textbf{Approval rate} là $51{,}86\%$ và \textbf{Manual review rate} là $39{,}54\%$.
-	\item \textbf{Phân tích theo phân khúc:} Ô chọn \textbf{Group by} có $13$ thuộc tính, mặc định là \texttt{credit\_history\_status}, và được lưu trong tham số \texttt{?dim=}. Ô này điều khiển biểu đồ \textbf{Default rate by segment} và bảng \textbf{Segment size}. Bấm một cột mở \textbf{Explorer} với nhóm đó làm điều kiện lọc.
-\end{itemize}
-Tỷ lệ duyệt trên biểu đồ ô vuông ($52{,}07\%$) khác ô KPI ($51{,}86\%$) vì biểu đồ ô vuông tính trên khoản vay lịch sử, còn ô KPI tính trên mọi hồ sơ (đã chấm). Với cấu hình mặc định, biểu đồ phân khúc cho thấy khách đang quá hạn ở tổ chức khác có tỷ lệ vỡ nợ $16{,}11\%$. Khách không có lịch sử tín dụng ngoài có tỷ lệ $10{,}12\%$, còn khách có lịch sử sạch có tỷ lệ $7{,}62\%$.
-
 \subsection{Trang Analytics}
 Trang \textbf{Analytics} minh họa các phép OLAP trên một khối dữ liệu và có hai thẻ: \textbf{Cube} và \textbf{SQL queries}. Hình~\ref{fig:page_analytics} là thẻ \textbf{Cube} với khoảng thời gian theo tháng; trục thời gian dùng ngày nộp hồ sơ mô phỏng.
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=\textwidth]{images/page_analytics.png}
-	\caption{Trang phân tích (\textbf{Analytics}), thẻ \textbf{Cube}}
-	\label{fig:page_analytics}
-\end{figure}
+\medskip
 
 Thẻ \textbf{Cube} gồm bốn phần:
 \begin{itemize}[topsep=0pt, itemsep=1pt]
@@ -319,7 +312,15 @@ Thẻ \textbf{Cube} gồm bốn phần:
 	\item \textbf{Bốn biểu đồ cố định:} \textbf{Applications over time} đếm hồ sơ theo quyết định. \textbf{Default rate over time} chỉ tính trên khoản vay lịch sử, nên dừng ở khoảng tháng 5/2017. \textbf{Grade mix over time} cho tỷ trọng hạng cuối, còn \textbf{Default rate by segment} so sánh các nhóm theo chiều chọn ở \textbf{Split by}.
 	\item \textbf{Bảng Cube:} Người dùng chọn tối đa $2$ chiều hàng, $1$ chiều cột và một thước đo ở \textbf{Measure}. Các nút $\blacktriangle$/$\blacktriangledown$, $\times$, \textbf{Add dimension} và $\rightleftarrows$ thực hiện các phép ở Bảng~\ref{tab:olap-ui}. Bảng tô màu theo giá trị và có tổng phụ ở cột và dòng \textbf{All}.
 \end{itemize}
+
 Trong Hình~\ref{fig:page_analytics}, bảng \textbf{Cube} có hàng là năm nộp hồ sơ (mô phỏng), cột là hạng cuối và thước đo là \textbf{Default rate}. Tỷ lệ vỡ nợ tăng đều theo hạng: $0{,}6\%$ ở hạng A, $3{,}5\%$ ở hạng B, $8{,}3\%$ ở hạng C, $12{,}1\%$ ở hạng D và $28{,}0\%$ ở hạng E. Dòng 2018 để trống vì hồ sơ nộp năm đó là hồ sơ mới, chưa có kết quả.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{images/page_analytics.png}
+	\caption{Trang phân tích (\textbf{Analytics}), thẻ \textbf{Cube}}
+	\label{fig:page_analytics}
+\end{figure}
 
 Thẻ \textbf{SQL queries} chạy sáu truy vấn mẫu ở mục~\ref{sec:olap-scenarios}. Hình~\ref{fig:page_analytics_sql} cho thấy danh sách truy vấn bên trái và kết quả của truy vấn đang chọn bên phải. Nút \textbf{Show SQL} hiện câu lệnh SQL tương ứng.
 

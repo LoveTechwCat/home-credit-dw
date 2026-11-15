@@ -26,13 +26,13 @@ models/*.joblib
 models/*.parquet
 
 # LaTeX build output
-reports/latex/*.aux
-reports/latex/*.log
-reports/latex/*.out
-reports/latex/*.toc
-reports/latex/*.synctex.gz
-reports/latex/*.fdb_latexmk
-reports/latex/*.fls
+reports/*/*.aux
+reports/*/*.log
+reports/*/*.out
+reports/*/*.toc
+reports/*/*.synctex.gz
+reports/*/*.fdb_*mk
+reports/*/*.fls
 
 # OS / editor
 .DS_Store

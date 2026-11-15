@@ -373,7 +373,7 @@ Tỷ lệ vỡ nợ theo `credit_to_income` trên toàn bộ khoản vay lịch 
 Kết luận:
 - `credit_to_income` gần như không phân biệt được rủi ro. Vì vậy hạn mức là công cụ **giới hạn mức tiền có thể mất** (KPI-03), không phải công cụ phân loại rủi ro.
 - Hạn mức giảm theo hạng, và được đặt theo phân vị của khoản vay lịch sử: 8,0 ≈ p92, 6,0 ≈ p82, 4,0 ≈ p62. Hạn mức 3,0 bằng trung vị của hạng D (thang tham chiếu).
-- Hồ sơ A/B hầu như không bị cắt hạn mức. Với C/D, hạn mức là mức tối đa nếu chuyên viên duyệt sau khi thẩm định thêm.
+- Hồ sơ A hầu như không bị cắt hạn mức, hồ sơ B bị cắt hạn mức khoảng 18.6%. Với C/D, hạn mức là mức tối đa nếu chuyên viên duyệt sau khi thẩm định thêm.
 
 Kết quả của chính sách trên PD thật: mục 9.3.
 

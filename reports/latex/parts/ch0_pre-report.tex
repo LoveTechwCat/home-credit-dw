@@ -5,17 +5,21 @@
 }
 
 \part*{Lời cam đoan}
-Nhóm sinh viên thực hiện cam đoan báo cáo bài tập lớn môn Kho dữ liệu và Hệ hỗ trợ quyết định (CO4031) là kết quả làm việc của nhóm, dưới sự hướng dẫn của giảng viên hướng dẫn. Các số liệu và kết quả trong báo cáo được tính từ bộ dữ liệu công khai \textit{Home Credit Default Risk} bằng mã nguồn do nhóm xây dựng. Tài liệu và bộ dữ liệu của bên thứ ba đều được trích dẫn trong phần Tài liệu tham khảo. Nhóm chịu trách nhiệm về toàn bộ nội dung của báo cáo.
+Nhóm sinh viên thực hiện cam đoan báo cáo bài tập lớn môn Kho dữ liệu và Hệ hỗ trợ quyết định (CO4031) là kết quả làm việc của nhóm, dưới sự hướng dẫn của giảng viên hướng dẫn. Các số liệu và kết quả trong báo cáo được tính từ bộ dữ liệu công khai Home Credit Default Risk~\cite{homecredit2018} bằng mã nguồn do nhóm xây dựng. Tài liệu và bộ dữ liệu của bên thứ ba đều được trích dẫn trong phần Tài liệu tham khảo. Nhóm chịu trách nhiệm về toàn bộ nội dung của báo cáo.
 
 \newpage\part*{Lời cảm ơn}
-Nhóm xin gửi lời cảm ơn đến giảng viên hướng dẫn môn Kho dữ liệu và Hệ hỗ trợ quyết định. Kiến thức trên lớp và các góp ý của giảng viên là nền tảng để nhóm hoàn thành bài tập lớn này. Nhóm cũng cảm ơn Khoa Khoa học và Kỹ thuật Máy tính, Trường Đại học Bách khoa -- Đại học Quốc gia Thành phố Hồ Chí Minh đã tạo điều kiện học tập. Nhóm cảm ơn Home Credit đã công bố bộ dữ liệu được dùng trong báo cáo.~\cite{homecredit2018}
+Nhóm xin gửi lời cảm ơn đến giảng viên hướng dẫn môn Kho dữ liệu và Hệ hỗ trợ quyết định. Kiến thức trên lớp và các góp ý của giảng viên là nền tảng để nhóm hoàn thành bài tập lớn này. Nhóm cũng cảm ơn Khoa Khoa học và Kỹ thuật Máy tính, Trường Đại học Bách khoa -- Đại học Quốc gia Thành phố Hồ Chí Minh đã tạo điều kiện học tập. Nhóm cảm ơn Home Credit đã công bố bộ dữ liệu~\cite{homecredit2018} được dùng trong báo cáo.
 
 Do thời gian và kinh nghiệm còn hạn chế, báo cáo khó tránh khỏi thiếu sót. Nhóm mong nhận được góp ý để hoàn thiện thêm.
 
 \newpage\part*{Tóm tắt}
 Báo cáo trình bày một kho dữ liệu và một hệ hỗ trợ quyết định (DSS) cho thẩm định tín dụng tiêu dùng, trên bộ dữ liệu \textit{Home Credit Default Risk}. Kho dữ liệu tích hợp $8$ bảng nguồn và một nguồn ngày mô phỏng theo mô hình đa chiều (\textit{star schema}). Quy trình ETL dựng lại toàn bộ kho bằng một lệnh trong khoảng $15$ giây và kiểm tra $50$ điều kiện chất lượng dữ liệu. Trang \textbf{Analytics} hỗ trợ các thao tác OLAP như cuộn lên, khoan xuống, cắt lát, cắt khối và xoay (\textit{roll-up, drill-down, slice, dice, pivot}).
 
+\medskip
+
 DSS xếp mỗi hồ sơ vào thang A--E từ hai nguồn. Hạng điểm suy ra từ xác suất vỡ nợ (PD) do mô hình ước lượng. Hạng luật suy ra từ các luật phân khúc và luật nghiệp vụ mà hồ sơ vi phạm. Hạng cuối là hạng xấu hơn và gắn với một chính sách: Duyệt (\textbf{Approve}), Thẩm định thêm (\textbf{Manual review}) hoặc Từ chối (\textbf{Reject}), kèm hạn mức khuyến nghị và lý do. Trang \textbf{Playground} mô phỏng tác động của một chính sách khác lên toàn danh mục.
+
+\medskip
 
 Trên mọi hồ sơ đã chấm ($356.255$ hồ sơ), chính sách hiện hành duyệt $51{,}86\%$, chuyển thẩm định $39{,}54\%$ và từ chối $8{,}59\%$. Dư nợ cấp mới là $209{,}4$ tỷ (đơn vị tiền gốc) và dư nợ chịu rủi ro là $15{,}76$ tỷ. Trên khoản vay lịch sử ($307.511$ hồ sơ), tỷ lệ vỡ nợ là $8{,}07\%$, còn tỷ lệ vỡ nợ của nhóm được duyệt là $3{,}37\%$. Mô hình đạt AUC $0{,}7586$ trên khoản vay lịch sử.
 
@@ -32,13 +36,13 @@ Bảng~\ref{tab:task-assignment} ghi vai trò và mức đóng góp của từng
 	\footnotesize
 	\begin{tabular}{p{3.8cm} p{2.2cm} p{6.2cm} p{2.6cm}}
 		\toprule
-		\textbf{Thành viên} & \textbf{MSSV} & \textbf{Công việc} & \textbf{Mức đóng góp} \\
+		\textbf{Thành viên}    & \textbf{MSSV} & \textbf{Công việc} & \textbf{Mức đóng góp} \\
 		\midrule
-		Doãn Phương Hùng Cường & 2310381 & & \rule{0pt}{1.2cm} \\
+		Doãn Phương Hùng Cường & 2310381       &                    & \rule{0pt}{1.2cm}     \\
 		\midrule
-		Nguyễn Thiên Hào & 2310853 & & \rule{0pt}{1.2cm} \\
+		Nguyễn Thiên Hào       & 2310853       &                    & \rule{0pt}{1.2cm}     \\
 		\midrule
-		Nguyễn Khắc Khánh Huy & 2311186 & & \rule{0pt}{1.2cm} \\
+		Nguyễn Khắc Khánh Huy  & 2311186       &                    & \rule{0pt}{1.2cm}     \\
 		\bottomrule
 	\end{tabular}
 \end{table}
