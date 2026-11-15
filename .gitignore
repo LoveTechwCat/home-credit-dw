@@ -48,3 +48,5 @@ frontend/*.tsbuildinfo
 # Developer
 graphify-out/
 .agents/
+# Submission archive (scripts/package_submission.py)
+submission/
