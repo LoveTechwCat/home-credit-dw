@@ -50,3 +50,6 @@ graphify-out/
 .agents/
 # Submission archive (scripts/package_submission.py)
 submission/
+
+# minted syntax-highlighting cache (cache=true in reports/latex/hcmut-report.cls)
+reports/latex/_minted*/

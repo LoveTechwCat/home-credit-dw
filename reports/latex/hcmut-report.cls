@@ -72,7 +72,7 @@
 
 % --- Code listings ---
 \RequirePackage{listings}
-\RequirePackage[newfloat,cache=false]{minted}
+\RequirePackage[newfloat,cache=true]{minted}
 \SetupFloatingEnvironment{listing}{name={Mã nguồn},listname={Danh sách mã nguồn}}
 \RequirePackage{dirtree}
 
