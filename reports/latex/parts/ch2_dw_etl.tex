@@ -193,10 +193,10 @@ Lược đồ \texttt{mart} có thêm \texttt{mart.segment\_risk} ($225$ phân k
 		Chiều gom cho khoản tín dụng ngoài                                        & Bảng sự kiện chỉ lưu khóa và thước đo. Lọc theo trạng thái hay loại tín dụng vẫn chỉ cần một phép nối.                    \\
 		\texttt{dim\_time} đóng nhiều vai trò                                     & Mọi ngày dùng chung một bảng lịch. Ngày tất toán không dùng được thì để \mintinline[fontsize=\footnotesize]{sql}|NULL|.   \\
 		Thước đo chi tiết đặt trên bảng sự kiện                                   & Nhóm giá trị nằm ở chiều để cắt lát; số chính xác nằm ở bảng sự kiện để tính toán và huấn luyện mô hình.                  \\
-		Khóa thay thế bằng \mintinline[fontsize=\footnotesize]{sql}|ROW_NUMBER()| & Mỗi lần nạp lại toàn bộ sinh ra đúng các khóa như cũ, vì dữ liệu là ảnh chụp tĩnh.                                        \\
+		Khóa thay thế bằng \mintinline[fontsize=\footnotesize]{sql}|ROW_NUMBER()| & Khóa được đánh số theo khóa tự nhiên của chiều (mã hồ sơ, hoặc tổ hợp thuộc tính), nên cùng dữ liệu nguồn luôn cho cùng khóa. \\
 		Kết quả chấm điểm là bảng sự kiện riêng                                   & ETL và chấm điểm chạy độc lập; chấm lại không phải nạp lại kho.                                                           \\
 		Hạng và luật là chiều nạp từ cấu hình                                     & Đổi ngưỡng hay chính sách chỉ cần sửa \texttt{configs/settings.yaml}; SQL và mã nguồn không viết cứng giá trị.            \\
-		Nạp lại toàn bộ vào tập tin tạm                                           & Nguồn là tập tin tĩnh và nạp lại chỉ mất khoảng $15$ giây. Kho đang dùng chỉ bị thay khi mọi kiểm tra chất lượng đều đạt. \\
+		Ghi vào tập tin tạm rồi mới công bố                                       & Kho đang dùng chỉ bị thay khi mọi kiểm tra chất lượng đều đạt.                                                            \\
 		\bottomrule
 	\end{tabular}
 \end{table}

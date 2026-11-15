@@ -309,7 +309,7 @@ Nguồn \texttt{application\_dates.csv} là dữ liệu mô phỏng do lệnh \t
 \label{sec:in-scope}
 \begin{itemize}[topsep=0pt, itemsep=1pt]
 	\item \textbf{Kho dữ liệu:} Kho tích hợp $8$ bảng nguồn và nguồn ngày mô phỏng theo mô hình đa chiều (\textit{star schema}), gồm $4$ bảng sự kiện và $8$ bảng chiều.~\cite{kimball2013} Thiết kế chi tiết nằm ở Chương~\ref{part:ch2}.
-	\item \textbf{ETL:} Quy trình trích xuất, làm sạch, biến đổi và nạp lại toàn bộ kho bằng một lệnh, kèm kiểm tra chất lượng dữ liệu.
+	\item \textbf{ETL:} Quy trình trích xuất, làm sạch, biến đổi và nạp kho bằng một lệnh, kèm kiểm tra chất lượng dữ liệu.
 	\item \textbf{Phân tích OLAP và giao diện web:} Các trang web phục vụ phân tích danh mục và tra cứu hồ sơ theo BR-10, được trình bày ở Chương~\ref{part:ch3}.
 	\item \textbf{DSS thẩm định:} Hệ thống xếp hạng hồ sơ theo hạng điểm, hạng luật và hạng cuối A--E, đề xuất quyết định, hạn mức và lý do, kèm mô phỏng chính sách (Chương~\ref{part:ch4}).
 \end{itemize}
@@ -320,7 +320,7 @@ Nguồn \texttt{application\_dates.csv} là dữ liệu mô phỏng do lệnh \t
 	\item \textbf{Định giá khoản vay:} Hệ thống không đề xuất lãi suất.
 	\item \textbf{Tối ưu lợi nhuận:} Hệ thống không tính lợi nhuận hay phân bổ vốn.
 	\item \textbf{Thu hồi nợ:} Hệ thống không hỗ trợ nghiệp vụ sau giải ngân như nhắc nợ hay thu hồi nợ.
-	\item \textbf{Cập nhật thời gian thực:} Kho dữ liệu được nạp lại toàn bộ theo lô, không cập nhật theo thời gian thực.
+	\item \textbf{Cập nhật thời gian thực:} Kho dữ liệu được nạp theo lô, không cập nhật theo thời gian thực.
 	\item \textbf{Thông báo cho khách hàng:} Phần giải thích chỉ dành cho chuyên viên thẩm định, không dùng để thông báo lý do từ chối cho khách hàng.
 \end{itemize}
 

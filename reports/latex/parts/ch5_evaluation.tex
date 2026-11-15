@@ -84,7 +84,7 @@ Các hạn chế dưới đây đến từ dữ liệu và từ các lựa chọ
 	\item \textbf{Rò rỉ nhỏ ở tỷ lệ luật:} Tỷ lệ của phân khúc và của luật tính trên toàn bộ khoản vay lịch sử, kể cả chính khoản vay được chấm. Với nhóm từ $500$ khoản vay, một khoản vay làm tỷ lệ lệch tối đa $0{,}2$ điểm phần trăm.
 	\item \textbf{Phân khúc sát ngưỡng:} Một số phân khúc hạng D chỉ cao hơn ngưỡng $13\%$ dưới $0{,}1$ điểm phần trăm, ví dụ $13{,}09\%$ và $13{,}03\%$. Dữ liệu đổi một chút có thể đưa chúng về hạng C.
 	\item \textbf{Phân tích giả định (\textit{what-if}) không đơn điệu:} Mô hình cây không có ràng buộc đơn điệu. Trên mẫu $30$ hồ sơ, tăng thu nhập $50\%$ làm PD tăng ở $1/30$ hồ sơ, giảm tiền vay $30\%$ làm PD tăng ở $4/30$ hồ sơ.
-	\item \textbf{Không nạp thời gian thực:} Mỗi lần ETL dựng lại toàn bộ kho. DuckDB chỉ cho một tiến trình ghi, nên phải tắt \texttt{hcdw serve} trước khi chạy \texttt{hcdw etl} hoặc \texttt{hcdw score}.
+	\item \textbf{Một tiến trình ghi:} DuckDB chỉ cho một tiến trình ghi, nên phải tắt \texttt{hcdw serve} trước khi chạy \texttt{hcdw etl} hoặc \texttt{hcdw score}.
 \end{itemize}
 
 %======================================================================
@@ -93,7 +93,7 @@ Các hạn chế dưới đây đến từ dữ liệu và từ các lựa chọ
 
 Mỗi đề xuất dưới đây ứng với một hạn chế ở mục~\ref{sec:eval-limits}:
 \begin{itemize}[topsep=0pt, itemsep=1pt]
-	\item \textbf{Ngày thật và nạp tăng dần:} Với dữ liệu có ngày nộp và ngày kết quả thật, kho có thể nạp tăng dần (\textit{incremental load}) theo ngày thay vì dựng lại toàn bộ. Khi đó các xu hướng theo thời gian mới có ý nghĩa nghiệp vụ.
+	\item \textbf{Ngày thật:} Với dữ liệu có ngày nộp và ngày kết quả thật, các xu hướng theo thời gian mới có ý nghĩa nghiệp vụ.
 	\item \textbf{Tỷ lệ thu hồi:} Nếu có dữ liệu thu hồi sau vỡ nợ, KPI-03 có thể nhân thêm tỷ lệ tổn thất thay vì giả định mất toàn bộ.
 	\item \textbf{Kiểm định hiệu chỉnh:} Tách riêng một phần khoản vay lịch sử làm tập giữ riêng (\textit{holdout}), khớp bộ hiệu chỉnh trên phần còn lại và đo bảng hiệu chỉnh, điểm Brier trên tập giữ riêng.
 	\item \textbf{Tỷ lệ luật ngoài phần:} Tính tỷ lệ của phân khúc và của luật theo từng phần của kiểm định chéo, như PD OOF, để loại phần rò rỉ nhỏ ở hạng luật.
